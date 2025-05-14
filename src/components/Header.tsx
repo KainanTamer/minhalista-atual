@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, LogOut } from 'lucide-react';
+import { Menu, LogOut, User, Calendar, Moon, Sun } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,8 +15,18 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true }) => {
   const { user, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -38,18 +49,31 @@ const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true })
   return (
     <header className={`w-full py-4 px-4 ${transparent ? 'absolute top-0 left-0 z-10' : 'border-b'}`}>
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold">
+        <a href="#" onClick={handleLogoClick} className="text-xl font-bold flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+            <Calendar size={16} />
+          </div>
           Minha Agenda
-        </Link>
+        </a>
         
         {showMenu && (
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </Button>
+            
             <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
-                  <span className="text-sm font-medium">
+                  <Link to="/profile" className="flex items-center gap-2 text-sm font-medium">
+                    <User size={16} />
                     {user.user_metadata.first_name || user.email}
-                  </span>
+                  </Link>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -87,6 +111,9 @@ const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true })
                       <Link to="/dashboard" className="text-lg font-medium">
                         Dashboard
                       </Link>
+                      <Link to="/profile" className="text-lg font-medium">
+                        Perfil
+                      </Link>
                       <button 
                         onClick={handleSignOut}
                         className="flex items-center gap-2 text-lg font-medium text-left"
@@ -94,6 +121,24 @@ const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true })
                         <LogOut size={18} />
                         Sair
                       </button>
+                      <div className="flex items-center gap-2 mt-4">
+                        <button 
+                          onClick={toggleTheme}
+                          className="flex items-center gap-2 text-lg font-medium"
+                        >
+                          {theme === 'dark' ? (
+                            <>
+                              <Sun size={18} />
+                              Modo claro
+                            </>
+                          ) : (
+                            <>
+                              <Moon size={18} />
+                              Modo escuro
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -103,6 +148,24 @@ const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true })
                       <Link to="/signup" className="text-lg font-medium">
                         Cadastrar
                       </Link>
+                      <div className="flex items-center gap-2 mt-4">
+                        <button 
+                          onClick={toggleTheme}
+                          className="flex items-center gap-2 text-lg font-medium"
+                        >
+                          {theme === 'dark' ? (
+                            <>
+                              <Sun size={18} />
+                              Modo claro
+                            </>
+                          ) : (
+                            <>
+                              <Moon size={18} />
+                              Modo escuro
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
