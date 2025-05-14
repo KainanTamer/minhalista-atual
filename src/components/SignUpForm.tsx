@@ -1,48 +1,81 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import Button from './Button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Facebook, Apple } from 'lucide-react';
+import { Facebook, Apple, AlertCircle } from 'lucide-react';
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage, 
+  FormDescription 
+} from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+const signupSchema = z.object({
+  firstName: z.string().min(2, { message: 'Nome deve ter pelo menos 2 caracteres' }),
+  lastName: z.string().min(2, { message: 'Sobrenome deve ter pelo menos 2 caracteres' }),
+  email: z.string()
+    .min(1, { message: 'Email é obrigatório' })
+    .email({ message: 'Email inválido' }),
+  password: z.string()
+    .min(8, { message: 'Senha deve ter pelo menos 8 caracteres' })
+    .refine(password => {
+      // Ao menos um número, uma letra maiúscula e uma letra minúscula
+      return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+    }, { message: 'Senha deve conter pelo menos um número, uma letra maiúscula e uma letra minúscula' }),
+  profileType: z.string(),
+  termsAccepted: z.boolean().refine(value => value === true, {
+    message: 'Você precisa aceitar os termos de serviço',
+  }),
+});
+
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignUpForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [profileType, setProfileType] = useState('músico');
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!termsAccepted) {
-      setError('Você precisa aceitar os termos de serviço para continuar.');
-      return;
-    }
-
-    setLoading(true);
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      profileType: 'músico',
+      termsAccepted: false,
+    },
+    mode: "onChange"
+  });
+  
+  const { formState } = form;
+  const { isSubmitting } = formState;
+  
+  const onSubmit = async (values: SignupFormValues) => {
+    setAuthError(null);
     
     try {
       // Registrar usuário com Supabase
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: values.email,
+        password: values.password,
         options: {
           data: {
-            first_name: firstName,
-            last_name: lastName,
-            profile_type: profileType
+            first_name: values.firstName,
+            last_name: values.lastName,
+            profile_type: values.profileType
           }
         }
       });
@@ -57,14 +90,12 @@ const SignUpForm: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Erro ao criar conta:', err);
-      setError(err.message || 'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.');
+      setAuthError(err.message || 'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.');
       toast({
         title: "Erro no cadastro",
         description: err.message || 'Não foi possível completar o cadastro. Por favor, tente novamente.',
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -90,6 +121,9 @@ const SignUpForm: React.FC = () => {
     <Card className="w-full max-w-md mx-auto animate-fade-in">
       <CardHeader>
         <CardTitle className="text-2xl text-center">Cadastre-se</CardTitle>
+        <CardDescription className="text-center">
+          Crie sua conta para começar a gerenciar sua agenda
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4 mb-4">
@@ -133,93 +167,144 @@ const SignUpForm: React.FC = () => {
           </div>
         </div>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">Nome</Label>
-              <Input 
-                id="firstName" 
-                placeholder="João" 
-                required 
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                disabled={loading}
+        {authError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="João" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sobrenome <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <Input placeholder="Silva" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Sobrenome</Label>
-              <Input 
-                id="lastName" 
-                placeholder="Silva" 
-                required 
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email" 
-              placeholder="seu@email.com" 
-              type="email" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
+            
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="seu@email.com" 
+                      type="email" 
+                      autoComplete="email"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input 
-              id="password" 
-              placeholder="••••••••" 
-              type="password" 
-              required 
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="••••••••" 
+                      type="password"
+                      autoComplete="new-password"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula e um número.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="profileType">Tipo de perfil</Label>
-            <select 
-              id="profileType"
-              value={profileType}
-              onChange={(e) => setProfileType(e.target.value)}
-              disabled={loading}
-              className="w-full rounded-md border border-input bg-background px-3 py-2"
+            
+            <FormField
+              control={form.control}
+              name="profileType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de perfil <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <select 
+                      {...field}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    >
+                      <option value="músico">Músico</option>
+                      <option value="banda">Banda</option>
+                      <option value="produtor">Produtor</option>
+                      <option value="empresário">Empresário</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="termsAccepted"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2">
+                  <FormControl>
+                    <Checkbox 
+                      checked={field.value} 
+                      onCheckedChange={field.onChange} 
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="text-sm font-normal">
+                      Eu concordo com os{' '}
+                      <a href="#" className="text-primary hover:underline font-medium">
+                        Termos de Serviço
+                      </a>{' '}
+                      e{' '}
+                      <a href="#" className="text-primary hover:underline font-medium">
+                        Política de Privacidade
+                      </a>
+                    </FormLabel>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              className="w-full dark:text-secondary-foreground"
+              disabled={isSubmitting}
             >
-              <option value="músico">Músico</option>
-              <option value="banda">Banda</option>
-              <option value="produtor">Produtor</option>
-              <option value="empresário">Empresário</option>
-            </select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="terms" 
-              checked={termsAccepted}
-              onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-            />
-            <Label htmlFor="terms" className="text-sm font-normal">
-              Eu concordo com os{' '}
-              <a href="#" className="text-primary hover:underline">
-                Termos de Serviço
-              </a>{' '}
-              e{' '}
-              <a href="#" className="text-primary hover:underline">
-                Política de Privacidade
-              </a>
-            </Label>
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Criando conta..." : "Criar conta"}
-          </Button>
-        </form>
+              {isSubmitting ? "Criando conta..." : "Criar conta"}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
       <CardFooter className="flex justify-center">
         <p className="text-sm text-muted-foreground">

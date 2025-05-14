@@ -15,6 +15,7 @@ const Button = ({
   size = 'default',
   className,
   children,
+  type,
   ...props
 }: ButtonProps) => {
   // Map custom variants to shadcn variants
@@ -22,11 +23,13 @@ const Button = ({
   
   return (
     <ShadcnButton
+      type={type}
       variant={mappedVariant}
       size={size}
       className={cn(
         'font-medium transition-colors',
         variant === 'primary' && 'bg-primary text-primary-foreground hover:bg-primary/90',
+        type === 'submit' && 'dark:text-secondary-foreground', // Garante texto escuro em botões de submit no tema escuro
         className
       )}
       {...props}
