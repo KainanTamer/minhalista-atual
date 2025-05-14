@@ -118,13 +118,15 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 }}
                 components={{
                   DayContent: (props) => {
+                    // Fixed type issue - using props.day directly
+                    const dayDate = props.date;
                     const hasEvent = events.some(event => 
-                      isSameDay(new Date(event.start_time), props.date)
+                      isSameDay(new Date(event.start_time), dayDate)
                     );
                     
                     return (
                       <div className="relative flex h-full w-full items-center justify-center">
-                        {props.children}
+                        {props.date.getDate()}
                         {hasEvent && (
                           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                         )}
