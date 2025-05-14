@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -14,6 +15,7 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   open?: boolean
+  onDismiss?: () => void // Adding the missing onDismiss property
 }
 
 const actionTypes = {
@@ -146,8 +148,8 @@ interface ToastBase {
   description?: React.ReactNode
   action?: ToastActionElement
   onOpenChange?: (open: boolean) => void
-  onDismiss?: () => void
-  open?: boolean; // Adding the open property here
+  onDismiss?: () => void // Adding onDismiss property
+  open?: boolean
 }
 
 function toast({ ...props }: Toast) {

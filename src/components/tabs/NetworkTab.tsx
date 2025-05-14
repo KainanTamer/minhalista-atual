@@ -11,6 +11,25 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
 
+// Define the structure for social links
+interface SocialLinks {
+  instagram?: string;
+  facebook?: string;
+  youtube?: string;
+  [key: string]: string | undefined;
+}
+
+// Define the profile interface
+interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  city: string | null;
+  instrument: string[] | null;
+  musical_genre: string[] | null;
+  social_links: SocialLinks | null;
+}
+
 const NetworkTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -29,7 +48,7 @@ const NetworkTab: React.FC = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      return data as Profile;
     }
   });
 
@@ -52,7 +71,7 @@ const NetworkTab: React.FC = () => {
       const { data, error } = await query.limit(10);
       
       if (error) throw error;
-      return data || [];
+      return (data || []) as Profile[];
     }
   });
 
@@ -80,7 +99,7 @@ const NetworkTab: React.FC = () => {
         />
       </div>
       
-      {currentProfile?.social_links && Object.keys(currentProfile.social_links).length > 0 && (
+      {currentProfile?.social_links && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Minhas redes sociais</CardTitle>
