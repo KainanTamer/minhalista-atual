@@ -9,16 +9,358 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      connections: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connections_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          contract_file_url: string | null
+          contractor_document: string | null
+          contractor_email: string | null
+          contractor_name: string
+          created_at: string
+          due_date: string | null
+          event_details: string | null
+          id: string
+          issue_date: string
+          payment_terms: string | null
+          signature_date: string | null
+          status: Database["public"]["Enums"]["contract_status"]
+          title: string
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          contract_file_url?: string | null
+          contractor_document?: string | null
+          contractor_email?: string | null
+          contractor_name: string
+          created_at?: string
+          due_date?: string | null
+          event_details?: string | null
+          id?: string
+          issue_date?: string
+          payment_terms?: string | null
+          signature_date?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          contract_file_url?: string | null
+          contractor_document?: string | null
+          contractor_email?: string | null
+          contractor_name?: string
+          created_at?: string
+          due_date?: string | null
+          event_details?: string | null
+          id?: string
+          issue_date?: string
+          payment_terms?: string | null
+          signature_date?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_participants: {
+        Row: {
+          added_at: string
+          event_id: string
+          profile_id: string
+          role: string | null
+        }
+        Insert: {
+          added_at?: string
+          event_id: string
+          profile_id: string
+          role?: string | null
+        }
+        Update: {
+          added_at?: string
+          event_id?: string
+          profile_id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_participants_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_time: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          location: string | null
+          notes: string | null
+          start_time: string
+          status: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at: string
+          user_id: string
+          venue_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_time: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          id?: string
+          location?: string | null
+          notes?: string | null
+          start_time: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+          venue_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          location?: string | null
+          notes?: string | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["transaction_category"]
+          created_at: string
+          description: string
+          id: string
+          notes: string | null
+          receipt_url: string | null
+          related_contract_id: string | null
+          related_event_id: string | null
+          transaction_date: string
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: Database["public"]["Enums"]["transaction_category"]
+          created_at?: string
+          description: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          related_contract_id?: string | null
+          related_event_id?: string | null
+          transaction_date?: string
+          transaction_type: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["transaction_category"]
+          created_at?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          related_contract_id?: string | null
+          related_event_id?: string | null
+          transaction_date?: string
+          transaction_type?: Database["public"]["Enums"]["transaction_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_related_contract_id_fkey"
+            columns: ["related_contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_related_event_id_fkey"
+            columns: ["related_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          contact_email: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          instrument: string[] | null
+          musical_genre: string[] | null
+          phone_number: string | null
+          social_links: Json | null
+          state: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          contact_email?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          instrument?: string[] | null
+          musical_genre?: string[] | null
+          phone_number?: string | null
+          social_links?: Json | null
+          state?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          contact_email?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          instrument?: string[] | null
+          musical_genre?: string[] | null
+          phone_number?: string | null
+          social_links?: Json | null
+          state?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_financial_balance: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
+      get_upcoming_events: {
+        Args: { user_uuid: string }
+        Returns: {
+          id: string
+          title: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          status: Database["public"]["Enums"]["event_status"]
+          start_time: string
+          end_time: string
+          location: string
+          venue_name: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      contract_status:
+        | "rascunho"
+        | "enviado"
+        | "assinado"
+        | "concluido"
+        | "cancelado"
+      event_status: "planejado" | "confirmado" | "cancelado" | "realizado"
+      event_type: "ensaio" | "show" | "gravacao" | "outro"
+      transaction_category:
+        | "show"
+        | "venda_merch"
+        | "equipamento"
+        | "transporte"
+        | "estudio"
+        | "marketing"
+        | "outro"
+      transaction_type: "receita" | "despesa"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +475,26 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      contract_status: [
+        "rascunho",
+        "enviado",
+        "assinado",
+        "concluido",
+        "cancelado",
+      ],
+      event_status: ["planejado", "confirmado", "cancelado", "realizado"],
+      event_type: ["ensaio", "show", "gravacao", "outro"],
+      transaction_category: [
+        "show",
+        "venda_merch",
+        "equipamento",
+        "transporte",
+        "estudio",
+        "marketing",
+        "outro",
+      ],
+      transaction_type: ["receita", "despesa"],
+    },
   },
 } as const
