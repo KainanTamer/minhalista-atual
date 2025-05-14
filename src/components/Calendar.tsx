@@ -1,46 +1,139 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
+import { PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { format, isSameDay } from 'date-fns';
+import { getEvents, Event } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
+import EventDialog from './EventDialog';
 
 interface CalendarProps {
   className?: string;
 }
 
 const Calendar: React.FC<CalendarProps> = ({ className }) => {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | undefined>(undefined);
+  const { toast } = useToast();
   
-  // Example events - in a real app, these would come from an API or state management
-  const events = [
-    { id: 1, title: 'Ensaio da banda', date: new Date(2025, 4, 15, 19, 0), type: 'rehearsal' },
-    { id: 2, title: 'Show no Bar do João', date: new Date(2025, 4, 18, 21, 0), type: 'gig' },
-    { id: 3, title: 'Gravação de demo', date: new Date(2025, 4, 20, 14, 0), type: 'recording' }
-  ];
+  const fetchEvents = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedEvents = await getEvents();
+      setEvents(fetchedEvents);
+    } catch (error) {
+      console.error('Erro ao carregar eventos:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os eventos.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
   
-  // Filter events for the selected day
+  // Filtra eventos para o dia selecionado
   const selectedDayEvents = events.filter(event => 
-    date && event.date.getDate() === date.getDate() && 
-    event.date.getMonth() === date.getMonth() && 
-    event.date.getFullYear() === date.getFullYear()
+    date && isSameDay(new Date(event.start_time), date)
   );
-  
+
+  // Define a classe de estilo com base no tipo de evento
+  const getEventTypeClass = (eventType: string) => {
+    switch(eventType) {
+      case 'ensaio':
+        return 'bg-blue-100 dark:bg-blue-900';
+      case 'show':
+        return 'bg-green-100 dark:bg-green-900';
+      case 'gravacao':
+        return 'bg-purple-100 dark:bg-purple-900';
+      default:
+        return 'bg-gray-100 dark:bg-gray-800';
+    }
+  };
+
+  // Função para adicionar indicadores de evento no calendário
+  const decorateDay = (day: Date) => {
+    const hasEvent = events.some(event => isSameDay(new Date(event.start_time), day));
+    
+    return {
+      className: cn({
+        'relative': hasEvent,
+        'after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full': hasEvent,
+      }),
+    };
+  };
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setEventDialogOpen(true);
+  };
+
+  const handleAddEvent = () => {
+    setSelectedEvent(undefined);
+    setEventDialogOpen(true);
+  };
+
   return (
     <div className={cn("grid gap-4", className)}>
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle>Calendário</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0" 
+            onClick={handleAddEvent}
+          >
+            <PlusCircle size={16} />
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="calendar-container p-3">
-            <CalendarComponent
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="border-none"
-              locale={ptBR}
-            />
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                className="border-none pointer-events-auto"
+                locale={ptBR}
+                modifiers={{ event: events.map(event => new Date(event.start_time)) }}
+                modifiersStyles={{
+                  event: { fontWeight: 'bold' }
+                }}
+                components={{
+                  DayContent: (props) => {
+                    const hasEvent = events.some(event => 
+                      isSameDay(new Date(event.start_time), props.date)
+                    );
+                    
+                    return (
+                      <div className="relative flex h-full w-full items-center justify-center">
+                        {props.children}
+                        {hasEvent && (
+                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                        )}
+                      </div>
+                    );
+                  }
+                }}
+              />
+            )}
           </div>
         </CardContent>
       </Card>
@@ -48,22 +141,49 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
       {selectedDayEvents.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Eventos do dia</CardTitle>
+            <CardTitle className="text-lg">
+              Eventos do dia {date && format(date, "dd 'de' MMMM", { locale: ptBR })}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {selectedDayEvents.map(event => (
-                <div key={event.id} className="event-item p-3 rounded-md">
-                  <h4 className="font-medium">{event.title}</h4>
+                <div 
+                  key={event.id} 
+                  className={cn(
+                    "event-item p-3 rounded-md cursor-pointer transition-colors hover:opacity-80", 
+                    getEventTypeClass(event.event_type)
+                  )}
+                  onClick={() => handleEventClick(event)}
+                >
+                  <div className="flex justify-between">
+                    <h4 className="font-medium">{event.title}</h4>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50">
+                      {event.event_type === 'ensaio' ? 'Ensaio' : 
+                       event.event_type === 'show' ? 'Show' : 
+                       event.event_type === 'gravacao' ? 'Gravação' : 'Outro'}
+                    </span>
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    {event.date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    {format(new Date(event.start_time), "HH:mm")} - {format(new Date(event.end_time), "HH:mm")}
                   </p>
+                  {event.venue_name && (
+                    <p className="text-sm mt-1">{event.venue_name}</p>
+                  )}
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       )}
+
+      <EventDialog 
+        open={eventDialogOpen} 
+        onOpenChange={setEventDialogOpen} 
+        event={selectedEvent}
+        onEventUpdated={fetchEvents}
+        defaultDate={date}
+      />
     </div>
   );
 };

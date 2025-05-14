@@ -25,12 +25,19 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+// Importar os novos componentes para as abas
+import FinancesTab from '@/components/tabs/FinancesTab';
+import RepertoireTab from '@/components/tabs/RepertoireTab';
+import NetworkTab from '@/components/tabs/NetworkTab';
+import EventDialog from '@/components/EventDialog';
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('agenda');
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
   const formattedToday = format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
   const formattedTodayCapitalized = formattedToday.charAt(0).toUpperCase() + formattedToday.slice(1);
@@ -62,10 +69,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleNewEvent = () => {
-    toast({
-      title: "Novo evento",
-      description: "Funcionalidade para criar novo evento será implementada em breve."
-    });
+    setEventDialogOpen(true);
   };
 
   const navigateToProfile = () => {
@@ -194,122 +198,35 @@ const Dashboard: React.FC = () => {
             <TabsContent value="agenda" className="space-y-4 animate-fade-in">
               <div className="grid gap-4 md:grid-cols-3">
                 <Calendar className="md:col-span-2 bg-background rounded-lg shadow-sm border" />
-                
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        <span>Próximos Eventos</span>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleNewEvent}>
-                          <PlusCircle size={16} />
-                        </Button>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="bg-secondary p-3 rounded-md event-item hover:bg-secondary/80 transition-colors cursor-pointer" onClick={() => toast({ title: "Detalhes do evento", description: "Visualização completa do ensaio será implementada em breve." })}>
-                          <h4 className="font-medium">Ensaio da banda</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Quinta, 15 de maio · 19:00
-                          </p>
-                        </div>
-                        <div className="bg-secondary p-3 rounded-md event-item hover:bg-secondary/80 transition-colors cursor-pointer" onClick={() => toast({ title: "Detalhes do evento", description: "Visualização completa do show será implementada em breve." })}>
-                          <h4 className="font-medium">Show no Bar do João</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Domingo, 18 de maio · 21:00
-                          </p>
-                        </div>
-                        <div className="bg-secondary p-3 rounded-md event-item hover:bg-secondary/80 transition-colors cursor-pointer" onClick={() => toast({ title: "Detalhes do evento", description: "Visualização completa da gravação será implementada em breve." })}>
-                          <h4 className="font-medium">Gravação de demo</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Terça, 20 de maio · 14:00
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">Resumo do Mês</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Total de eventos</span>
-                          <span className="font-medium">8</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Shows</span>
-                          <span className="font-medium">3</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Ensaios</span>
-                          <span className="font-medium">4</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Outros</span>
-                          <span className="font-medium">1</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
               </div>
             </TabsContent>
             
             <TabsContent value="finances" className="animate-fade-in">
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>Resumo Financeiro</CardTitle>
-                  <CardDescription>Gerenciamento financeiro para suas atividades musicais</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-48 flex items-center justify-center">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <BarChart size={24} />
-                      <span>Estatísticas financeiras serão exibidas aqui</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <FinancesTab />
             </TabsContent>
             
             <TabsContent value="repertoire" className="animate-fade-in">
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>Seu Repertório</CardTitle>
-                  <CardDescription>Gerencie suas músicas e setlists</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-48 flex items-center justify-center">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Play size={24} />
-                      <span>Seu repertório será exibido aqui</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <RepertoireTab />
             </TabsContent>
             
             <TabsContent value="network" className="animate-fade-in">
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>Sua Rede</CardTitle>
-                  <CardDescription>Conecte-se com outros músicos</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-48 flex items-center justify-center">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <span>Sua rede de contatos será exibida aqui</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <NetworkTab />
             </TabsContent>
           </Tabs>
         </div>
       </main>
+      
+      <EventDialog 
+        open={eventDialogOpen} 
+        onOpenChange={setEventDialogOpen} 
+        onEventUpdated={() => {
+          // Atualizar agenda
+          toast({
+            title: "Evento criado",
+            description: "O evento foi adicionado à sua agenda."
+          });
+        }}
+      />
     </div>
   );
 };
