@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,19 +7,62 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import Button from './Button';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignUpForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Normally we would register the user here
-    toast({
-      title: "Cadastro realizado!",
-      description: "Bem-vindo ao Minha Agenda.",
-    });
-    navigate('/dashboard');
+    setError(null);
+
+    if (!termsAccepted) {
+      setError('Você precisa aceitar os termos de serviço para continuar.');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      // Registrar usuário com Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Cadastro realizado!",
+        description: "Bem-vindo ao Minha Agenda.",
+      });
+      
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Erro ao criar conta:', err);
+      setError(err.message || 'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.');
+      toast({
+        title: "Erro no cadastro",
+        description: err.message || 'Não foi possível completar o cadastro. Por favor, tente novamente.',
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
@@ -36,6 +79,9 @@ const SignUpForm: React.FC = () => {
                 id="firstName" 
                 placeholder="João" 
                 required 
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -44,6 +90,9 @@ const SignUpForm: React.FC = () => {
                 id="lastName" 
                 placeholder="Silva" 
                 required 
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                disabled={loading}
               />
             </div>
           </div>
@@ -54,6 +103,9 @@ const SignUpForm: React.FC = () => {
               placeholder="seu@email.com" 
               type="email" 
               required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
           <div className="space-y-2">
@@ -64,10 +116,17 @@ const SignUpForm: React.FC = () => {
               type="password" 
               required 
               minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
           <div className="flex items-center space-x-2">
-            <Checkbox id="terms" required />
+            <Checkbox 
+              id="terms" 
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+            />
             <Label htmlFor="terms" className="text-sm font-normal">
               Eu concordo com os{' '}
               <a href="#" className="text-primary hover:underline">
@@ -79,8 +138,9 @@ const SignUpForm: React.FC = () => {
               </a>
             </Label>
           </div>
-          <Button type="submit" className="w-full">
-            Criar conta
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Criando conta..." : "Criar conta"}
           </Button>
         </form>
       </CardContent>

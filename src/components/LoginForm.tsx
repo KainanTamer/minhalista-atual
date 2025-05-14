@@ -1,24 +1,51 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Button from './Button';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Normally we would authenticate here
-    toast({
-      title: "Login bem-sucedido!",
-      description: "Bem-vindo de volta ao Minha Agenda.",
-    });
-    navigate('/dashboard');
+    setError(null);
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Login bem-sucedido!",
+        description: "Bem-vindo de volta ao Minha Agenda.",
+      });
+      
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Erro ao fazer login:', err);
+      setError(err.message || 'Ocorreu um erro ao fazer login. Por favor, tente novamente.');
+      toast({
+        title: "Erro no login",
+        description: err.message || 'Credenciais inválidas. Por favor, tente novamente.',
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
@@ -35,6 +62,9 @@ const LoginForm: React.FC = () => {
               placeholder="seu@email.com" 
               type="email" 
               required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
           <div className="space-y-2">
@@ -49,10 +79,14 @@ const LoginForm: React.FC = () => {
               placeholder="••••••••" 
               type="password" 
               required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Entrar
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
       </CardContent>
