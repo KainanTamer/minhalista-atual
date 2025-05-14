@@ -16,6 +16,7 @@ interface ToastBase {
   className?: string;
   onOpenChange?: (open: boolean) => void;
   onDismiss?: () => void;
+  open?: boolean; // Adding the open property here
 }
 
 // Now define the ToasterToast type without circular reference
