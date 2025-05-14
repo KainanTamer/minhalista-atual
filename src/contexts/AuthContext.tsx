@@ -8,6 +8,7 @@ interface AuthContextProps {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -43,11 +44,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const refreshUser = async () => {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (currentSession) {
+      setSession(currentSession);
+      setUser(currentSession.user);
+    }
+  };
+
   const value = {
     session,
     user,
     loading,
     signOut,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

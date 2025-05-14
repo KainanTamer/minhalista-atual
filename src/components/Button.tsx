@@ -29,7 +29,8 @@ const Button = ({
       className={cn(
         'font-medium transition-colors',
         variant === 'primary' && 'bg-primary text-primary-foreground hover:bg-primary/90',
-        type === 'submit' && 'dark:text-secondary-foreground', // Garante texto escuro em botões de submit no tema escuro
+        // Fix for dark mode button contrast
+        type === 'submit' && 'dark:text-primary-foreground dark:bg-primary dark:hover:bg-primary/90',
         className
       )}
       {...props}
