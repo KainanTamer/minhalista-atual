@@ -29,8 +29,9 @@ const Button = ({
       className={cn(
         'font-medium transition-colors',
         variant === 'primary' && 'bg-primary text-primary-foreground hover:bg-primary/90',
-        // Ensure white buttons have black text in dark mode
-        'dark:bg-white dark:text-black dark:hover:bg-gray-200',
+        // Fixar cores para modo escuro
+        variant === 'outline' && 'dark:bg-transparent dark:text-white dark:border-white/20 dark:hover:bg-white/10',
+        variant === 'default' && 'dark:bg-white dark:text-black dark:hover:bg-gray-200',
         className
       )}
       {...props}

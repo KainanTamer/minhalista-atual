@@ -118,6 +118,22 @@
   .dark button.bg-white {
     @apply text-black;
   }
+  
+  /* Fix for button text color in light mode */
+  button.bg-white, button.bg-secondary {
+    @apply text-foreground;
+  }
+  
+  /* Fix for text in calendar number in dark mode */
+  .dark .react-calendar__tile {
+    @apply text-white;
+  }
+  
+  .dark .react-calendar__tile:enabled:hover,
+  .dark .react-calendar__tile:enabled:focus,
+  .dark .react-calendar__tile--active {
+    @apply text-black;
+  }
 }
 
 .calendar-container {
@@ -143,4 +159,19 @@
 /* Estilo para botões de redes sociais */
 .social-button {
   @apply flex items-center justify-center rounded-full w-10 h-10 bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition-colors;
+}
+
+/* Corrigir cores no modo escuro para botões sociais */
+.dark .social-button {
+  @apply bg-gray-800 text-white hover:bg-white hover:text-black;
+}
+
+/* Garantir contraste adequado no modo dark para botões */
+.dark .bg-white, .dark .bg-secondary {
+  @apply text-black;
+}
+
+/* Melhorar visibilidade de datas selecionadas no calendário */
+.dark .react-calendar__tile--active {
+  @apply bg-white text-black font-bold;
 }

@@ -162,7 +162,9 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                         className={cn(
                           "relative flex h-full w-full items-center justify-center",
                           isWeekendDay && "weekend-day bg-secondary/80 dark:bg-secondary/30",
-                          isTodayDay && "dark:text-white font-bold text-primary"
+                          isTodayDay && "dark:text-white font-bold text-primary",
+                          // Garantir que texto seja visível no modo escuro quando selecionado
+                          props.selected && "dark:text-black font-bold"
                         )}
                       >
                         {props.date.getDate()}
@@ -199,7 +201,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 >
                   <div className="flex justify-between">
                     <h4 className="font-medium dark:text-white">{event.title}</h4>
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50 dark:text-black">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50 dark:bg-white/20 dark:text-white">
                       {event.event_type === 'ensaio' ? 'Ensaio' : 
                        event.event_type === 'show' ? 'Show' : 
                        event.event_type === 'gravacao' ? 'Gravação' : 'Outro'}
