@@ -48,42 +48,43 @@
   }
 
   .dark {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    /* Inversão das cores: o que está branco fica preto e vice-versa */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 25%;
+    --muted-foreground: 0 0% 80%;
 
-    --accent: 0 0% 90%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 0 0% 25%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 80%;
-    --input: 0 0% 80%;
-    --ring: 0 0% 0%;
+    --border: 0 0% 30%;
+    --input: 0 0% 30%;
+    --ring: 0 0% 90%;
     
-    --sidebar-background: 0 0% 90%;
-    --sidebar-foreground: 0 0% 0%;
-    --sidebar-primary: 0 0% 0%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 85%;
-    --sidebar-accent-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 80%;
-    --sidebar-ring: 0 0% 0%;
+    --sidebar-background: 0 0% 15%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 20%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 30%;
+    --sidebar-ring: 0 0% 90%;
   }
 }
 
@@ -140,6 +141,24 @@
 
 /* Melhorar visibilidade de datas selecionadas no calendário */
 .dark .react-calendar__tile--active {
-  background-color: rgba(0, 0, 0, 0.2);
-  color: black;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Estilos adicionais para melhor visibilidade no calendário */
+.dark .rdp-button:not([disabled]) {
+  color: hsl(var(--foreground));
+}
+
+.dark .rdp-day_selected:not([disabled]) {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.calendar-day-selected {
+  @apply relative z-10 bg-primary/20 rounded-md;
+}
+
+.dark .calendar-day-selected {
+  @apply bg-white/30 text-white;
 }

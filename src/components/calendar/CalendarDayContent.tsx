@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { isWeekend, isToday, isSameDay } from 'date-fns';
 
-// Updated interface to match what's actually used in the component
+// Interface atualizada para o componente
 interface CalendarDayContentProps {
   date: Date;
   displayValue?: string;
@@ -33,13 +33,14 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
         "relative flex h-full w-full items-center justify-center",
         isWeekendDay && "weekend-day",
         isTodayDay && "font-bold text-primary",
-        selected && "bg-primary/10 rounded-md", // Destaque sutil para o dia selecionado
-        // Garantir que texto seja sempre visível nos modos claro e escuro
-        selected && "text-foreground dark:text-foreground font-medium"
+        selected && "calendar-day-selected" // Classe customizada para dias selecionados
       )}
     >
       <span className={cn(
+        "text-foreground", // Garante que o texto sempre usa a cor principal de texto
         selected && "relative z-10",
+        disabled && "opacity-50",
+        outside && "text-muted-foreground"
       )}>
         {displayValue || date.getDate()}
       </span>

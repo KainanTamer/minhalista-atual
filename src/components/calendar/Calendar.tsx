@@ -11,7 +11,6 @@ import { useCalendarEvents } from '@/hooks';
 import EventDialog from '@/components/EventDialog';
 import EventListCard from './EventListCard';
 import CalendarDayContent from './CalendarDayContent';
-import { DayContentProps } from 'react-day-picker';
 
 interface CalendarProps {
   className?: string;
@@ -38,6 +37,22 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
   const handleAddEvent = () => {
     setSelectedEvent(undefined);
     setEventDialogOpen(true);
+  };
+
+  // Função para renderizar o conteúdo do dia
+  const renderDayContent = (props: any) => {
+    // Extrair as propriedades necessárias do objeto props
+    return (
+      <CalendarDayContent
+        date={props.date}
+        events={events}
+        selected={Boolean(props.selected)}
+        today={Boolean(props.today)}
+        outside={Boolean(props.outside)}
+        disabled={Boolean(props.disabled)}
+        displayValue={props.displayValue}
+      />
+    );
   };
 
   return (
@@ -69,17 +84,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 className="border-none pointer-events-auto"
                 locale={ptBR}
                 components={{
-                  DayContent: (props: DayContentProps) => (
-                    <CalendarDayContent
-                      date={props.date}
-                      events={events}
-                      selected={props.day?.isSelected}
-                      today={props.day?.isToday}
-                      outside={props.day?.isOutside}
-                      disabled={props.day?.isDisabled}
-                      displayValue={props.day?.day.toString()}
-                    />
-                  )
+                  DayContent: renderDayContent
                 }}
               />
             )}

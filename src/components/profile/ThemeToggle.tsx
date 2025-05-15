@@ -14,7 +14,7 @@ const ThemeToggle: React.FC = () => {
         {theme === 'light' ? (
           <Sun className="h-5 w-5 text-yellow-500" />
         ) : (
-          <Moon className="h-5 w-5 text-blue-400" />
+          <Moon className="h-5 w-5 text-blue-300" />
         )}
         <Label htmlFor="darkmode" className="text-sm font-medium">
           {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
