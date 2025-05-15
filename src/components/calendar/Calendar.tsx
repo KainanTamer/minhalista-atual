@@ -80,7 +80,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 selected={date}
                 onSelect={setDate}
                 onDayClick={handleDayClick}
-                className="border-none pointer-events-auto text-base" // Adicionado pointer-events-auto e aumentado texto
+                className="border-none pointer-events-auto text-base" 
                 locale={ptBR}
                 components={{
                   DayContent: renderDayContent
