@@ -48,42 +48,42 @@
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 100%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 80%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 100%;
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
+    --ring: 0 0% 0%;
     
-    --sidebar-background: 0 0% 15%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 0 0% 100%;
+    --sidebar-background: 0 0% 90%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 85%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 80%;
+    --sidebar-ring: 0 0% 0%;
   }
 }
 
@@ -96,45 +96,6 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
-  /* Enhanced contrast for dark mode text */
-  .dark {
-    color: white;
-  }
-  
-  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-    color: white;
-    font-weight: 700;
-  }
-  
-  .dark p, .dark span, .dark div {
-    color: rgb(243 244 246); /* text-gray-100 equivalent */
-  }
-  
-  /* Ensure buttons in dark mode have correct text color */
-  .dark button {
-    color: white;
-  }
-  
-  .dark button.bg-white {
-    color: black;
-  }
-  
-  /* Fix for button text color in light mode */
-  button.bg-white, button.bg-secondary {
-    color: hsl(var(--foreground));
-  }
-  
-  /* Fix for text in calendar number in dark mode */
-  .dark .react-calendar__tile {
-    color: white;
-  }
-  
-  .dark .react-calendar__tile:enabled:hover,
-  .dark .react-calendar__tile:enabled:focus,
-  .dark .react-calendar__tile--active {
-    color: black;
-  }
 }
 
 .calendar-container {
@@ -144,7 +105,7 @@
 
 /* Estilizar dias de fim de semana no calendário */
 .weekend-day {
-  @apply bg-secondary/80 dark:bg-secondary/30;
+  @apply bg-secondary/80 dark:bg-secondary/70;
 }
 
 .event-item {
@@ -166,29 +127,19 @@
   @apply bg-primary text-primary-foreground;
 }
 
-/* Corrigir cores no modo escuro para botões sociais */
+/* Corrigir cores no modo dark para botões sociais */
 .dark .social-button {
-  background-color: rgb(31, 41, 55); /* bg-gray-800 */
-  color: white;
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
 }
 
 .dark .social-button:hover {
-  background-color: white;
-  color: black;
-}
-
-/* Garantir contraste adequado no modo dark para botões */
-.dark .bg-white {
-  color: black !important;
-}
-
-.dark .bg-secondary {
-  color: black !important;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
 /* Melhorar visibilidade de datas selecionadas no calendário */
 .dark .react-calendar__tile--active {
-  background-color: white;
-  font-weight: 700;
+  background-color: rgba(0, 0, 0, 0.2);
   color: black;
 }

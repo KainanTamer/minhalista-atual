@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 import { PlusCircle } from 'lucide-react';
 import { Event } from '@/services/api';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { useCalendarEvents } from '@/hooks';
 import EventDialog from '@/components/EventDialog';
 import EventListCard from './EventListCard';
 import CalendarDayContent from './CalendarDayContent';

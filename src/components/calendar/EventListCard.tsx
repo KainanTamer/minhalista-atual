@@ -26,20 +26,20 @@ const EventListCard: React.FC<EventListCardProps> = ({ events, date, onEventClic
   const getEventTypeClass = (eventType: string) => {
     switch(eventType) {
       case 'ensaio':
-        return 'bg-blue-100 dark:bg-blue-900';
+        return 'bg-blue-100 dark:bg-blue-50';
       case 'show':
-        return 'bg-green-100 dark:bg-green-900';
+        return 'bg-green-100 dark:bg-green-50';
       case 'gravacao':
-        return 'bg-purple-100 dark:bg-purple-900';
+        return 'bg-purple-100 dark:bg-purple-50';
       default:
-        return 'bg-gray-100 dark:bg-gray-800';
+        return 'bg-gray-100 dark:bg-gray-50';
     }
   };
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg dark:text-white">
+        <CardTitle className="text-lg">
           Eventos do dia {date && format(date, "dd 'de' MMMM", { locale: ptBR })}
         </CardTitle>
       </CardHeader>
@@ -55,18 +55,18 @@ const EventListCard: React.FC<EventListCardProps> = ({ events, date, onEventClic
               onClick={() => onEventClick(event)}
             >
               <div className="flex justify-between">
-                <h4 className="font-medium dark:text-white">{event.title}</h4>
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50 dark:bg-white/20 dark:text-white">
+                <h4 className="font-medium">{event.title}</h4>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50 dark:bg-background/80">
                   {event.event_type === 'ensaio' ? 'Ensaio' : 
                    event.event_type === 'show' ? 'Show' : 
                    event.event_type === 'gravacao' ? 'Gravação' : 'Outro'}
                 </span>
               </div>
-              <p className="text-sm dark:text-gray-300">
+              <p className="text-sm">
                 {format(new Date(event.start_time), "HH:mm")} - {format(new Date(event.end_time), "HH:mm")}
               </p>
               {event.venue_name && (
-                <p className="text-sm mt-1 dark:text-gray-300">{event.venue_name}</p>
+                <p className="text-sm mt-1">{event.venue_name}</p>
               )}
             </div>
           ))}

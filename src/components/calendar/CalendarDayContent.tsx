@@ -30,13 +30,18 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     <div 
       className={cn(
         "relative flex h-full w-full items-center justify-center",
-        isWeekendDay && "weekend-day bg-secondary/80 dark:bg-secondary/30",
-        isTodayDay && "dark:text-white font-bold text-primary",
-        // Garantir que texto seja visível no modo escuro quando selecionado
-        selected && "dark:text-black font-bold"
+        isWeekendDay && "weekend-day",
+        isTodayDay && "font-bold text-primary",
+        selected && "bg-primary/10 rounded-md", // Destaque sutil para o dia selecionado
+        // Garantir que texto seja sempre visível nos modos claro e escuro
+        selected && "text-foreground dark:text-foreground font-medium"
       )}
     >
-      {displayValue || date.getDate()}
+      <span className={cn(
+        selected && "relative z-10",
+      )}>
+        {displayValue || date.getDate()}
+      </span>
       {hasEvent && (
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
       )}
