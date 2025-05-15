@@ -27,28 +27,28 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
   return (
     <Tabs defaultValue={initialTab} value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="mb-4 flex overflow-x-auto pb-2 w-full justify-start md:justify-center">
-        <TabsTrigger value="agenda" className="flex items-center gap-1">
-          <CalendarIcon size={16} /> 
+      <TabsList className="mb-6 flex overflow-x-auto pb-2 w-full justify-start md:justify-center gap-2">
+        <TabsTrigger value="agenda" className="flex items-center gap-1 px-4 py-2">
+          <CalendarIcon size={18} /> 
           Agenda
         </TabsTrigger>
-        <TabsTrigger value="finances" className="flex items-center gap-1">
-          <BarChart size={16} />
+        <TabsTrigger value="finances" className="flex items-center gap-1 px-4 py-2">
+          <BarChart size={18} />
           Finanças
         </TabsTrigger>
-        <TabsTrigger value="repertoire" className="flex items-center gap-1">
-          <Music size={16} />
+        <TabsTrigger value="repertoire" className="flex items-center gap-1 px-4 py-2">
+          <Music size={18} />
           Repertório
         </TabsTrigger>
-        <TabsTrigger value="network" className="flex items-center gap-1">
-          <User size={16} />
+        <TabsTrigger value="network" className="flex items-center gap-1 px-4 py-2">
+          <User size={18} />
           Networking
         </TabsTrigger>
       </TabsList>
       
       <TabsContent value="agenda" className="space-y-4 animate-fade-in">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Calendar className="md:col-span-2 bg-background rounded-lg shadow-sm border" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Calendar className="md:col-span-1 lg:col-span-2 bg-background rounded-lg shadow-sm border" />
         </div>
       </TabsContent>
       

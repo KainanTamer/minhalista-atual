@@ -41,7 +41,6 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
 
   // Função para renderizar o conteúdo do dia
   const renderDayContent = (props: any) => {
-    // Extrair as propriedades necessárias do objeto props
     return (
       <CalendarDayContent
         date={props.date}
@@ -57,7 +56,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
 
   return (
     <div className={cn("grid gap-4", className)}>
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle>Calendário</CardTitle>
           <Button 
@@ -81,7 +80,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 selected={date}
                 onSelect={setDate}
                 onDayClick={handleDayClick}
-                className="border-none pointer-events-auto"
+                className="border-none pointer-events-auto text-base" // Adicionado pointer-events-auto e aumentado texto
                 locale={ptBR}
                 components={{
                   DayContent: renderDayContent
