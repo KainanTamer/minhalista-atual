@@ -71,3 +71,5 @@ export const useCalendarEvents = () => {
     fetchEvents
   };
 };
+
+export default useCalendarEvents;

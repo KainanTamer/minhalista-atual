@@ -11,6 +11,7 @@ import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import EventDialog from '@/components/EventDialog';
 import EventListCard from './EventListCard';
 import CalendarDayContent from './CalendarDayContent';
+import { DayContentProps } from 'react-day-picker';
 
 interface CalendarProps {
   className?: string;
@@ -68,14 +69,14 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 className="border-none pointer-events-auto"
                 locale={ptBR}
                 components={{
-                  DayContent: (props) => (
+                  DayContent: (props: DayContentProps) => (
                     <CalendarDayContent
                       date={props.date}
                       events={events}
-                      selected={props.selected}
-                      today={props.today}
-                      outside={props.outside}
-                      disabled={props.disabled}
+                      selected={Boolean(props.selected)}
+                      today={Boolean(props.today)}
+                      outside={Boolean(props.outside)}
+                      disabled={Boolean(props.disabled)}
                       displayValue={props.displayValue}
                     />
                   )
