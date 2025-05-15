@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Music, User, Calendar as CalendarIcon } from 'lucide-react';
-import Calendar from '@/components/Calendar';
+import Calendar from '@/components/calendar';
 import FinancesTab from '@/components/tabs/FinancesTab';
 import RepertoireTab from '@/components/tabs/RepertoireTab';
 import NetworkTab from '@/components/tabs/NetworkTab';
