@@ -162,7 +162,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                           isWeekendDay && "weekend-day bg-secondary/80 dark:bg-secondary/30",
                           isTodayDay && "dark:text-white font-bold text-primary",
                           // Garantir que texto seja visível no modo escuro quando selecionado
-                          props.day?.isSelected && "dark:text-black font-bold"
+                          props.selected && "dark:text-black font-bold"
                         )}
                       >
                         {props.date.getDate()}

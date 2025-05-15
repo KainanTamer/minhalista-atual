@@ -99,20 +99,21 @@
 
   /* Enhanced contrast for dark mode text */
   .dark {
-    @apply text-white;
+    color: white;
   }
   
   .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-    @apply text-white font-bold;
+    color: white;
+    font-weight: 700;
   }
   
   .dark p, .dark span, .dark div {
-    @apply text-gray-100;
+    color: rgb(243 244 246); /* text-gray-100 equivalent */
   }
   
   /* Ensure buttons in dark mode have correct text color */
   .dark button {
-    @apply text-white;
+    color: white;
   }
   
   .dark button.bg-white {
@@ -121,18 +122,18 @@
   
   /* Fix for button text color in light mode */
   button.bg-white, button.bg-secondary {
-    @apply text-foreground;
+    color: hsl(var(--foreground));
   }
   
   /* Fix for text in calendar number in dark mode */
   .dark .react-calendar__tile {
-    @apply text-white;
+    color: white;
   }
   
   .dark .react-calendar__tile:enabled:hover,
   .dark .react-calendar__tile:enabled:focus,
   .dark .react-calendar__tile--active {
-    @apply text-black;
+    color: black;
   }
 }
 
@@ -183,6 +184,7 @@
 
 /* Melhorar visibilidade de datas selecionadas no calendário */
 .dark .react-calendar__tile--active {
-  @apply bg-white font-bold;
+  background-color: white;
+  font-weight: 700;
   color: black;
 }
