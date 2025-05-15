@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -299,6 +298,22 @@ const NetworkTab: React.FC = () => {
           </CardContent>
         </Card>
       )}
+      
+      {/* Informações do desenvolvedor */}
+      <div className="md:col-span-2 mt-6 text-center">
+        <div className="p-4 border-t border-border">
+          <p className="text-sm text-muted-foreground">Desenvolvido por <span className="font-semibold">Kainan Tamer</span></p>
+          <a 
+            href="https://instagram.com/kainan_tamer" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm flex items-center justify-center gap-1 mt-1 text-primary hover:underline"
+          >
+            <Instagram size={14} />
+            kainan_tamer
+          </a>
+        </div>
+      </div>
     </div>
   );
 };

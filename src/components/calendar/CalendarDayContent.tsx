@@ -34,10 +34,10 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
         isTodayDay && "font-bold text-primary"
       )}
     >
-      {/* Mudamos para uma borda colorida em vez de fundo opaco para seleção */}
+      {/* Atualizamos o estilo da seleção para garantir contraste */}
       <span className={cn(
         "relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-all",
-        selected ? "border-2 border-primary font-bold" : "",
+        selected ? "border-2 border-primary font-bold text-foreground" : "", /* Garante contraste do texto */
         disabled && "opacity-50",
         outside && "text-muted-foreground"
       )}>

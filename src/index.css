@@ -158,8 +158,10 @@
 /* Melhorar visibilidade de datas selecionadas no calendário - novo estilo */
 .rdp-day_selected {
   background-color: transparent !important;
-  color: hsl(var(--foreground)) !important;
+  color: hsl(var(--foreground)) !important; /* Garante contraste adequado */
   font-weight: bold !important;
+  border: 2px solid hsl(var(--primary)) !important; /* Adiciona borda para melhor visualização */
+  border-radius: 50%;
 }
 
 /* Novos estilos para o calendário interativo */
