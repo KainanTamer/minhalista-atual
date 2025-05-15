@@ -1,82 +1,70 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import Button from './Button';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Facebook, Apple, AlertCircle } from 'lucide-react';
+import { Apple, Facebook, AlertCircle } from 'lucide-react';
 import { 
   Form, 
   FormControl, 
   FormField, 
   FormItem, 
   FormLabel, 
-  FormMessage, 
-  FormDescription 
+  FormMessage 
 } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const signupSchema = z.object({
-  firstName: z.string().min(2, { message: 'Nome deve ter pelo menos 2 caracteres' }),
-  lastName: z.string().min(2, { message: 'Sobrenome deve ter pelo menos 2 caracteres' }),
+const signUpSchema = z.object({
   email: z.string()
     .min(1, { message: 'Email é obrigatório' })
     .email({ message: 'Email inválido' }),
   password: z.string()
-    .min(8, { message: 'Senha deve ter pelo menos 8 caracteres' })
-    .refine(password => {
-      // Ao menos um número, uma letra maiúscula e uma letra minúscula
-      return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
-    }, { message: 'Senha deve conter pelo menos um número, uma letra maiúscula e uma letra minúscula' }),
-  profileType: z.string(),
-  termsAccepted: z.boolean().refine(value => value === true, {
-    message: 'Você precisa aceitar os termos de serviço',
-  }),
+    .min(6, { message: 'Senha deve ter pelo menos 6 caracteres' }),
+  confirmPassword: z.string()
+    .min(6, { message: 'Confirmação de senha deve ter pelo menos 6 caracteres' }),
+  name: z.string()
+    .min(1, { message: 'Nome é obrigatório' })
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Senhas não correspondem",
+  path: ["confirmPassword"],
 });
 
-type SignupFormValues = z.infer<typeof signupSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUpForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const form = useForm<SignupFormValues>({
-    resolver: zodResolver(signupSchema),
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
       email: '',
       password: '',
-      profileType: 'músico',
-      termsAccepted: false,
+      confirmPassword: '',
+      name: ''
     },
     mode: "onChange"
   });
   
-  const { formState } = form;
-  const { isSubmitting } = formState;
-  
-  const onSubmit = async (values: SignupFormValues) => {
+  const handleSubmit = async (values: SignUpFormValues) => {
     setAuthError(null);
+    setIsSubmitting(true);
     
     try {
-      // Registrar usuário com Supabase
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
           data: {
-            first_name: values.firstName,
-            last_name: values.lastName,
-            profile_type: values.profileType,
-            full_name: `${values.firstName} ${values.lastName}`
+            name: values.name,
           }
         }
       });
@@ -84,31 +72,30 @@ const SignUpForm: React.FC = () => {
       if (error) throw error;
       
       toast({
-        title: "Cadastro realizado!",
-        description: "Bem-vindo ao Minha Agenda.",
+        title: "Cadastro bem-sucedido!",
+        description: "Verifique seu email para confirmar o cadastro.",
       });
       
-      navigate('/dashboard');
+      navigate('/login');
     } catch (err: any) {
-      console.error('Erro ao criar conta:', err);
-      setAuthError(err.message || 'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.');
+      console.error('Erro ao cadastrar:', err);
+      setAuthError(err.message || 'Ocorreu um erro ao cadastrar. Por favor, tente novamente.');
       toast({
         title: "Erro no cadastro",
         description: err.message || 'Não foi possível completar o cadastro. Por favor, tente novamente.',
         variant: "destructive"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple') => {
+  const handleSocialSignUp = async (provider: 'google' | 'facebook' | 'apple') => {
     try {
       await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            profile_type: form.getValues('profileType') || 'músico'
-          }
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
     } catch (err: any) {
@@ -124,9 +111,9 @@ const SignUpForm: React.FC = () => {
   return (
     <Card className="w-full max-w-md mx-auto animate-fade-in">
       <CardHeader>
-        <CardTitle className="text-2xl text-center">Cadastre-se</CardTitle>
+        <CardTitle className="text-2xl text-center">Criar uma conta</CardTitle>
         <CardDescription className="text-center">
-          Crie sua conta para começar a gerenciar sua agenda
+          Crie sua conta para começar a usar o Minha Agenda
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -134,7 +121,7 @@ const SignUpForm: React.FC = () => {
           <Button 
             variant="outline" 
             className="w-full flex justify-center items-center gap-2"
-            onClick={() => handleSocialLogin('google')}
+            onClick={() => handleSocialSignUp('google')}
           >
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path
@@ -147,7 +134,7 @@ const SignUpForm: React.FC = () => {
           <Button 
             variant="outline" 
             className="w-full flex justify-center items-center gap-2"
-            onClick={() => handleSocialLogin('facebook')}
+            onClick={() => handleSocialSignUp('facebook')}
           >
             <Facebook size={18} />
             Continuar com Facebook
@@ -155,7 +142,7 @@ const SignUpForm: React.FC = () => {
           <Button 
             variant="outline" 
             className="w-full flex justify-center items-center gap-2"
-            onClick={() => handleSocialLogin('apple')}
+            onClick={() => handleSocialSignUp('apple')}
           >
             <Apple size={18} />
             Continuar com Apple
@@ -179,35 +166,23 @@ const SignUpForm: React.FC = () => {
         )}
         
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <Input placeholder="João" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sobrenome <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <Input placeholder="Silva" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Seu nome completo" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <FormField
               control={form.control}
@@ -242,9 +217,6 @@ const SignUpForm: React.FC = () => {
                       {...field} 
                     />
                   </FormControl>
-                  <FormDescription>
-                    A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma letra minúscula e um número.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -252,60 +224,29 @@ const SignUpForm: React.FC = () => {
             
             <FormField
               control={form.control}
-              name="profileType"
+              name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de perfil <span className="text-destructive">*</span></FormLabel>
+                  <FormLabel>Confirmar Senha <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
-                    <select 
-                      {...field}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2"
-                    >
-                      <option value="músico">Músico</option>
-                      <option value="banda">Banda</option>
-                      <option value="produtor">Produtor</option>
-                      <option value="empresário">Empresário</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="termsAccepted"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2">
-                  <FormControl>
-                    <Checkbox 
-                      checked={field.value} 
-                      onCheckedChange={field.onChange} 
+                    <Input 
+                      placeholder="••••••••" 
+                      type="password"
+                      autoComplete="new-password"
+                      {...field} 
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm font-normal">
-                      Eu concordo com os{' '}
-                      <a href="#" className="text-primary hover:underline font-medium">
-                        Termos de Serviço
-                      </a>{' '}
-                      e{' '}
-                      <a href="#" className="text-primary hover:underline font-medium">
-                        Política de Privacidade
-                      </a>
-                    </FormLabel>
-                    <FormMessage />
-                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
             
             <Button 
               type="submit" 
-              className="w-full dark:text-secondary-foreground"
+              className="w-full" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Criando conta..." : "Criar conta"}
+              {isSubmitting ? "Cadastrando..." : "Cadastrar"}
             </Button>
           </form>
         </Form>
@@ -317,7 +258,7 @@ const SignUpForm: React.FC = () => {
             onClick={() => navigate('/login')} 
             className="text-primary cursor-pointer hover:underline"
           >
-            Entrar
+            Entre
           </a>
         </p>
       </CardFooter>
