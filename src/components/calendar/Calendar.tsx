@@ -73,11 +73,11 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                     <CalendarDayContent
                       date={props.date}
                       events={events}
-                      selected={Boolean(props.selected)}
-                      today={Boolean(props.today)}
-                      outside={Boolean(props.outside)}
-                      disabled={Boolean(props.disabled)}
-                      displayValue={props.displayValue}
+                      selected={props.day?.isSelected}
+                      today={props.day?.isToday}
+                      outside={props.day?.isOutside}
+                      disabled={props.day?.isDisabled}
+                      displayValue={props.day?.day.toString()}
                     />
                   )
                 }}

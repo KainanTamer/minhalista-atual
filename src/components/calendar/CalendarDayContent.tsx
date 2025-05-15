@@ -3,6 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { isWeekend, isToday, isSameDay } from 'date-fns';
 
+// Updated interface to match what's actually used in the component
 interface CalendarDayContentProps {
   date: Date;
   displayValue?: string;
