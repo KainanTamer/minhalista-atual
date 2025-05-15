@@ -57,9 +57,9 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
 
   return (
     <div className={cn("flex flex-col items-center calendar-wrapper", className)}>
-      <Card className="overflow-hidden calendar-card w-full max-w-4xl">
+      <Card className="overflow-hidden calendar-card w-full max-w-3xl">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-xl flex items-center gap-2">
+          <CardTitle className="text-lg flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             Calendário
           </CardTitle>
@@ -73,11 +73,11 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="calendar-container p-3 md:w-3/5">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="calendar-container p-2 md:w-3/5 w-full">
               {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="flex justify-center items-center h-48">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
               ) : (
                 <CalendarComponent
@@ -85,7 +85,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                   selected={date}
                   onSelect={setDate}
                   onDayClick={handleDayClick}
-                  className="border-none pointer-events-auto text-lg mx-auto" 
+                  className="border-none pointer-events-auto mx-auto" 
                   locale={ptBR}
                   components={{
                     DayContent: renderDayContent
@@ -94,9 +94,9 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
               )}
             </div>
             
-            <div className="md:w-2/5">
+            <div className="md:w-2/5 w-full">
               {/* Legenda de cores para tipos de eventos */}
-              <div className="event-legend mb-4">
+              <div className="event-legend mb-3 flex flex-wrap">
                 <div className="event-legend-item">
                   <span className="event-legend-color" style={{backgroundColor: '#4ade80'}}></span>
                   <span>Show</span>

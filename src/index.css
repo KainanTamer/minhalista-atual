@@ -100,19 +100,25 @@
 }
 
 .calendar-container {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: var(--radius);
   background-color: hsl(var(--card));
   max-width: 100%;
   margin: 0 auto;
 }
 
-/* Deixar o calendário maior */
+/* Deixar o calendário menor para mobile */
 .rdp {
-  --rdp-cell-size: 60px !important; /* Aumentar tamanho das células */
+  --rdp-cell-size: 40px !important; /* Tamanho reduzido para mobile */
   --rdp-accent-color: hsl(var(--primary));
   --rdp-background-color: hsl(var(--primary) / 0.3);
   margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .rdp {
+    --rdp-cell-size: 50px !important; /* Tamanho maior para desktop */
+  }
 }
 
 .rdp-months {
@@ -121,7 +127,7 @@
 
 .rdp-month {
   width: 100%;
-  max-width: 400px; /* Largura máxima para o calendário */
+  max-width: 350px; /* Largura máxima para o calendário */
 }
 
 /* Estilizar dias de fim de semana no calendário */
@@ -139,7 +145,7 @@
 }
 
 .calendar-card {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border: 1px solid hsl(var(--border));
 }
 
@@ -149,29 +155,11 @@
 
 /* ... keep existing code */
 
-/* Melhorar visibilidade de datas selecionadas no calendário */
-.dark .react-calendar__tile--active {
-  background-color: rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-/* Estilos adicionais para melhor visibilidade no calendário */
-.dark .rdp-button:not([disabled]) {
-  color: hsl(var(--foreground));
-}
-
-.dark .rdp-day_selected:not([disabled]) {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-}
-
-/* Destacar dia selecionado no calendário com opacidade */
-.calendar-day-selected {
-  @apply relative z-10 bg-primary/70 rounded-md;
-}
-
-.dark .calendar-day-selected {
-  @apply bg-primary/70 text-white;
+/* Melhorar visibilidade de datas selecionadas no calendário - novo estilo */
+.rdp-day_selected {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  font-weight: bold !important;
 }
 
 /* Novos estilos para o calendário interativo */
@@ -179,49 +167,17 @@
   position: relative;
   cursor: pointer;
   user-select: none;
-  font-weight: 600 !important;
-}
-
-.rdp-day_selected {
-  font-weight: bold !important;
+  font-weight: 500 !important;
 }
 
 .rdp-day:hover:not(.rdp-day_outside):not(.rdp-day_disabled) {
   background-color: hsl(var(--accent));
 }
 
-.dark .rdp-day:hover:not(.rdp-day_outside):not(.rdp-day_disabled) {
-  background-color: hsl(var(--accent));
-  color: hsl(var(--accent-foreground));
-}
-
 /* Aumentar o tamanho da fonte dos dias */
 .rdp-day_today {
   font-weight: bold !important;
   color: hsl(var(--primary)) !important;
-  text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
-}
-
-.dark .rdp-day_today {
-  color: hsl(var(--primary)) !important;
-  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
-}
-
-/* Garantir que os números dos dias sejam visíveis */
-.rdp-day_selected,
-.rdp-day {
-  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
-}
-
-.dark .rdp-day_selected,
-.dark .rdp-day {
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-}
-
-/* Estilo para o modo escuro garantir visibilidade */
-.dark .rdp-day {
-  color: white !important;
-  font-weight: 600 !important;
 }
 
 /* Centralizar o calendário na tela */
@@ -235,14 +191,14 @@
   margin: 0 auto;
 }
 
-/* Legenda de eventos */
+/* Legenda de eventos - mais compacta para mobile */
 .event-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
-  justify-content: center;
-  padding: 10px;
+  gap: 8px;
+  margin-top: 0;
+  justify-content: flex-start;
+  padding: 8px;
   background: hsl(var(--card));
   border-radius: var(--radius);
   border: 1px solid hsl(var(--border));
@@ -251,15 +207,16 @@
 .event-legend-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: 4px;
+  padding: 2px 6px;
   border-radius: 4px;
   font-weight: 500;
+  font-size: 0.8rem;
 }
 
 .event-legend-color {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
 }
 
@@ -278,4 +235,17 @@
 
 .event-outro {
   border-left: 4px solid #94a3b8 !important; /* Cinza */
+}
+
+/* Melhorar visualização em dispositivos móveis */
+@media (max-width: 640px) {
+  .calendar-card {
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .event-legend-item {
+    padding: 1px 4px;
+    font-size: 0.7rem;
+  }
 }
