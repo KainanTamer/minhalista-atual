@@ -178,8 +178,12 @@
 }
 
 /* Garantir contraste adequado no modo dark para botões */
-.dark .bg-white, .dark .bg-secondary {
-  color: black;
+.dark .bg-white {
+  color: black !important;
+}
+
+.dark .bg-secondary {
+  color: black !important;
 }
 
 /* Melhorar visibilidade de datas selecionadas no calendário */
