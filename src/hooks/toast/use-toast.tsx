@@ -7,7 +7,7 @@ import { genId } from "./toast-utils";
 function toast(props: ToastBase) {
   const id = props.id || genId();
 
-  const update = (props: ToasterToast) =>
+  const update = (props: Partial<ToasterToast>) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
