@@ -14,17 +14,20 @@ function toast(props: ToastBase) {
     });
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
+  // Create a properly typed toast object with all required properties
+  const toastProps: ToasterToast = {
+    ...props,
+    id,
+    open: true,
+    onOpenChange: (open) => {
+      if (!open) dismiss();
+    },
+    onDismiss: dismiss,
+  };
+
   dispatch({
     type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open) => {
-        if (!open) dismiss();
-      },
-      onDismiss: dismiss,
-    },
+    toast: toastProps,
   });
 
   return {

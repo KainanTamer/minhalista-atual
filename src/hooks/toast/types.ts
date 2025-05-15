@@ -12,6 +12,7 @@ export type ToasterToast = ToastProps & {
   action?: ToastActionElement;
   open?: boolean;
   onDismiss?: () => void;
+  variant?: "default" | "destructive";
 };
 
 export type ToastBase = {
@@ -22,6 +23,7 @@ export type ToastBase = {
   onOpenChange?: (open: boolean) => void;
   onDismiss?: () => void;
   open?: boolean;
+  variant?: "default" | "destructive";
 };
 
 export const actionTypes = {
