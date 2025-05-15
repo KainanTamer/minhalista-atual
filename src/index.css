@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -107,9 +106,9 @@
   margin: 0 auto;
 }
 
-/* Deixar o calendário menor para mobile */
+/* Diminuir o calendário para mobile e centralizar */
 .rdp {
-  --rdp-cell-size: 40px !important; /* Tamanho reduzido para mobile */
+  --rdp-cell-size: 36px !important; /* Tamanho menor para mobile */
   --rdp-accent-color: hsl(var(--primary));
   --rdp-background-color: hsl(var(--primary) / 0.3);
   margin: 0 auto;
@@ -117,7 +116,7 @@
 
 @media (min-width: 768px) {
   .rdp {
-    --rdp-cell-size: 50px !important; /* Tamanho maior para desktop */
+    --rdp-cell-size: 46px !important; /* Tamanho moderado para desktop */
   }
 }
 
@@ -127,7 +126,8 @@
 
 .rdp-month {
   width: 100%;
-  max-width: 350px; /* Largura máxima para o calendário */
+  max-width: 320px; /* Largura máxima reduzida para o calendário */
+  margin: 0 auto; /* Centralizar na tela */
 }
 
 /* Estilizar dias de fim de semana no calendário */
@@ -153,14 +153,20 @@
   border: 1px solid hsl(var(--border));
 }
 
-/* ... keep existing code */
-
-/* Melhorar visibilidade de datas selecionadas no calendário - novo estilo */
+/* Redefinir estilos para dia selecionado - removendo background */
 .rdp-day_selected {
   background-color: transparent !important;
-  color: hsl(var(--foreground)) !important; /* Garante contraste adequado */
+  color: hsl(var(--foreground)) !important; 
   font-weight: bold !important;
-  border: 2px solid hsl(var(--primary)) !important; /* Adiciona borda para melhor visualização */
+  border: 2px solid hsl(var(--primary)) !important;
+  border-radius: 50%;
+}
+
+/* Destaque para o dia atual - foco no número */
+.rdp-day_today:not(.rdp-day_outside) {
+  background-color: hsl(var(--primary)/20) !important;
+  color: hsl(var(--primary)) !important;
+  font-weight: bold !important;
   border-radius: 50%;
 }
 
@@ -170,16 +176,11 @@
   cursor: pointer;
   user-select: none;
   font-weight: 500 !important;
+  border-radius: 50%;
 }
 
 .rdp-day:hover:not(.rdp-day_outside):not(.rdp-day_disabled) {
   background-color: hsl(var(--accent));
-}
-
-/* Aumentar o tamanho da fonte dos dias */
-.rdp-day_today {
-  font-weight: bold !important;
-  color: hsl(var(--primary)) !important;
 }
 
 /* Centralizar o calendário na tela */
@@ -193,17 +194,25 @@
   margin: 0 auto;
 }
 
-/* Legenda de eventos - mais compacta para mobile */
+/* Legenda de eventos - mais compacta e centralizada para mobile */
 .event-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin-top: 0;
-  justify-content: flex-start;
-  padding: 8px;
+  justify-content: center; /* Centralizado em mobile */
+  padding: 6px;
   background: hsl(var(--card));
   border-radius: var(--radius);
   border: 1px solid hsl(var(--border));
+}
+
+@media (min-width: 768px) {
+  .event-legend {
+    justify-content: flex-start; /* Alinhado à esquerda em desktop */
+    gap: 8px;
+    padding: 8px;
+  }
 }
 
 .event-legend-item {
@@ -244,6 +253,7 @@
   .calendar-card {
     margin: 0 auto;
     width: 100%;
+    max-width: 95%;
   }
   
   .event-legend-item {

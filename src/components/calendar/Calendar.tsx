@@ -57,7 +57,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
 
   return (
     <div className={cn("flex flex-col items-center calendar-wrapper", className)}>
-      <Card className="overflow-hidden calendar-card w-full max-w-3xl">
+      <Card className="overflow-hidden calendar-card w-full max-w-3xl mx-auto">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
@@ -74,7 +74,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="calendar-container p-2 md:w-3/5 w-full">
+            <div className="calendar-container p-2 md:w-3/5 w-full mx-auto">
               {isLoading ? (
                 <div className="flex justify-center items-center h-48">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -96,7 +96,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
             
             <div className="md:w-2/5 w-full">
               {/* Legenda de cores para tipos de eventos */}
-              <div className="event-legend mb-3 flex flex-wrap">
+              <div className="event-legend mb-3 flex flex-wrap justify-center md:justify-start">
                 <div className="event-legend-item">
                   <span className="event-legend-color" style={{backgroundColor: '#4ade80'}}></span>
                   <span>Show</span>

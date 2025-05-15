@@ -30,14 +30,14 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     <div 
       className={cn(
         "relative flex h-full w-full items-center justify-center transition-all duration-200",
-        isWeekendDay && "weekend-day",
-        isTodayDay && "font-bold text-primary"
+        isWeekendDay && "weekend-day"
       )}
     >
-      {/* Atualizamos o estilo da seleção para garantir contraste */}
+      {/* Estilo para o número do dia */}
       <span className={cn(
         "relative z-10 flex items-center justify-center w-8 h-8 rounded-full transition-all",
-        selected ? "border-2 border-primary font-bold text-foreground" : "", /* Garante contraste do texto */
+        selected ? "border-2 border-primary font-bold text-foreground" : "", /* Garantir contraste */
+        isTodayDay ? "bg-primary/20 text-primary font-bold" : "", /* Destacar data atual pelo número */
         disabled && "opacity-50",
         outside && "text-muted-foreground"
       )}>
