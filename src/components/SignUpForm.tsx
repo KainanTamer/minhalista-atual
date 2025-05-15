@@ -75,7 +75,8 @@ const SignUpForm: React.FC = () => {
           data: {
             first_name: values.firstName,
             last_name: values.lastName,
-            profile_type: values.profileType
+            profile_type: values.profileType,
+            full_name: `${values.firstName} ${values.lastName}`
           }
         }
       });
@@ -104,7 +105,10 @@ const SignUpForm: React.FC = () => {
       await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            profile_type: form.getValues('profileType') || 'músico'
+          }
         }
       });
     } catch (err: any) {

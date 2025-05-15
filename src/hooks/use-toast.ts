@@ -15,7 +15,7 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   open?: boolean
-  onDismiss?: () => void // Adding the missing onDismiss property
+  onDismiss?: () => void
 }
 
 const actionTypes = {
@@ -148,7 +148,7 @@ interface ToastBase {
   description?: React.ReactNode
   action?: ToastActionElement
   onOpenChange?: (open: boolean) => void
-  onDismiss?: () => void // Adding onDismiss property
+  onDismiss?: () => void
   open?: boolean
 }
 

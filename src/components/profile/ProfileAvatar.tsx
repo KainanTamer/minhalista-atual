@@ -76,6 +76,14 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ avatarUrl, onAvatarUpdate
       
       if (updateError) throw updateError;
       
+      // Também atualizar na tabela profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', userId);
+      
+      if (profileError) throw profileError;
+      
       // Atualizar estado local e recarregar dados do usuário
       onAvatarUpdate(publicUrl);
       await refreshUser();
