@@ -46,6 +46,11 @@ const Index: React.FC = () => {
                   Comece agora
                 </Button>
               </Link>
+              <Link to="/signup">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Criar conta
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
