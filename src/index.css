@@ -155,10 +155,11 @@
   color: hsl(var(--foreground)) !important;
 }
 
+/* Destacar dia selecionado no calendário com mais opacidade */
 .calendar-day-selected {
-  @apply relative z-10 bg-primary/20 rounded-md;
+  @apply relative z-10 bg-primary/40 rounded-md;
 }
 
 .dark .calendar-day-selected {
-  @apply bg-white/30 text-white;
+  @apply bg-white/50 text-white;
 }

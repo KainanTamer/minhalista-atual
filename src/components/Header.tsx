@@ -89,9 +89,6 @@ const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true })
                   <Link to="/login" className="text-sm font-medium">
                     Entrar
                   </Link>
-                  <Link to="/signup" className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-md">
-                    Cadastrar
-                  </Link>
                 </>
               )}
             </div>
@@ -144,9 +141,6 @@ const Header: React.FC<HeaderProps> = ({ transparent = false, showMenu = true })
                     <>
                       <Link to="/login" className="text-lg font-medium">
                         Entrar
-                      </Link>
-                      <Link to="/signup" className="text-lg font-medium">
-                        Cadastrar
                       </Link>
                       <div className="flex items-center gap-2 mt-4">
                         <button 

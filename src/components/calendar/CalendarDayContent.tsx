@@ -38,7 +38,7 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     >
       <span className={cn(
         "text-foreground", // Garante que o texto sempre usa a cor principal de texto
-        selected && "relative z-10",
+        selected && "relative z-10 font-bold opacity-100",
         disabled && "opacity-50",
         outside && "text-muted-foreground"
       )}>

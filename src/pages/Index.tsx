@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -40,14 +41,9 @@ const Index: React.FC = () => {
               O aplicativo completo para músicos gerenciarem shows, finanças e rede de contatos. Tudo em um só lugar.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup">
+              <Link to="/login">
                 <Button size="lg" className="w-full sm:w-auto">
                   Comece agora
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  Já tem conta? Entre
                 </Button>
               </Link>
             </div>
