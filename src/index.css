@@ -100,13 +100,14 @@
 }
 
 .calendar-container {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: var(--radius);
+  background-color: hsl(var(--card));
 }
 
 /* Deixar o calendário maior */
 .rdp {
-  --rdp-cell-size: 45px !important; /* Aumentar tamanho das células */
+  --rdp-cell-size: 50px !important; /* Aumentar tamanho das células */
   --rdp-accent-color: hsl(var(--primary));
   --rdp-background-color: hsl(var(--primary) / 0.3);
   margin: 0;
@@ -126,44 +127,28 @@
 }
 
 .event-item {
-  border-left: 3px solid hsl(var(--primary));
-  background-color: hsl(var(--secondary));
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
 }
 
 .event-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.welcome-illustration {
-  max-width: 250px;
-  margin: 0 auto;
+.calendar-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid hsl(var(--border));
 }
 
-/* Estilo para botões de redes sociais */
-.social-button {
-  @apply flex items-center justify-center rounded-full w-10 h-10 bg-secondary text-foreground transition-colors;
+.event-list-card {
+  border: 1px solid hsl(var(--border));
 }
 
-.social-button:hover {
-  @apply bg-primary text-primary-foreground;
-}
-
-/* Corrigir cores no modo dark para botões sociais */
-.dark .social-button {
-  background-color: hsl(var(--secondary));
-  color: hsl(var(--foreground));
-}
-
-.dark .social-button:hover {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-}
+/* ... keep existing code */
 
 /* Melhorar visibilidade de datas selecionadas no calendário */
 .dark .react-calendar__tile--active {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.3);
   color: white;
 }
 
@@ -173,26 +158,47 @@
 }
 
 .dark .rdp-day_selected:not([disabled]) {
-  background-color: hsl(var(--primary) / 0.4) !important;
-  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--primary) / 0.5) !important;
+  color: hsl(var(--primary-foreground)) !important;
 }
 
 /* Destacar dia selecionado no calendário com opacidade */
 .calendar-day-selected {
-  @apply relative z-10 bg-primary/30 rounded-md;
+  @apply relative z-10 bg-primary/40 rounded-md;
 }
 
 .dark .calendar-day-selected {
-  @apply bg-primary/40 text-white;
+  @apply bg-primary/50 text-white;
 }
 
-/* Animações para elementos interativos */
-@keyframes pulse-subtle {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
+/* Novos estilos para o calendário interativo */
+.rdp-day {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
 }
 
-.pulse-on-hover:hover {
-  animation: pulse-subtle 0.8s infinite;
+.rdp-day_selected {
+  font-weight: bold;
 }
+
+.rdp-day:hover:not(.rdp-day_outside):not(.rdp-day_disabled) {
+  background-color: hsl(var(--accent));
+}
+
+.dark .rdp-day:hover:not(.rdp-day_outside):not(.rdp-day_disabled) {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Aumentar o tamanho da fonte dos dias */
+.rdp-day_today {
+  font-weight: bold !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .rdp-day_today {
+  color: hsl(var(--primary)) !important;
+}
+
+/* ... keep existing code */

@@ -2,8 +2,8 @@
 import Calendar from './Calendar';
 import type { CalendarProps as CalendarComponentProps } from '@/components/ui/calendar';
 
-export type CalendarProps = CalendarComponentProps & {
+export interface CalendarProps {
   className?: string;
-};
+}
 
 export default Calendar;

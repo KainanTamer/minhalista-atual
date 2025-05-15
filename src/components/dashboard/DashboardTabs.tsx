@@ -47,8 +47,8 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
       </TabsList>
       
       <TabsContent value="agenda" className="space-y-4 animate-fade-in">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Calendar className="md:col-span-1 lg:col-span-2 bg-background rounded-lg shadow-sm border" />
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
+          <Calendar className="col-span-1 bg-background rounded-lg shadow-sm border" />
         </div>
       </TabsContent>
       

@@ -3,7 +3,6 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { isWeekend, isToday, isSameDay } from 'date-fns';
 
-// Interface atualizada para o componente
 interface CalendarDayContentProps {
   date: Date;
   displayValue?: string;
@@ -30,14 +29,19 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   return (
     <div 
       className={cn(
-        "relative flex h-full w-full items-center justify-center",
+        "relative flex h-full w-full items-center justify-center transition-all duration-200",
         isWeekendDay && "weekend-day",
         isTodayDay && "font-bold text-primary"
       )}
     >
+      {/* Fundo opaco para seleção */}
+      {selected && (
+        <div className="absolute inset-0 bg-primary/40 dark:bg-primary/50 rounded-md -z-10" />
+      )}
+      
       <span className={cn(
-        "relative z-10 text-foreground", // Aumentei a prioridade z-index
-        selected && "font-bold opacity-100",
+        "relative z-10 font-medium", 
+        selected ? "text-foreground dark:text-primary-foreground" : "text-foreground",
         disabled && "opacity-50",
         outside && "text-muted-foreground"
       )}>
@@ -46,12 +50,10 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
       
       {/* Indicador de evento abaixo do número */}
       {hasEvent && (
-        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-      )}
-      
-      {/* Fundo opaco para seleção */}
-      {selected && (
-        <div className="absolute inset-0 bg-primary/30 dark:bg-primary/40 rounded-md -z-10" />
+        <div className={cn(
+          "absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full",
+          selected ? "bg-foreground dark:bg-primary-foreground" : "bg-primary"
+        )} />
       )}
     </div>
   );

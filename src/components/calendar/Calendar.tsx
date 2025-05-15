@@ -23,6 +23,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
   
   const { events, isLoading, fetchEvents } = useCalendarEvents();
 
+  // Função para lidar com o clique em um dia do calendário
   const handleDayClick = (day: Date) => {
     setDate(day);
     setSelectedEvent(undefined);
@@ -56,7 +57,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
 
   return (
     <div className={cn("grid gap-4", className)}>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden calendar-card">
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle>Calendário</CardTitle>
           <Button 
@@ -80,7 +81,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 selected={date}
                 onSelect={setDate}
                 onDayClick={handleDayClick}
-                className="border-none pointer-events-auto text-base" 
+                className="border-none pointer-events-auto text-lg" 
                 locale={ptBR}
                 components={{
                   DayContent: renderDayContent
