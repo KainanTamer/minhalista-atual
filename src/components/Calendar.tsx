@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 import { PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
-import { format, isSameDay, isWeekend } from 'date-fns';
+import { format, isSameDay, isWeekend, isToday } from 'date-fns';
 import { getEvents, Event } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import EventDialog from './EventDialog';
@@ -28,6 +28,20 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
       setIsLoading(true);
       const fetchedEvents = await getEvents();
       setEvents(fetchedEvents);
+      
+      // Check for today's events and notify user
+      const todaysEvents = fetchedEvents.filter(event => 
+        isToday(new Date(event.start_time))
+      );
+      
+      if (todaysEvents.length > 0) {
+        toast({
+          title: `${todaysEvents.length} evento${todaysEvents.length > 1 ? 's' : ''} hoje!`,
+          description: todaysEvents.map(e => e.title).join(", "),
+          duration: 6000,
+        });
+      }
+      
     } catch (error) {
       console.error('Erro ao carregar eventos:', error);
       toast({
@@ -42,6 +56,29 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
 
   useEffect(() => {
     fetchEvents();
+    
+    // Set up a check for today's events when component mounts
+    const checkTodaysEvents = () => {
+      const todaysEvents = events.filter(event => 
+        isToday(new Date(event.start_time))
+      );
+      
+      if (todaysEvents.length > 0) {
+        toast({
+          title: `Lembrete: ${todaysEvents.length} evento${todaysEvents.length > 1 ? 's' : ''} hoje!`,
+          description: todaysEvents.map(e => e.title).join(", "),
+          duration: 6000,
+        });
+      }
+    };
+    
+    // Check once when component mounts
+    checkTodaysEvents();
+    
+    // Set up interval to check periodically (e.g., every hour)
+    const intervalId = setInterval(checkTodaysEvents, 3600000);
+    
+    return () => clearInterval(intervalId);
   }, []);
   
   // Filtra eventos para o dia selecionado
@@ -118,12 +155,14 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                       isSameDay(new Date(event.start_time), dayDate)
                     );
                     const isWeekendDay = isWeekend(dayDate);
+                    const isTodayDay = isToday(dayDate);
                     
                     return (
                       <div 
                         className={cn(
                           "relative flex h-full w-full items-center justify-center",
-                          isWeekendDay && "weekend-day"
+                          isWeekendDay && "weekend-day bg-secondary/80 dark:bg-secondary/30",
+                          isTodayDay && "dark:text-white font-bold text-primary"
                         )}
                       >
                         {props.date.getDate()}
@@ -143,7 +182,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
       {selectedDayEvents.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">
+            <CardTitle className="text-lg dark:text-white">
               Eventos do dia {date && format(date, "dd 'de' MMMM", { locale: ptBR })}
             </CardTitle>
           </CardHeader>
@@ -159,18 +198,18 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                   onClick={() => handleEventClick(event)}
                 >
                   <div className="flex justify-between">
-                    <h4 className="font-medium">{event.title}</h4>
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50">
+                    <h4 className="font-medium dark:text-white">{event.title}</h4>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-background/50 dark:text-black">
                       {event.event_type === 'ensaio' ? 'Ensaio' : 
                        event.event_type === 'show' ? 'Show' : 
                        event.event_type === 'gravacao' ? 'Gravação' : 'Outro'}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm dark:text-gray-300">
                     {format(new Date(event.start_time), "HH:mm")} - {format(new Date(event.end_time), "HH:mm")}
                   </p>
                   {event.venue_name && (
-                    <p className="text-sm mt-1">{event.venue_name}</p>
+                    <p className="text-sm mt-1 dark:text-gray-300">{event.venue_name}</p>
                   )}
                 </div>
               ))}

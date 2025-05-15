@@ -58,13 +58,13 @@
     --popover-foreground: 0 0% 100%;
 
     --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 10%;
+    --primary-foreground: 0 0% 0%;
 
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted-foreground: 0 0% 80%;
 
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 100%;
@@ -79,7 +79,7 @@
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 20%;
@@ -97,9 +97,26 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Garantir que botões no modo escuro mostrem texto branco */
-  .dark button, .dark a {
-    @apply text-foreground;
+  /* Enhanced contrast for dark mode text */
+  .dark {
+    @apply text-white;
+  }
+  
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-white font-bold;
+  }
+  
+  .dark p, .dark span, .dark div {
+    @apply text-gray-100;
+  }
+  
+  /* Ensure buttons in dark mode have correct text color */
+  .dark button {
+    @apply text-white;
+  }
+  
+  .dark button.bg-white {
+    @apply text-black;
   }
 }
 
@@ -110,7 +127,7 @@
 
 /* Estilizar dias de fim de semana no calendário */
 .weekend-day {
-  @apply bg-secondary/80 dark:bg-secondary/50;
+  @apply bg-secondary/80 dark:bg-secondary/30;
 }
 
 .event-item {
@@ -127,4 +144,3 @@
 .social-button {
   @apply flex items-center justify-center rounded-full w-10 h-10 bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition-colors;
 }
-

@@ -1,399 +1,290 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Music, Search, UserPlus, Instagram, Facebook, Youtube, Plus, X, ExternalLink } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Facebook, Instagram, Music, Youtube } from 'lucide-react';
 
-// Define a estrutura para links sociais
-interface SocialLinks {
+interface SocialProfile {
+  id?: string;
+  user_id: string;
   instagram?: string;
   facebook?: string;
-  youtube?: string;
   spotify?: string;
   deezer?: string;
-  [key: string]: string | undefined;
-}
-
-// Define os tipos de links sociais disponíveis
-interface SocialPlatform {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  placeholder: string;
-}
-
-// Define a interface do perfil
-interface Profile {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  city: string | null;
-  instrument: string[] | null;
-  musical_genre: string[] | null;
-  social_links: SocialLinks | null;
+  youtube?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const NetworkTab: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [socialDialogOpen, setSocialDialogOpen] = useState(false);
-  const [socialPlatform, setSocialPlatform] = useState<string>('');
-  const [socialUrl, setSocialUrl] = useState<string>('');
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [socialProfile, setSocialProfile] = useState<SocialProfile>({
+    user_id: user?.id || '',
+    instagram: '',
+    facebook: '',
+    spotify: '',
+    deezer: '',
+    youtube: '',
+  });
 
-  const socialPlatforms: SocialPlatform[] = [
-    { 
-      id: 'instagram', 
-      name: 'Instagram', 
-      icon: <Instagram size={18} />,
-      placeholder: 'https://instagram.com/seu.perfil'
-    },
-    { 
-      id: 'facebook', 
-      name: 'Facebook', 
-      icon: <Facebook size={18} />,
-      placeholder: 'https://facebook.com/seu.perfil'
-    },
-    { 
-      id: 'youtube', 
-      name: 'YouTube', 
-      icon: <Youtube size={18} />,
-      placeholder: 'https://youtube.com/c/seu.canal'
-    },
-    { 
-      id: 'spotify', 
-      name: 'Spotify', 
-      icon: <Music size={18} />,
-      placeholder: 'https://open.spotify.com/artist/seu-id'
-    },
-    { 
-      id: 'deezer', 
-      name: 'Deezer', 
-      icon: <Music size={18} />,
-      placeholder: 'https://www.deezer.com/artist/seu-id'
-    }
-  ];
-
-  // Get current user profile
-  const { data: currentProfile, refetch: refetchProfile } = useQuery({
-    queryKey: ['current-profile'],
-    queryFn: async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error('User not authenticated');
+  // Fetch user's social profile
+  useEffect(() => {
+    const fetchSocialProfile = async () => {
+      if (!user) return;
+      
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('social_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (error && error.code !== 'PGRST116') {
+          throw error;
+        }
+        
+        if (data) {
+          setSocialProfile(data);
+        }
+      } catch (error) {
+        console.error('Error fetching social profile:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar seu perfil social.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSocialProfile();
+  }, [user]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSocialProfile(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSaveSocialProfile = async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('profiles')
+        .from('social_profiles')
+        .upsert({
+          ...socialProfile,
+          user_id: user.id,
+          updated_at: new Date().toISOString()
+        }, { 
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        })
         .select('*')
-        .eq('id', user.id)
         .single();
       
       if (error) throw error;
-      return data as Profile;
-    }
-  });
-
-  // Get other musician profiles
-  const { data: musicians = [], isLoading } = useQuery({
-    queryKey: ['musicians', searchTerm],
-    queryFn: async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error('User not authenticated');
       
-      let query = supabase
-        .from('profiles')
-        .select('*')
-        .neq('id', user.id);
-      
-      if (searchTerm) {
-        query = query.or(`full_name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
-      }
-      
-      const { data, error } = await query.limit(10);
-      
-      if (error) throw error;
-      return (data || []) as Profile[];
-    }
-  });
-
-  const handleConnect = (musicianId: string) => {
-    // In a full implementation, this would create a connection in the database
-    toast({
-      title: "Solicitação enviada!",
-      description: "O músico receberá sua solicitação de conexão."
-    });
-  };
-
-  const handleAddSocialLink = async () => {
-    if (!socialPlatform || !socialUrl || !socialUrl.trim()) {
+      setSocialProfile(data);
       toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive"
+        title: 'Perfil salvo',
+        description: 'Suas redes sociais foram atualizadas com sucesso.',
       });
-      return;
-    }
-    
-    try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error('User not authenticated');
-
-      const socialLinks = {
-        ...(currentProfile?.social_links || {}),
-        [socialPlatform]: socialUrl
-      };
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ social_links: socialLinks })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
+    } catch (error) {
+      console.error('Error saving social profile:', error);
       toast({
-        title: "Link adicionado!",
-        description: `Seu perfil em ${socialPlatforms.find(p => p.id === socialPlatform)?.name} foi atualizado.`
+        title: 'Erro',
+        description: 'Não foi possível salvar seu perfil social.',
+        variant: 'destructive',
       });
-
-      setSocialDialogOpen(false);
-      setSocialPlatform('');
-      setSocialUrl('');
-      refetchProfile();
-    } catch (error: any) {
-      console.error('Erro ao adicionar link social:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível adicionar o link social.",
-        variant: "destructive"
-      });
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const handleRemoveSocialLink = async (platform: string) => {
-    try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error('User not authenticated');
-
-      const socialLinks = { ...(currentProfile?.social_links || {}) };
-      delete socialLinks[platform];
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ social_links: socialLinks })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Link removido!",
-        description: `Seu perfil em ${
-          socialPlatforms.find(p => p.id === platform)?.name
-        } foi removido.`
-      });
-
-      refetchProfile();
-    } catch (error: any) {
-      console.error('Erro ao remover link social:', error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível remover o link social.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const getIconForPlatform = (platform: string) => {
-    const socialPlatform = socialPlatforms.find(p => p.id === platform);
-    return socialPlatform?.icon || <ExternalLink size={18} />;
-  };
-
-  const getPlatformName = (platform: string) => {
-    const socialPlatform = socialPlatforms.find(p => p.id === platform);
-    return socialPlatform?.name || platform;
-  };
-
+  
+  const hasLinks = socialProfile.instagram || socialProfile.facebook || 
+                  socialProfile.spotify || socialProfile.deezer || socialProfile.youtube;
+                  
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Networking</h2>
-      </div>
-      
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-        <Input 
-          placeholder="Buscar músicos por nome ou cidade..."
-          className="pl-10"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      
+    <div className="grid gap-4 md:grid-cols-2">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Minhas redes sociais</CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setSocialDialogOpen(true)}
-            className="h-8 w-8 p-0"
-          >
-            <Plus size={16} />
-          </Button>
+        <CardHeader>
+          <CardTitle className="dark:text-white">Redes Sociais</CardTitle>
+          <CardDescription>
+            Conecte seu perfil musical às suas redes sociais
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {currentProfile?.social_links && Object.keys(currentProfile.social_links).length > 0 ? (
-            <div className="flex flex-wrap gap-3">
-              {Object.entries(currentProfile.social_links).map(([platform, url]) => (
-                <div key={platform} className="relative group">
-                  <a 
-                    href={url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 bg-accent/50 rounded-md hover:bg-accent transition-colors"
-                  >
-                    {getIconForPlatform(platform)}
-                    <span>{getPlatformName(platform)}</span>
-                  </a>
-                  <button 
-                    onClick={() => handleRemoveSocialLink(platform)}
-                    className="absolute -top-2 -right-2 bg-background border border-border rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label={`Remover ${platform}`}
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6 text-muted-foreground">
-              <Music className="mx-auto h-10 w-10 opacity-50" />
-              <p className="mt-2">Adicione suas redes sociais e plataformas de streaming</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setSocialDialogOpen(true)}
-                className="mt-3"
-              >
-                <Plus size={16} className="mr-2" />
-                Adicionar plataforma
-              </Button>
-            </div>
-          )}
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="instagram" className="flex items-center gap-2">
+              <Instagram size={16} /> Instagram
+            </Label>
+            <Input
+              id="instagram"
+              name="instagram"
+              placeholder="@seuusuario"
+              value={socialProfile.instagram || ''}
+              onChange={handleInputChange}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="facebook" className="flex items-center gap-2">
+              <Facebook size={16} /> Facebook
+            </Label>
+            <Input
+              id="facebook"
+              name="facebook"
+              placeholder="@seuusuario"
+              value={socialProfile.facebook || ''}
+              onChange={handleInputChange}
+            />
+          </div>
         </CardContent>
+        <CardFooter>
+          <Button onClick={handleSaveSocialProfile} disabled={isLoading}>
+            {isLoading ? 'Salvando...' : 'Salvar Redes Sociais'}
+          </Button>
+        </CardFooter>
       </Card>
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Músicos em destaque</CardTitle>
+          <CardTitle className="dark:text-white">Plataformas de Streaming</CardTitle>
+          <CardDescription>
+            Conecte-se às plataformas onde sua música está disponível
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="h-20 animate-pulse bg-muted rounded"></div>
-              ))}
-            </div>
-          ) : musicians.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Music className="mx-auto h-12 w-12 opacity-50" />
-              <p className="mt-2">Nenhum músico encontrado</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {musicians.map((musician) => (
-                <div key={musician.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={musician.avatar_url || ""} />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {musician.full_name?.[0]?.toUpperCase() || 'M'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-medium">{musician.full_name || 'Músico'}</h3>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {musician.instrument?.slice(0, 2).map((inst: string) => (
-                          <Badge variant="outline" key={inst}>{inst}</Badge>
-                        ))}
-                        {musician.musical_genre?.slice(0, 1).map((genre: string) => (
-                          <Badge variant="secondary" key={genre}>{genre}</Badge>
-                        ))}
-                        {musician.city && <Badge variant="outline">{musician.city}</Badge>}
-                      </div>
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline" onClick={() => handleConnect(musician.id)}>
-                    <UserPlus size={16} className="mr-2" />
-                    Conectar
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={socialDialogOpen} onOpenChange={setSocialDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar rede social</DialogTitle>
-            <DialogDescription>
-              Adicione suas redes sociais ou plataformas de streaming para que outros músicos possam te encontrar.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="platform">Plataforma</Label>
-              <Select value={socialPlatform} onValueChange={setSocialPlatform}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma plataforma" />
-                </SelectTrigger>
-                <SelectContent>
-                  {socialPlatforms.map((platform) => (
-                    <SelectItem key={platform.id} value={platform.id}>
-                      <div className="flex items-center gap-2">
-                        {platform.icon}
-                        <span>{platform.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="url">URL</Label>
-              <Input 
-                id="url" 
-                value={socialUrl} 
-                onChange={(e) => setSocialUrl(e.target.value)} 
-                placeholder={socialPlatform ? 
-                  socialPlatforms.find(p => p.id === socialPlatform)?.placeholder : 
-                  "https://..."
-                }
-              />
-            </div>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="spotify" className="flex items-center gap-2">
+              <Music size={16} /> Spotify
+            </Label>
+            <Input
+              id="spotify"
+              name="spotify"
+              placeholder="URL do seu perfil no Spotify"
+              value={socialProfile.spotify || ''}
+              onChange={handleInputChange}
+            />
           </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSocialDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAddSocialLink}>
-              Adicionar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          
+          <div className="space-y-2">
+            <Label htmlFor="deezer" className="flex items-center gap-2">
+              <Music size={16} /> Deezer
+            </Label>
+            <Input
+              id="deezer"
+              name="deezer"
+              placeholder="URL do seu perfil no Deezer"
+              value={socialProfile.deezer || ''}
+              onChange={handleInputChange}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="youtube" className="flex items-center gap-2">
+              <Youtube size={16} /> YouTube
+            </Label>
+            <Input
+              id="youtube"
+              name="youtube"
+              placeholder="URL do seu canal no YouTube"
+              value={socialProfile.youtube || ''}
+              onChange={handleInputChange}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleSaveSocialProfile} disabled={isLoading}>
+            {isLoading ? 'Salvando...' : 'Salvar Plataformas'}
+          </Button>
+        </CardFooter>
+      </Card>
+      
+      {hasLinks && (
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="dark:text-white">Seu Perfil Social</CardTitle>
+            <CardDescription>
+              Confira como seus links estão configurados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-5">
+              {socialProfile.instagram && (
+                <a 
+                  href={`https://instagram.com/${socialProfile.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                >
+                  <Instagram size={24} className="mb-2" />
+                  <span className="text-sm font-medium dark:text-white">Instagram</span>
+                </a>
+              )}
+              
+              {socialProfile.facebook && (
+                <a 
+                  href={`https://facebook.com/${socialProfile.facebook.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                >
+                  <Facebook size={24} className="mb-2" />
+                  <span className="text-sm font-medium dark:text-white">Facebook</span>
+                </a>
+              )}
+              
+              {socialProfile.spotify && (
+                <a 
+                  href={socialProfile.spotify}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                >
+                  <Music size={24} className="mb-2" />
+                  <span className="text-sm font-medium dark:text-white">Spotify</span>
+                </a>
+              )}
+              
+              {socialProfile.deezer && (
+                <a 
+                  href={socialProfile.deezer}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                >
+                  <Music size={24} className="mb-2" />
+                  <span className="text-sm font-medium dark:text-white">Deezer</span>
+                </a>
+              )}
+              
+              {socialProfile.youtube && (
+                <a 
+                  href={socialProfile.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                >
+                  <Youtube size={24} className="mb-2" />
+                  <span className="text-sm font-medium dark:text-white">YouTube</span>
+                </a>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

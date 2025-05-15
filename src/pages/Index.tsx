@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -14,14 +13,24 @@ const Index: React.FC = () => {
         <section className="pt-24 pb-20 px-4">
           <div className="container mx-auto max-w-4xl text-center">
             <div className="welcome-illustration mb-6">
-              <svg className="w-full" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <path fill="none" stroke="currentColor" strokeWidth="2" 
-                  d="M60,50 C60,50 60,150 60,150 M60,50 C80,30 120,30 140,50 C160,70 160,130 140,150 C120,170 80,170 60,150" />
-                <circle cx="60" cy="100" r="5" fill="currentColor" />
-                <path fill="none" stroke="currentColor" strokeWidth="2" 
-                  d="M80,90 L120,90 M80,110 L120,110" />
-                <path fill="none" stroke="currentColor" strokeWidth="1.5"
-                  d="M70,70 C90,50 110,50 130,70 M70,130 C90,150 110,150 130,130" />
+              {/* Minimalist square calendar */}
+              <svg className="w-full max-w-[200px] mx-auto" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                {/* Calendar outer square */}
+                <rect x="10" y="20" width="80" height="70" fill="none" stroke="currentColor" strokeWidth="2" rx="4" />
+                {/* Calendar header bar */}
+                <rect x="10" y="20" width="80" height="15" fill="none" stroke="currentColor" strokeWidth="2" rx="4" />
+                {/* Calendar days */}
+                <line x1="25" y1="20" x2="25" y2="90" stroke="currentColor" strokeWidth="1" />
+                <line x1="40" y1="20" x2="40" y2="90" stroke="currentColor" strokeWidth="1" />
+                <line x1="55" y1="20" x2="55" y2="90" stroke="currentColor" strokeWidth="1" />
+                <line x1="70" y1="20" x2="70" y2="90" stroke="currentColor" strokeWidth="1" />
+                <line x1="85" y1="20" x2="85" y2="90" stroke="currentColor" strokeWidth="1" />
+                {/* Calendar rows */}
+                <line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" strokeWidth="1" />
+                <line x1="10" y1="65" x2="90" y2="65" stroke="currentColor" strokeWidth="1" />
+                <line x1="10" y1="80" x2="90" y2="80" stroke="currentColor" strokeWidth="1" />
+                {/* Small circle for current day */}
+                <circle cx="62" cy="57" r="4" fill="currentColor" />
               </svg>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
