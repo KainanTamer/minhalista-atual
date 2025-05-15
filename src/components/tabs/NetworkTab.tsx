@@ -9,16 +9,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Facebook, Instagram, Music, Youtube } from 'lucide-react';
 
+// Define the social profile structure
 interface SocialProfile {
-  id?: string;
   user_id: string;
   instagram?: string;
   facebook?: string;
   spotify?: string;
   deezer?: string;
   youtube?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 const NetworkTab: React.FC = () => {
@@ -34,28 +32,38 @@ const NetworkTab: React.FC = () => {
     youtube: '',
   });
 
-  // Fetch user's social profile
+  // Fetch user's profile which contains social links
   useEffect(() => {
-    const fetchSocialProfile = async () => {
+    const fetchUserProfile = async () => {
       if (!user) return;
       
       try {
         setIsLoading(true);
         const { data, error } = await supabase
-          .from('social_profiles')
+          .from('profiles')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .single();
           
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           throw error;
         }
         
-        if (data) {
-          setSocialProfile(data);
+        if (data && data.social_links) {
+          // Extract social links from the profile's social_links JSON field
+          const socialLinks = data.social_links as Record<string, string>;
+          
+          setSocialProfile({
+            user_id: user.id,
+            instagram: socialLinks.instagram || '',
+            facebook: socialLinks.facebook || '',
+            spotify: socialLinks.spotify || '',
+            deezer: socialLinks.deezer || '',
+            youtube: socialLinks.youtube || '',
+          });
         }
       } catch (error) {
-        console.error('Error fetching social profile:', error);
+        console.error('Error fetching user profile:', error);
         toast({
           title: 'Erro',
           description: 'Não foi possível carregar seu perfil social.',
@@ -66,7 +74,7 @@ const NetworkTab: React.FC = () => {
       }
     };
     
-    fetchSocialProfile();
+    fetchUserProfile();
   }, [user]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,22 +88,28 @@ const NetworkTab: React.FC = () => {
     try {
       setIsLoading(true);
       
+      // Create a social_links object from our socialProfile state
+      const social_links = {
+        instagram: socialProfile.instagram || null,
+        facebook: socialProfile.facebook || null,
+        spotify: socialProfile.spotify || null,
+        deezer: socialProfile.deezer || null,
+        youtube: socialProfile.youtube || null,
+      };
+      
+      // Update the profiles table with the social_links field
       const { data, error } = await supabase
-        .from('social_profiles')
-        .upsert({
-          ...socialProfile,
-          user_id: user.id,
+        .from('profiles')
+        .update({
+          social_links,
           updated_at: new Date().toISOString()
-        }, { 
-          onConflict: 'user_id',
-          ignoreDuplicates: false
         })
-        .select('*')
+        .eq('id', user.id)
+        .select()
         .single();
       
       if (error) throw error;
       
-      setSocialProfile(data);
       toast({
         title: 'Perfil salvo',
         description: 'Suas redes sociais foram atualizadas com sucesso.',

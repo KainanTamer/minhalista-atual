@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import type { ToastProps } from "@/components/ui/toast";
 
@@ -26,6 +25,7 @@ export type ToastBase = {
   onDismiss?: () => void;
   open?: boolean;
   variant?: "default" | "destructive";
+  duration?: number;
 };
 
 export const actionTypes = {

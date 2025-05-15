@@ -37,8 +37,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
       if (todaysEvents.length > 0) {
         toast({
           title: `${todaysEvents.length} evento${todaysEvents.length > 1 ? 's' : ''} hoje!`,
-          description: todaysEvents.map(e => e.title).join(", "),
-          duration: 6000,
+          description: todaysEvents.map(e => e.title).join(", ")
         });
       }
       
@@ -66,8 +65,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
       if (todaysEvents.length > 0) {
         toast({
           title: `Lembrete: ${todaysEvents.length} evento${todaysEvents.length > 1 ? 's' : ''} hoje!`,
-          description: todaysEvents.map(e => e.title).join(", "),
-          duration: 6000,
+          description: todaysEvents.map(e => e.title).join(", ")
         });
       }
     };
@@ -164,7 +162,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                           isWeekendDay && "weekend-day bg-secondary/80 dark:bg-secondary/30",
                           isTodayDay && "dark:text-white font-bold text-primary",
                           // Garantir que texto seja visível no modo escuro quando selecionado
-                          props.selected && "dark:text-black font-bold"
+                          props.day?.isSelected && "dark:text-black font-bold"
                         )}
                       >
                         {props.date.getDate()}
