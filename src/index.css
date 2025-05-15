@@ -100,17 +100,19 @@
 }
 
 .calendar-container {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   border-radius: var(--radius);
   background-color: hsl(var(--card));
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 /* Deixar o calendário maior */
 .rdp {
-  --rdp-cell-size: 50px !important; /* Aumentar tamanho das células */
+  --rdp-cell-size: 60px !important; /* Aumentar tamanho das células */
   --rdp-accent-color: hsl(var(--primary));
   --rdp-background-color: hsl(var(--primary) / 0.3);
-  margin: 0;
+  margin: 0 auto;
 }
 
 .rdp-months {
@@ -119,6 +121,7 @@
 
 .rdp-month {
   width: 100%;
+  max-width: 400px; /* Largura máxima para o calendário */
 }
 
 /* Estilizar dias de fim de semana no calendário */
@@ -158,17 +161,17 @@
 }
 
 .dark .rdp-day_selected:not([disabled]) {
-  background-color: hsl(var(--primary) / 0.5) !important;
+  background-color: hsl(var(--primary)) !important;
   color: hsl(var(--primary-foreground)) !important;
 }
 
 /* Destacar dia selecionado no calendário com opacidade */
 .calendar-day-selected {
-  @apply relative z-10 bg-primary/40 rounded-md;
+  @apply relative z-10 bg-primary/70 rounded-md;
 }
 
 .dark .calendar-day-selected {
-  @apply bg-primary/50 text-white;
+  @apply bg-primary/70 text-white;
 }
 
 /* Novos estilos para o calendário interativo */
@@ -176,10 +179,11 @@
   position: relative;
   cursor: pointer;
   user-select: none;
+  font-weight: 600 !important;
 }
 
 .rdp-day_selected {
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .rdp-day:hover:not(.rdp-day_outside):not(.rdp-day_disabled) {
@@ -195,10 +199,83 @@
 .rdp-day_today {
   font-weight: bold !important;
   color: hsl(var(--primary)) !important;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
 .dark .rdp-day_today {
   color: hsl(var(--primary)) !important;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
-/* ... keep existing code */
+/* Garantir que os números dos dias sejam visíveis */
+.rdp-day_selected,
+.rdp-day {
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.dark .rdp-day_selected,
+.dark .rdp-day {
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Estilo para o modo escuro garantir visibilidade */
+.dark .rdp-day {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Centralizar o calendário na tela */
+.calendar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Legenda de eventos */
+.event-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  justify-content: center;
+  padding: 10px;
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+}
+
+.event-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.event-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Cores específicas dos tipos de eventos */
+.event-show {
+  border-left: 4px solid #4ade80 !important; /* Verde */
+}
+
+.event-ensaio {
+  border-left: 4px solid #60a5fa !important; /* Azul */
+}
+
+.event-gravacao {
+  border-left: 4px solid #c084fc !important; /* Roxo */
+}
+
+.event-outro {
+  border-left: 4px solid #94a3b8 !important; /* Cinza */
+}

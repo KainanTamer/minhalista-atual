@@ -27,18 +27,18 @@ const EventListCard: React.FC<EventListCardProps> = ({ events, date, onEventClic
   const getEventTypeClass = (eventType: string) => {
     switch(eventType) {
       case 'ensaio':
-        return 'bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100 border-l-blue-500';
+        return 'bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100 event-ensaio';
       case 'show':
-        return 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100 border-l-green-500';
+        return 'bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-100 event-show';
       case 'gravacao':
-        return 'bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100 border-l-purple-500';
+        return 'bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-100 event-gravacao';
       default:
-        return 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100 border-l-gray-500';
+        return 'bg-gray-100 text-gray-900 dark:bg-gray-800/50 dark:text-gray-100 event-outro';
     }
   };
 
   return (
-    <Card className="event-list-card shadow-md">
+    <Card className="event-list-card shadow-md w-full">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <CalendarDays size={20} className="text-primary" />
