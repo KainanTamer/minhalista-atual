@@ -96,11 +96,21 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Garantir que botões no modo escuro mostrem texto branco */
+  .dark button, .dark a {
+    @apply text-foreground;
+  }
 }
 
 .calendar-container {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius);
+}
+
+/* Estilizar dias de fim de semana no calendário */
+.weekend-day {
+  @apply bg-secondary/80 dark:bg-secondary/50;
 }
 
 .event-item {
@@ -112,3 +122,9 @@
   max-width: 250px;
   margin: 0 auto;
 }
+
+/* Estilo para botões de redes sociais */
+.social-button {
+  @apply flex items-center justify-center rounded-full w-10 h-10 bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition-colors;
+}
+

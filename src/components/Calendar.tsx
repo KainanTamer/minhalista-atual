@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
 import { PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
-import { format, isSameDay } from 'date-fns';
+import { format, isSameDay, isWeekend } from 'date-fns';
 import { getEvents, Event } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import EventDialog from './EventDialog';
@@ -63,16 +63,10 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
     }
   };
 
-  // Função para adicionar indicadores de evento no calendário
-  const decorateDay = (day: Date) => {
-    const hasEvent = events.some(event => isSameDay(new Date(event.start_time), day));
-    
-    return {
-      className: cn({
-        'relative': hasEvent,
-        'after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full': hasEvent,
-      }),
-    };
+  const handleDayClick = (day: Date) => {
+    setDate(day);
+    setSelectedEvent(undefined);
+    setEventDialogOpen(true);
   };
 
   const handleEventClick = (event: Event) => {
@@ -110,6 +104,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 mode="single"
                 selected={date}
                 onSelect={setDate}
+                onDayClick={handleDayClick}
                 className="border-none pointer-events-auto"
                 locale={ptBR}
                 modifiers={{ event: events.map(event => new Date(event.start_time)) }}
@@ -118,14 +113,19 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 }}
                 components={{
                   DayContent: (props) => {
-                    // Fixed type issue - using props.day directly
                     const dayDate = props.date;
                     const hasEvent = events.some(event => 
                       isSameDay(new Date(event.start_time), dayDate)
                     );
+                    const isWeekendDay = isWeekend(dayDate);
                     
                     return (
-                      <div className="relative flex h-full w-full items-center justify-center">
+                      <div 
+                        className={cn(
+                          "relative flex h-full w-full items-center justify-center",
+                          isWeekendDay && "weekend-day"
+                        )}
+                      >
                         {props.date.getDate()}
                         {hasEvent && (
                           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
