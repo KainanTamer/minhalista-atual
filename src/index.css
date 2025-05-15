@@ -116,7 +116,7 @@
   }
   
   .dark button.bg-white {
-    @apply text-black;
+    color: black;
   }
   
   /* Fix for button text color in light mode */
@@ -158,20 +158,31 @@
 
 /* Estilo para botões de redes sociais */
 .social-button {
-  @apply flex items-center justify-center rounded-full w-10 h-10 bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition-colors;
+  @apply flex items-center justify-center rounded-full w-10 h-10 bg-secondary text-foreground transition-colors;
+}
+
+.social-button:hover {
+  @apply bg-primary text-primary-foreground;
 }
 
 /* Corrigir cores no modo escuro para botões sociais */
 .dark .social-button {
-  @apply bg-gray-800 text-white hover:bg-white hover:text-black;
+  background-color: rgb(31, 41, 55); /* bg-gray-800 */
+  color: white;
+}
+
+.dark .social-button:hover {
+  background-color: white;
+  color: black;
 }
 
 /* Garantir contraste adequado no modo dark para botões */
 .dark .bg-white, .dark .bg-secondary {
-  @apply text-black;
+  color: black;
 }
 
 /* Melhorar visibilidade de datas selecionadas no calendário */
 .dark .react-calendar__tile--active {
-  @apply bg-white text-black font-bold;
+  @apply bg-white font-bold;
+  color: black;
 }
