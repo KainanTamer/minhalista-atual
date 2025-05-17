@@ -3,7 +3,7 @@ import React from 'react';
 import { ArrowRight, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/contexts/subscription';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

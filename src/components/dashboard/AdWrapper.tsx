@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/contexts/subscription';
 import AdBanner from '../ads/AdBanner';
 
 interface AdWrapperProps {

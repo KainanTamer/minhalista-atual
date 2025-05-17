@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/contexts/subscription';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import {
   Alert,

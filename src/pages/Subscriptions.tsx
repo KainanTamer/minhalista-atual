@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +5,7 @@ import { toast } from '@/hooks/toast';
 import Header from '@/components/Header';
 import PricingPlans from '@/components/subscription/PricingPlans';
 import SubscriptionStatus from '@/components/subscription/SubscriptionStatus';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/contexts/subscription';
 
 const Subscriptions: React.FC = () => {
   const { user, loading } = useAuth();

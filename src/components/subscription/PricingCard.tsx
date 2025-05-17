@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Check, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { SubscriptionPlan } from '@/contexts/SubscriptionContext';
+import { SubscriptionPlan } from '@/contexts/subscription';
 
 interface PricingCardProps {
   plan: SubscriptionPlan;

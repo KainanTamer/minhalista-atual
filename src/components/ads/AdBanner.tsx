@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { useSubscription } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/contexts/subscription';
 
 interface AdBannerProps {
   location?: 'top' | 'bottom' | 'sidebar';

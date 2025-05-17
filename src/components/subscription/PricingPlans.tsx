@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import PricingCard from './PricingCard';
-import { useSubscription, SubscriptionPlan } from '@/contexts/SubscriptionContext';
+import { useSubscription, SubscriptionPlan } from '@/contexts/subscription';
 import { toast } from '@/hooks/toast';
 
 const PricingPlans: React.FC = () => {
