@@ -13,12 +13,21 @@ export interface SubscriptionPlan {
   features: string[];
 }
 
+interface SubscriptionLimits {
+  events: number;
+  finances: number;
+  repertoire: number;
+  networking: number;
+  showAds: boolean;
+}
+
 export interface SubscriptionStatus {
   subscribed: boolean;
   subscription_tier: string | null;
   subscription_end: string | null;
   loading: boolean;
   error: string | null;
+  limits: SubscriptionLimits;
 }
 
 interface SubscriptionContextProps {
@@ -28,6 +37,7 @@ interface SubscriptionContextProps {
   refreshSubscriptionStatus: () => Promise<void>;
   createCheckoutSession: (priceId: string) => Promise<string | null>;
   openCustomerPortal: () => Promise<string | null>;
+  checkLimit: (type: 'events' | 'finances' | 'repertoire' | 'networking', currentCount: number) => boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextProps | undefined>(undefined);
@@ -41,7 +51,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     subscription_tier: null,
     subscription_end: null,
     loading: true,
-    error: null
+    error: null,
+    limits: {
+      events: 5,
+      finances: 5,
+      repertoire: 5,
+      networking: 5,
+      showAds: true
+    }
   });
 
   const fetchPlans = async () => {
@@ -77,10 +94,17 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) {
       setSubscriptionStatus({
         subscribed: false,
-        subscription_tier: null,
+        subscription_tier: "Básico",
         subscription_end: null,
         loading: false,
-        error: null
+        error: null,
+        limits: {
+          events: 5,
+          finances: 5,
+          repertoire: 5,
+          networking: 5,
+          showAds: true
+        }
       });
       return;
     }
@@ -100,7 +124,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         subscription_tier: data.subscription_tier,
         subscription_end: data.subscription_end,
         loading: false,
-        error: null
+        error: null,
+        limits: data.limits || {
+          events: 5,
+          finances: 5,
+          repertoire: 5,
+          networking: 5,
+          showAds: true
+        }
       });
     } catch (error) {
       console.error('Erro ao verificar status da assinatura:', error);
@@ -165,6 +196,19 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       return null;
     }
   };
+  
+  // Função para verificar se o usuário atingiu o limite para determinado recurso
+  const checkLimit = (type: 'events' | 'finances' | 'repertoire' | 'networking', currentCount: number): boolean => {
+    const limit = subscriptionStatus.limits[type];
+    
+    // Se o limite for -1, significa que é ilimitado
+    if (limit === -1) {
+      return true;
+    }
+    
+    // Se o limite for um número positivo, verificar se o usuário já atingiu o limite
+    return currentCount < limit;
+  };
 
   useEffect(() => {
     fetchPlans();
@@ -182,7 +226,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     subscriptionStatus,
     refreshSubscriptionStatus,
     createCheckoutSession,
-    openCustomerPortal
+    openCustomerPortal,
+    checkLimit
   };
 
   return (

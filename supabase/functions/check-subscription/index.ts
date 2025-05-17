@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.18.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
@@ -76,7 +77,14 @@ serve(async (req) => {
       return new Response(JSON.stringify({ 
         subscribed: false,
         subscription_tier: "Básico",
-        subscription_end: null
+        subscription_end: null,
+        limits: {
+          events: 5,
+          finances: 5,
+          repertoire: 5,
+          networking: 5,
+          showAds: true
+        }
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -96,6 +104,13 @@ serve(async (req) => {
     const hasActiveSub = subscriptions.data.length > 0;
     let subscriptionTier = "Básico"; // Padrão para usuários sem assinatura ativa
     let subscriptionEnd = null;
+    let limits = {
+      events: 5,
+      finances: 5,
+      repertoire: 5,
+      networking: 5,
+      showAds: true
+    };
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
@@ -117,9 +132,21 @@ serve(async (req) => {
         .single();
       
       subscriptionTier = planData?.name || "Básico";
-      logStep("Tier de assinatura determinado", { priceId, subscriptionTier });
+      
+      // Se for plano Pro, remover limites
+      if (subscriptionTier === "Pro") {
+        limits = {
+          events: -1, // -1 significa ilimitado
+          finances: -1,
+          repertoire: -1,
+          networking: -1,
+          showAds: false
+        };
+      }
+      
+      logStep("Tier de assinatura determinado", { priceId, subscriptionTier, limits });
     } else {
-      logStep("Nenhuma assinatura ativa encontrada, usando plano Básico");
+      logStep("Nenhuma assinatura ativa encontrada, usando plano Básico com limites", { limits });
     }
 
     // Atualizar informações do assinante no banco de dados
@@ -141,7 +168,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      limits
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
