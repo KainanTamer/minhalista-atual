@@ -11,15 +11,6 @@ const PricingPlans: React.FC = () => {
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
     if (processingPlanId) return;
     
-    // Se o plano for gratuito (Básico), exiba uma mensagem e não faça checkout
-    if (plan.price === 0) {
-      toast({
-        title: 'Plano Básico',
-        description: 'Você já está usando o plano básico gratuito com limitações.'
-      });
-      return;
-    }
-    
     try {
       setProcessingPlanId(plan.id);
       
@@ -49,29 +40,37 @@ const PricingPlans: React.FC = () => {
 
   if (plansLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 max-w-6xl mx-auto">
-        {[...Array(2)].map((_, i) => (
-          <div 
-            key={i}
-            className="h-[400px] rounded-lg border-2 border-border/30 animate-pulse bg-muted/20"
-          />
-        ))}
+      <div className="flex justify-center py-8 max-w-6xl mx-auto">
+        <div className="h-[400px] w-full max-w-md rounded-lg border-2 border-border/30 animate-pulse bg-muted/20" />
+      </div>
+    );
+  }
+
+  // Filtrar para mostrar apenas o plano Pro
+  const proPlan = plans.find(plan => plan.name === "Pro");
+
+  if (!proPlan) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">
+          Nenhum plano disponível no momento. Tente novamente mais tarde.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 max-w-6xl mx-auto">
-      {plans.map((plan) => (
+    <div className="flex justify-center py-8 max-w-6xl mx-auto">
+      <div className="w-full max-w-md">
         <PricingCard
-          key={plan.id}
-          plan={plan}
-          isCurrentPlan={subscriptionStatus.subscription_tier === plan.name}
-          isRecommended={plan.name === "Pro"}
+          key={proPlan.id}
+          plan={proPlan}
+          isCurrentPlan={subscriptionStatus.subscription_tier === proPlan.name}
+          isRecommended={true}
           onSelectPlan={handleSelectPlan}
           disabled={processingPlanId !== null}
         />
-      ))}
+      </div>
     </div>
   );
 };

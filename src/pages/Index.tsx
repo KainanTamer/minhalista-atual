@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
+import MusicScheduleLogo from '@/components/MusicScheduleLogo';
 
 const Index: React.FC = () => {
   const { user } = useAuth();
@@ -15,6 +16,10 @@ const Index: React.FC = () => {
       
       <main className="flex-grow flex flex-col items-center justify-center text-center px-4 py-10">
         <div className="max-w-3xl mx-auto">
+          <div className="flex justify-center mb-6">
+            <MusicScheduleLogo className="w-32 h-32 mb-4" />
+          </div>
+          
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             Gerencie sua agenda musical com facilidade
           </h1>

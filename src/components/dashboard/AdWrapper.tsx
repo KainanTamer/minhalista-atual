@@ -27,8 +27,16 @@ const AdWrapper: React.FC<AdWrapperProps> = ({
     <div className="flex flex-col w-full">
       {showTopAd && <AdBanner location="top" />}
       
-      <div className="flex-grow">
-        {children}
+      <div className="flex flex-grow">
+        {showSidebarAd && (
+          <div className="hidden lg:block w-64 flex-shrink-0 mr-4">
+            <AdBanner location="sidebar" />
+          </div>
+        )}
+        
+        <div className="flex-grow">
+          {children}
+        </div>
       </div>
       
       {showBottomAd && <AdBanner location="bottom" />}
