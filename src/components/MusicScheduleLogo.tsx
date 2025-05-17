@@ -1,13 +1,17 @@
 
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const MusicScheduleLogo: React.FC<{ className?: string }> = ({ className }) => {
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
+  
   return (
     <div className={`relative ${className || 'w-24 h-24'}`}>
       {/* Agenda quadrada minimalista */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-50 rounded-lg border-2 border-primary shadow-md flex flex-col">
+      <div className={`absolute inset-0 ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'} rounded-lg border-2 border-primary shadow-md flex flex-col`}>
         {/* Espiral superior da agenda */}
-        <div className="h-4 bg-primary/10 flex justify-center items-center">
+        <div className={`h-4 ${isDarkMode ? 'bg-gray-700' : 'bg-primary/10'} flex justify-center items-center`}>
           {[...Array(7)].map((_, i) => (
             <div key={i} className="h-2 w-2 mx-0.5 rounded-full bg-primary" />
           ))}
