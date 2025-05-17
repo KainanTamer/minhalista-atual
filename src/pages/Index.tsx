@@ -1,14 +1,16 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Music, DollarSign, Users } from 'lucide-react';
+import { ArrowRight, Calendar, Music, DollarSign, Users, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import Header from '@/components/Header';
 import MusicScheduleLogo from '@/components/MusicScheduleLogo';
 
 const Index: React.FC = () => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const features = [
     {
@@ -38,10 +40,18 @@ const Index: React.FC = () => {
       <Header />
       
       <main className="flex-grow flex flex-col items-center justify-center px-4 py-10">
-        {/* Hero Section */}
+        {/* Hero Section com botão de tema */}
         <div className="max-w-4xl mx-auto text-center mb-16">
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center relative mb-8">
             <MusicScheduleLogo className="w-48 h-48 mb-4" />
+            {/* Botão para alternar tema */}
+            <button 
+              onClick={toggleTheme}
+              className="absolute top-0 right-0 p-2 rounded-full bg-accent hover:bg-accent/80 transition-colors"
+              aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
           </div>
           
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
