@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -6,7 +7,6 @@ import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import EventDialog from '@/components/EventDialog';
 import { useToast } from '@/hooks/use-toast';
 import { Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const Dashboard: React.FC = () => {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
