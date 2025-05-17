@@ -11,8 +11,21 @@ const supabase = createClient(supabaseUrl, supabaseServiceRole);
 // Limpar planos existentes
 await supabase.from("subscription_plans").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
-// Inserir apenas o plano Pro
+// Inserir planos: Básico (gratuito) e Pro
 await supabase.from("subscription_plans").insert([
+  {
+    name: "Básico",
+    description: "Comece a organizar sua carreira musical gratuitamente",
+    price: 0,
+    stripe_price_id: null, // Plano gratuito não tem price_id
+    features: [
+      "Até 5 eventos por mês",
+      "Até 5 transações financeiras por mês",
+      "Até 5 músicas no repertório",
+      "Até 5 contatos no networking",
+      "Inclui anúncios"
+    ]
+  },
   {
     name: "Pro",
     description: "Acesso completo a todas as funcionalidades",

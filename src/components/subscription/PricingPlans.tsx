@@ -9,6 +9,15 @@ const PricingPlans: React.FC = () => {
   const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
 
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
+    // Se for o plano gratuito, não fazemos nada
+    if (plan.price === 0) {
+      toast({
+        title: 'Plano Básico',
+        description: 'Você já está usando o plano básico gratuito.'
+      });
+      return;
+    }
+    
     if (processingPlanId) return;
     
     try {
@@ -41,15 +50,19 @@ const PricingPlans: React.FC = () => {
   if (plansLoading) {
     return (
       <div className="flex justify-center py-8 max-w-6xl mx-auto">
-        <div className="h-[400px] w-full max-w-md rounded-lg border-2 border-border/30 animate-pulse bg-muted/20" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+          {[1, 2].map(i => (
+            <div key={i} className="h-[400px] rounded-lg border-2 border-border/30 animate-pulse bg-muted/20" />
+          ))}
+        </div>
       </div>
     );
   }
 
-  // Filtrar para mostrar apenas o plano Pro
-  const proPlan = plans.find(plan => plan.name === "Pro");
-
-  if (!proPlan) {
+  // Organizar os planos - gratuito primeiro, depois pagos
+  const sortedPlans = [...plans].sort((a, b) => a.price - b.price);
+  
+  if (sortedPlans.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">
@@ -61,15 +74,17 @@ const PricingPlans: React.FC = () => {
 
   return (
     <div className="flex justify-center py-8 max-w-6xl mx-auto">
-      <div className="w-full max-w-md">
-        <PricingCard
-          key={proPlan.id}
-          plan={proPlan}
-          isCurrentPlan={subscriptionStatus.subscription_tier === proPlan.name}
-          isRecommended={true}
-          onSelectPlan={handleSelectPlan}
-          disabled={processingPlanId !== null}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+        {sortedPlans.map(plan => (
+          <PricingCard
+            key={plan.id}
+            plan={plan}
+            isCurrentPlan={subscriptionStatus.subscription_tier === plan.name}
+            isRecommended={plan.name === "Pro"}
+            onSelectPlan={handleSelectPlan}
+            disabled={processingPlanId !== null}
+          />
+        ))}
       </div>
     </div>
   );
