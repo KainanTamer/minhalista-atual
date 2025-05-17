@@ -11,7 +11,7 @@ import {
   BellOff,
   Lock,
   Key,
-  Language
+  Languages
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -115,7 +115,7 @@ const Settings = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Language className="w-5 h-5 text-muted-foreground" />
+                  <Languages className="w-5 h-5 text-muted-foreground" />
                   <span>Idioma</span>
                 </div>
                 <Select value={language} onValueChange={handleLanguageChange}>
