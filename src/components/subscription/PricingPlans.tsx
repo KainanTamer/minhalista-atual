@@ -11,6 +11,15 @@ const PricingPlans: React.FC = () => {
   const handleSelectPlan = async (plan: SubscriptionPlan) => {
     if (processingPlanId) return;
     
+    // Se o plano for gratuito (Básico), exiba uma mensagem e não faça checkout
+    if (plan.price === 0) {
+      toast({
+        title: 'Plano Básico',
+        description: 'Você já está usando o plano básico gratuito com limitações.'
+      });
+      return;
+    }
+    
     try {
       setProcessingPlanId(plan.id);
       
@@ -40,8 +49,8 @@ const PricingPlans: React.FC = () => {
 
   if (plansLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 max-w-6xl mx-auto">
-        {[...Array(3)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 max-w-6xl mx-auto">
+        {[...Array(2)].map((_, i) => (
           <div 
             key={i}
             className="h-[400px] rounded-lg border-2 border-border/30 animate-pulse bg-muted/20"
@@ -52,12 +61,13 @@ const PricingPlans: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8 max-w-6xl mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8 max-w-6xl mx-auto">
       {plans.map((plan) => (
         <PricingCard
           key={plan.id}
           plan={plan}
           isCurrentPlan={subscriptionStatus.subscription_tier === plan.name}
+          isRecommended={plan.name === "Pro"}
           onSelectPlan={handleSelectPlan}
           disabled={processingPlanId !== null}
         />

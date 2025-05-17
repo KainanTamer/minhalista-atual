@@ -81,8 +81,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: returnUrl || `${origin}/dashboard?payment=success`,
-      cancel_url: returnUrl || `${origin}/assinaturas?payment=cancelled`,
+      success_url: returnUrl || `${origin}/subscriptions?payment=success`,
+      cancel_url: returnUrl || `${origin}/subscriptions?payment=cancelled`,
       allow_promotion_codes: true,
       billing_address_collection: "required",
       client_reference_id: user.id

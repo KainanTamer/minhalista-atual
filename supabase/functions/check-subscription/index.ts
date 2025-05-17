@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@12.18.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
@@ -69,12 +68,16 @@ serve(async (req) => {
         user_id: user.id,
         stripe_customer_id: null,
         subscribed: false,
-        subscription_tier: null,
+        subscription_tier: "Básico", // Plano padrão gratuito
         subscription_end: null,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
       
-      return new Response(JSON.stringify({ subscribed: false }), {
+      return new Response(JSON.stringify({ 
+        subscribed: false,
+        subscription_tier: "Básico",
+        subscription_end: null
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -91,7 +94,7 @@ serve(async (req) => {
     });
     
     const hasActiveSub = subscriptions.data.length > 0;
-    let subscriptionTier = null;
+    let subscriptionTier = "Básico"; // Padrão para usuários sem assinatura ativa
     let subscriptionEnd = null;
 
     if (hasActiveSub) {
@@ -113,10 +116,10 @@ serve(async (req) => {
         .eq("stripe_price_id", priceId)
         .single();
       
-      subscriptionTier = planData?.name || null;
+      subscriptionTier = planData?.name || "Básico";
       logStep("Tier de assinatura determinado", { priceId, subscriptionTier });
     } else {
-      logStep("Nenhuma assinatura ativa encontrada");
+      logStep("Nenhuma assinatura ativa encontrada, usando plano Básico");
     }
 
     // Atualizar informações do assinante no banco de dados

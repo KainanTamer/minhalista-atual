@@ -58,10 +58,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       const formattedPlans = data.map(plan => ({
         ...plan,
-        features: Array.isArray(plan.features) ? plan.features : []
+        features: Array.isArray(plan.features) 
+          ? plan.features.map(f => String(f)) 
+          : typeof plan.features === 'object' 
+            ? Object.values(plan.features).map(f => String(f)) 
+            : []
       }));
 
-      setPlans(formattedPlans);
+      setPlans(formattedPlans as SubscriptionPlan[]);
     } catch (error) {
       console.error('Erro ao buscar planos:', error);
     } finally {
