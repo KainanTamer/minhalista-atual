@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/toast';
 import { SubscriptionStatus } from './types';
+import { getDefaultLimits, getPlanLimits } from './subscriptionUtils';
 
 export function useSubscriptionApi() {
   const fetchPlans = async () => {
@@ -38,13 +39,7 @@ export function useSubscriptionApi() {
         subscription_end: null,
         loading: false,
         error: null,
-        limits: {
-          events: 5,
-          finances: 5,
-          repertoire: 5,
-          networking: 5,
-          showAds: true
-        }
+        limits: getDefaultLimits()
       } as SubscriptionStatus;
     }
 
@@ -55,6 +50,11 @@ export function useSubscriptionApi() {
       });
 
       if (error) throw new Error(error.message);
+      
+      // Use the subscription tier to determine limits
+      const limits = data.subscription_tier ? 
+        getPlanLimits(data.subscription_tier) : 
+        getDefaultLimits();
 
       return {
         subscribed: data.subscribed,
@@ -62,13 +62,7 @@ export function useSubscriptionApi() {
         subscription_end: data.subscription_end,
         loading: false,
         error: null,
-        limits: data.limits || {
-          events: 5,
-          finances: 5,
-          repertoire: 5,
-          networking: 5,
-          showAds: true
-        }
+        limits
       } as SubscriptionStatus;
     } catch (error) {
       console.error('Erro ao verificar status da assinatura:', error);
