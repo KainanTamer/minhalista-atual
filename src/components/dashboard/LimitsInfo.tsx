@@ -9,6 +9,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Button } from '@/components/ui/button';
+import UsageLimitBar from '@/components/subscription/UsageLimitBar';
 
 interface LimitsInfoProps {
   type: 'events' | 'finances' | 'repertoire' | 'networking';
@@ -36,9 +37,10 @@ const LimitsInfo: React.FC<LimitsInfoProps> = ({ type, currentCount }) => {
             <Lock className="ml-2 h-4 w-4" />
           </AlertTitle>
         </div>
-        <AlertDescription className="flex flex-col space-y-2">
+        <AlertDescription className="space-y-2">
           <p>Você atingiu o limite de {limit} {getLimitTypeName(type)} do plano Básico.</p>
-          <Button asChild variant="outline" size="sm" className="mt-2 w-full sm:w-auto">
+          <UsageLimitBar current={currentCount} limit={limit} isPro={false} />
+          <Button asChild variant="outline" size="sm" className="mt-3 w-full sm:w-auto">
             <Link to="/subscriptions" className="flex items-center">
               Assinar plano Pro <Crown className="ml-2 h-4 w-4 text-primary" />
               <ArrowRight className="ml-1 h-4 w-4" />
@@ -54,9 +56,10 @@ const LimitsInfo: React.FC<LimitsInfoProps> = ({ type, currentCount }) => {
       <Alert className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Limite próximo</AlertTitle>
-        <AlertDescription>
-          Você tem apenas {remaining} {getLimitTypeName(type)} restantes no plano Básico. 
-          <Link to="/subscriptions" className="ml-1 text-primary font-medium hover:underline">
+        <AlertDescription className="space-y-2">
+          <p>Você tem apenas {remaining} {getLimitTypeName(type)} restantes no plano Básico.</p>
+          <UsageLimitBar current={currentCount} limit={limit} isPro={false} />
+          <Link to="/subscriptions" className="mt-2 inline-block text-primary font-medium hover:underline">
             Considere assinar o plano Pro para acesso ilimitado.
           </Link>
         </AlertDescription>

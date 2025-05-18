@@ -6,24 +6,44 @@ import WelcomeCard from '@/components/dashboard/WelcomeCard';
 import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import EventDialog from '@/components/EventDialog';
 import { useToast } from '@/hooks/use-toast';
-import { Settings } from 'lucide-react';
+import FloatingActions from '@/components/dashboard/FloatingActions';
+import { useCalendarEvents } from '@/hooks';
+import { useQuery } from '@tanstack/react-query';
 
 const Dashboard: React.FC = () => {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [financeDialogOpen, setFinanceDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('agenda');
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Obter eventos para contagem
+  const { events, isLoading: eventsLoading } = useCalendarEvents();
+  
+  // Obter transações financeiras para contagem
+  const { data: finances = [], isLoading: financesLoading } = useQuery({
+    queryKey: ['financial-transactions'],
+    queryFn: async () => {
+      try {
+        // Simulação de dados até que a API real seja implementada
+        return [];
+      } catch (error) {
+        console.error("Erro ao buscar transações:", error);
+        return [];
+      }
+    }
+  });
 
   const handleNewEvent = () => {
     setEventDialogOpen(true);
   };
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+  const handleNewFinance = () => {
+    setFinanceDialogOpen(true);
   };
 
-  const goToSettings = () => {
-    navigate('/settings');
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
   };
 
   return (
@@ -40,15 +60,16 @@ const Dashboard: React.FC = () => {
           />
         </div>
       </main>
-      
-      {/* Botão de configurações flutuante */}
-      <button
-        onClick={goToSettings}
-        className="fixed bottom-6 right-6 bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:opacity-90 transition-opacity"
-        aria-label="Configurações"
-      >
-        <Settings size={24} />
-      </button>
+
+      {/* Botão flutuante com menu de ações */}
+      <FloatingActions 
+        onAddEvent={handleNewEvent}
+        onAddFinance={handleNewFinance}
+        eventsCount={events.length}
+        financesCount={finances.length}
+        repertoireCount={3} // Placeholder até implementação real
+        contactsCount={2} // Placeholder até implementação real
+      />
       
       <EventDialog 
         open={eventDialogOpen} 

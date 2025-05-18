@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { AlertCircle, Trash2 } from 'lucide-react';
 
 interface ConfirmModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface ConfirmModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  icon?: React.ReactNode;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -31,23 +33,33 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmLabel = "Confirmar",
   cancelLabel = "Cancelar",
   destructive = true,
+  icon,
 }) => {
   const handleConfirm = () => {
     onConfirm();
     onOpenChange(false);
   };
 
+  const DefaultIcon = destructive ? Trash2 : AlertCircle;
+  const IconComponent = icon || <DefaultIcon className={`h-6 w-6 ${destructive ? 'text-destructive' : 'text-primary'}`} />;
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <div className="flex items-center gap-3 mb-2">
+            {IconComponent}
+            <AlertDialogTitle>{title}</AlertDialogTitle>
+          </div>
+          <AlertDialogDescription className="text-base">{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
+        <AlertDialogFooter className="mt-4">
+          <AlertDialogCancel className="min-w-28">{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
-            className={destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            className={destructive 
+              ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 min-w-28" 
+              : "min-w-28"
+            }
             onClick={handleConfirm}
           >
             {confirmLabel}
