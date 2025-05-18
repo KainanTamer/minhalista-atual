@@ -35,7 +35,7 @@ export function useSubscriptionApi() {
     if (!userId) {
       return {
         subscribed: false,
-        subscription_tier: "Básico", // Definido como Básico por padrão
+        subscription_tier: "Básico", // Sempre definido como Básico por padrão
         subscription_end: null,
         loading: false,
         error: null,
@@ -51,8 +51,8 @@ export function useSubscriptionApi() {
 
       if (error) throw new Error(error.message);
       
-      // Se não houver plano definido, use Básico como padrão
-      const tier = data.subscription_tier || "Básico";
+      // Se não houver plano definido ou for diferente de Pro, use Básico como padrão
+      const tier = data.subscribed && data.subscription_tier === "Pro" ? "Pro" : "Básico";
       
       // Use the subscription tier to determine limits
       const limits = getPlanLimits(tier);

@@ -19,10 +19,10 @@ export function checkLimit(
 
 export function getDefaultLimits(): SubscriptionLimits {
   return {
-    events: 5,        // Alterado de 5 para o limite do Plano Básico
-    finances: 10,     // Alterado de 5 para 10
-    repertoire: 10,   // Alterado de 5 para 10
-    networking: 5,    // Mantido em 5
+    events: 5,        // Limite do Plano Básico
+    finances: 10,     // Limite do Plano Básico
+    repertoire: 10,   // Limite do Plano Básico
+    networking: 5,    // Limite do Plano Básico
     showAds: true
   };
 }
@@ -37,5 +37,5 @@ export function getPlanLimits(planName: string | null): SubscriptionLimits {
       showAds: false
     };
   }
-  return getDefaultLimits(); // Basic plan or no plan
+  return getDefaultLimits(); // Basic plan ou qualquer outro plano é tratado como Básico
 }

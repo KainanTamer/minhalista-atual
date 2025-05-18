@@ -63,13 +63,13 @@ serve(async (req) => {
     if (customers.data.length === 0) {
       logStep("Nenhum cliente encontrado, atualizando estado como não assinante");
       
-      // Upsert como não assinante
+      // Upsert como não assinante com plano Básico
       await supabase.from("subscribers").upsert({
         email: user.email,
         user_id: user.id,
         stripe_customer_id: null,
         subscribed: false,
-        subscription_tier: "Básico", // Plano padrão gratuito
+        subscription_tier: "Básico", // Definido como Básico por padrão
         subscription_end: null,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'email' });
@@ -80,8 +80,8 @@ serve(async (req) => {
         subscription_end: null,
         limits: {
           events: 5,
-          finances: 5,
-          repertoire: 5,
+          finances: 10,
+          repertoire: 10,
           networking: 5,
           showAds: true
         }
@@ -106,8 +106,8 @@ serve(async (req) => {
     let subscriptionEnd = null;
     let limits = {
       events: 5,
-      finances: 5,
-      repertoire: 5,
+      finances: 10,
+      repertoire: 10,
       networking: 5,
       showAds: true
     };
