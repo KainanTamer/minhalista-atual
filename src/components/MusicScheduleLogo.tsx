@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Plus } from 'lucide-react';
+import { Plus, Music } from 'lucide-react';
 
 const MusicScheduleLogo: React.FC<{ className?: string }> = ({ className }) => {
   const { theme } = useTheme();
@@ -35,7 +35,7 @@ const MusicScheduleLogo: React.FC<{ className?: string }> = ({ className }) => {
       </div>
       
       {/* Texto "AGENDA" abaixo do calendário */}
-      <div className={`absolute -bottom-7 left-0 right-0 text-center text-xs font-bold ${isDarkMode ? 'text-primary-foreground' : 'text-primary'}`}>
+      <div className={`absolute -bottom-7 left-0 right-0 text-center text-xs font-bold ${isDarkMode ? 'text-primary-foreground' : 'text-primary/90'}`}>
         AGENDA
       </div>
     </div>

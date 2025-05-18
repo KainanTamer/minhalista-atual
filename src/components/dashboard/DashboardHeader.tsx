@@ -2,16 +2,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, LogOut, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, LogOut, Moon, Sun, Music } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/contexts/subscription';
+import { Badge } from '@/components/ui/badge';
 
 const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
+  const { subscriptionStatus } = useSubscription();
 
   const handleGoBack = () => {
     navigate('/');
@@ -40,7 +43,7 @@ const DashboardHeader: React.FC = () => {
   };
 
   return (
-    <header className="bg-background border-b px-4 py-3 sticky top-0 z-10">
+    <header className="bg-background border-b px-4 py-3 sticky top-0 z-10 shadow-sm">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button 
@@ -56,6 +59,13 @@ const DashboardHeader: React.FC = () => {
             </div>
             Minha Agenda
           </h1>
+          
+          {/* Mostrar o plano de assinatura atual */}
+          {subscriptionStatus && (
+            <Badge variant={subscriptionStatus.subscription_tier === "Pro" ? "default" : "outline"} className="ml-2">
+              Plano {subscriptionStatus.subscription_tier || "Básico"}
+            </Badge>
+          )}
         </div>
         
         <div className="flex items-center gap-4">
@@ -64,7 +74,7 @@ const DashboardHeader: React.FC = () => {
             className="p-2 rounded-full hover:bg-accent transition-colors"
             aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} className="text-gray-700" />}
           </button>
           
           <button 
@@ -95,8 +105,5 @@ const DashboardHeader: React.FC = () => {
     </header>
   );
 };
-
-// Missing import at the top of the file
-import { Music } from 'lucide-react';
 
 export default DashboardHeader;

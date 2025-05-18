@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, User, Settings } from 'lucide-react';
+import { PlusCircle, User } from 'lucide-react';
 import Button from '@/components/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -43,18 +43,6 @@ const WelcomeCard: React.FC<{ onNewEvent: () => void }> = ({ onNewEvent }) => {
           >
             <User size={18} />
             Editar Perfil
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 md:flex hidden"
-            onClick={() => toast({
-              title: "Em breve",
-              description: "Configurações avançadas serão implementadas em breve."
-            })}
-          >
-            <Settings size={18} />
-            Configurações
           </Button>
         </div>
       </CardContent>
