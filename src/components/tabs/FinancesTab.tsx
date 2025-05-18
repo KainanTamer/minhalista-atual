@@ -1,195 +1,188 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/toast';
+import { Trash2, Lock, Crown, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BarChart, PlusCircle, TrendingDown, TrendingUp, DollarSign } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
-import { getFinancialTransactions, FinancialTransaction } from '@/services/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSubscription } from '@/contexts/subscription';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getFinancialTransactions, deleteFinancialTransaction } from '@/services/api';
 import FinancialTransactionDialog from '@/components/FinancialTransactionDialog';
-import { useQuery } from '@tanstack/react-query';
+import ConfirmModal from '@/components/ui/confirm-modal';
+import PlanLimitModal from '@/components/subscription/PlanLimitModal';
+import LimitsInfo from '@/components/dashboard/LimitsInfo';
 import { supabase } from '@/integrations/supabase/client';
 
 const FinancesTab: React.FC = () => {
-  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<FinancialTransaction | undefined>(undefined);
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+  const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
   const { toast } = useToast();
-
-  const { data: transactions = [], isLoading, refetch } = useQuery({
+  const { subscriptionStatus, checkLimit } = useSubscription();
+  const isPro = subscriptionStatus.subscription_tier === 'Pro';
+  const queryClient = useQueryClient();
+  
+  const { data: transactions = [], isLoading } = useQuery({
     queryKey: ['financial-transactions'],
-    queryFn: getFinancialTransactions,
+    queryFn: getFinancialTransactions
   });
-
-  const { data: balanceData, isLoading: isLoadingBalance } = useQuery({
-    queryKey: ['financial-balance'],
-    queryFn: async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error('User not authenticated');
-      
-      const { data, error } = await supabase.rpc('get_financial_balance', {
-        user_uuid: user.id
-      });
-      
+  
+  const deleteAllMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('financial_transactions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all transactions
+        
       if (error) throw error;
-      return data || 0;
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financial-transactions'] });
+      toast({
+        title: "Sucesso!",
+        description: "Todas as transações foram excluídas.",
+      });
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir todas as transações:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir as transações. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
     }
   });
 
+  const handleDeleteAll = async () => {
+    deleteAllMutation.mutate();
+  };
+
   const handleAddTransaction = () => {
-    setSelectedTransaction(undefined);
-    setTransactionDialogOpen(true);
+    if (!isPro && !checkLimit('finances', transactions.length)) {
+      setIsPlanLimitModalOpen(true);
+      return;
+    }
+    setIsTransactionDialogOpen(true);
   };
 
-  const handleTransactionClick = (transaction: FinancialTransaction) => {
-    setSelectedTransaction(transaction);
-    setTransactionDialogOpen(true);
-  };
-
-  const calculateMonthlyTotals = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-    
-    const monthTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.transaction_date);
-      return transactionDate.getMonth() === currentMonth && 
-             transactionDate.getFullYear() === currentYear;
-    });
-    
-    const income = monthTransactions
-      .filter(t => t.transaction_type === 'receita')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-      
-    const expenses = monthTransactions
-      .filter(t => t.transaction_type === 'despesa')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-      
-    return { income, expenses, balance: income - expenses };
-  };
-
-  const monthlyTotals = calculateMonthlyTotals();
-  
-  const getTransactionTypeClass = (type: string) => {
-    return type === 'receita' 
-      ? 'bg-green-100 dark:bg-green-900 border-l-4 border-l-green-500' 
-      : 'bg-red-100 dark:bg-red-900 border-l-4 border-l-red-500';
-  };
+  // Verificação de 80% do limite atingido
+  useEffect(() => {
+    if (!isPro) {
+      const limit = subscriptionStatus.limits.finances;
+      if (limit > 0 && transactions.length >= limit * 0.8 && transactions.length < limit) {
+        toast({
+          title: "Limite próximo",
+          description: `Você já usou ${transactions.length}/${limit} transações financeiras disponíveis no seu plano.`,
+        });
+      }
+    }
+  }, [transactions.length, subscriptionStatus.limits.finances, isPro, toast]);
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Finanças</h2>
-        <Button onClick={handleAddTransaction} className="flex items-center gap-2">
-          <PlusCircle size={18} />
-          Nova Transação
-        </Button>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-primary" />
-              Saldo Total
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingBalance ? (
-              <div className="h-8 animate-pulse bg-muted rounded"></div>
-            ) : (
-              <div className="text-2xl font-bold">
-                R$ {balanceData.toFixed(2).replace('.', ',')}
+      <LimitsInfo type="finances" currentCount={transactions.length} />
+
+      <Card className="shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-xl">Finanças</CardTitle>
+            <CardDescription>
+              Gerencie suas receitas e despesas
+            </CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isPro && (
+              <div className="text-sm text-muted-foreground mr-2">
+                <span className="font-medium">{transactions.length}</span>
+                <span>/</span>
+                <span>{subscriptionStatus.limits.finances === -1 ? '∞' : subscriptionStatus.limits.finances}</span>
+                {isPro ? (
+                  <Crown className="inline-block ml-1 h-4 w-4 text-primary" />
+                ) : (
+                  <Lock className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
+                )}
               </div>
             )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-500" />
-              Receitas do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">
-              R$ {monthlyTotals.income.toFixed(2).replace('.', ',')}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-red-500" />
-              Despesas do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-500">
-              R$ {monthlyTotals.expenses.toFixed(2).replace('.', ',')}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle>Transações Recentes</CardTitle>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleAddTransaction}
+              disabled={!isPro && !checkLimit('finances', transactions.length)}
+            >
+              <PlusCircle className="mr-1 h-4 w-4" />
+              Nova transação
+              {!isPro && !checkLimit('finances', transactions.length) && (
+                <Lock className="ml-1 h-3 w-3" />
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="h-16 animate-pulse bg-muted rounded"></div>
-              ))}
+            <div className="flex justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : transactions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <BarChart className="mx-auto h-12 w-12 opacity-50" />
-              <p className="mt-2">Nenhuma transação registrada</p>
+              Nenhuma transação financeira registrada ainda.
             </div>
           ) : (
-            <div className="space-y-3">
-              {transactions.slice(0, 10).map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className={`p-3 rounded-md cursor-pointer transition-colors hover:opacity-90 ${getTransactionTypeClass(transaction.transaction_type)}`}
-                  onClick={() => handleTransactionClick(transaction)}
-                >
-                  <div className="flex justify-between">
-                    <h4 className="font-medium">{transaction.description}</h4>
-                    <span className="font-bold">
-                      {transaction.transaction_type === 'receita' ? '+' : '-'}
-                      R$ {Number(transaction.amount).toFixed(2).replace('.', ',')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {format(new Date(transaction.transaction_date), "dd 'de' MMMM", { locale: ptBR })}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-background/50">
-                      {transaction.category === 'show' ? 'Show' :
-                       transaction.category === 'venda_merch' ? 'Merchandise' :
-                       transaction.category === 'equipamento' ? 'Equipamento' :
-                       transaction.category === 'transporte' ? 'Transporte' :
-                       transaction.category === 'estudio' ? 'Estúdio' :
-                       transaction.category === 'marketing' ? 'Marketing' : 'Outro'}
-                    </span>
-                  </div>
-                </div>
+            <div className="space-y-4">
+              {transactions.map((transaction) => (
+                <Card key={transaction.id} className="bg-muted/50">
+                  <CardHeader>
+                    <CardTitle>{transaction.description}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium">Valor:</p>
+                      <p>R$ {transaction.amount}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Data:</p>
+                      <p>{new Date(transaction.transaction_date).toLocaleDateString()}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
+            </div>
+          )}
+          
+          {transactions.length > 0 && (
+            <div className="mt-6 flex justify-end">
+              <Button
+                variant="outline"
+                className="border-destructive text-destructive hover:bg-destructive/10"
+                onClick={() => setIsDeleteAllDialogOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Deletar Tudo
+              </Button>
             </div>
           )}
         </CardContent>
       </Card>
       
       <FinancialTransactionDialog
-        open={transactionDialogOpen}
-        onOpenChange={setTransactionDialogOpen}
-        transaction={selectedTransaction}
-        onTransactionUpdated={() => refetch()}
+        open={isTransactionDialogOpen}
+        onOpenChange={setIsTransactionDialogOpen}
+      />
+      
+      <ConfirmModal
+        open={isDeleteAllDialogOpen}
+        onOpenChange={setIsDeleteAllDialogOpen}
+        onConfirm={handleDeleteAll}
+        title="Deletar todas as transações"
+        description="Tem certeza que deseja excluir TODAS as transações financeiras? Essa ação não pode ser desfeita."
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        destructive={true}
+      />
+      
+      <PlanLimitModal
+        open={isPlanLimitModalOpen}
+        onOpenChange={setIsPlanLimitModalOpen}
+        feature="transações financeiras"
       />
     </div>
   );

@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSubscription } from '@/contexts/subscription';
-import { AlertCircle, ArrowRight } from 'lucide-react';
+import { AlertCircle, ArrowRight, Crown, Lock } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
@@ -22,18 +23,25 @@ const LimitsInfo: React.FC<LimitsInfoProps> = ({ type, currentCount }) => {
   
   const limit = subscriptionStatus.limits[type];
   const isLimitReached = !checkLimit(type, currentCount);
+  const isNearLimit = limit > 0 && currentCount >= limit * 0.8 && currentCount < limit;
   const remaining = limit - currentCount;
   
   if (isLimitReached) {
     return (
       <Alert variant="destructive" className="mb-4">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Limite atingido</AlertTitle>
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle className="flex items-center">
+            Limite atingido
+            <Lock className="ml-2 h-4 w-4" />
+          </AlertTitle>
+        </div>
         <AlertDescription className="flex flex-col space-y-2">
           <p>Você atingiu o limite de {limit} {getLimitTypeName(type)} do plano Básico.</p>
           <Button asChild variant="outline" size="sm" className="mt-2 w-full sm:w-auto">
             <Link to="/subscriptions" className="flex items-center">
-              Assinar plano Pro <ArrowRight className="ml-2 h-4 w-4" />
+              Assinar plano Pro <Crown className="ml-2 h-4 w-4 text-primary" />
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </AlertDescription>
@@ -41,7 +49,7 @@ const LimitsInfo: React.FC<LimitsInfoProps> = ({ type, currentCount }) => {
     );
   }
   
-  if (remaining <= 2) {
+  if (isNearLimit) {
     return (
       <Alert className="mb-4">
         <AlertCircle className="h-4 w-4" />

@@ -1,319 +1,153 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/toast';
+import { Trash2, Lock, Crown, PlusCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSubscription } from '@/contexts/subscription';
+import ConfirmModal from '@/components/ui/confirm-modal';
+import PlanLimitModal from '@/components/subscription/PlanLimitModal';
+import LimitsInfo from '@/components/dashboard/LimitsInfo';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { Facebook, Instagram, Music, Youtube } from 'lucide-react';
 
-// Define the social profile structure
-interface SocialProfile {
-  user_id: string;
-  instagram?: string;
-  facebook?: string;
-  spotify?: string;
-  deezer?: string;
-  youtube?: string;
-}
+// Componente temporário - substitua pelo seu componente real
+const NetworkList = () => (
+  <div className="text-center py-8 text-muted-foreground">
+    Funcionalidade de networking em desenvolvimento.
+  </div>
+);
 
 const NetworkTab: React.FC = () => {
+  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+  const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
+  const [contactsCount, setContactsCount] = useState(0);
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [socialProfile, setSocialProfile] = useState<SocialProfile>({
-    user_id: user?.id || '',
-    instagram: '',
-    facebook: '',
-    spotify: '',
-    deezer: '',
-    youtube: '',
-  });
-
-  // Fetch user's profile which contains social links
+  const { subscriptionStatus, checkLimit } = useSubscription();
+  const isPro = subscriptionStatus.subscription_tier === 'Pro';
+  
+  // Simula obtenção de dados de contatos
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user) return;
-      
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-          
-        if (error) {
-          throw error;
-        }
-        
-        if (data && data.social_links) {
-          // Extract social links from the profile's social_links JSON field
-          const socialLinks = data.social_links as Record<string, string>;
-          
-          setSocialProfile({
-            user_id: user.id,
-            instagram: socialLinks.instagram || '',
-            facebook: socialLinks.facebook || '',
-            spotify: socialLinks.spotify || '',
-            deezer: socialLinks.deezer || '',
-            youtube: socialLinks.youtube || '',
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar seu perfil social.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchUserProfile();
-  }, [user]);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setSocialProfile(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSaveSocialProfile = async () => {
-    if (!user) return;
-    
+    // Simula o número de contatos - substituir por consulta real
+    setContactsCount(2);
+  }, []);
+
+  const handleDeleteAll = async () => {
     try {
-      setIsLoading(true);
-      
-      // Create a social_links object from our socialProfile state
-      const social_links = {
-        instagram: socialProfile.instagram || null,
-        facebook: socialProfile.facebook || null,
-        spotify: socialProfile.spotify || null,
-        deezer: socialProfile.deezer || null,
-        youtube: socialProfile.youtube || null,
-      };
-      
-      // Update the profiles table with the social_links field
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({
-          social_links,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id)
-        .select()
-        .single();
-      
-      if (error) throw error;
+      // Implemente a lógica para excluir todos os contatos
+      // await supabase.from('connections').delete().eq('follower_id', user.id);
       
       toast({
-        title: 'Perfil salvo',
-        description: 'Suas redes sociais foram atualizadas com sucesso.',
+        title: "Sucesso!",
+        description: "Todos os contatos foram excluídos.",
       });
+      setContactsCount(0);
     } catch (error) {
-      console.error('Error saving social profile:', error);
+      console.error("Erro ao excluir os contatos:", error);
       toast({
-        title: 'Erro',
-        description: 'Não foi possível salvar seu perfil social.',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível excluir os contatos. Tente novamente mais tarde.",
+        variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
-  
-  const hasLinks = socialProfile.instagram || socialProfile.facebook || 
-                  socialProfile.spotify || socialProfile.deezer || socialProfile.youtube;
-                  
+
+  const handleAddContact = () => {
+    if (!isPro && !checkLimit('networking', contactsCount)) {
+      setIsPlanLimitModalOpen(true);
+      return;
+    }
+    // Adicionar contato (implementar diálogo/formulário)
+    toast({
+      title: "Funcionalidade em desenvolvimento",
+      description: "Adicionar contato será implementado em breve.",
+    });
+  };
+
+  // Verificação de 80% do limite atingido
+  useEffect(() => {
+    if (!isPro) {
+      const limit = subscriptionStatus.limits.networking;
+      if (limit > 0 && contactsCount >= limit * 0.8 && contactsCount < limit) {
+        toast({
+          title: "Limite próximo",
+          description: `Você já usou ${contactsCount}/${limit} contatos disponíveis no seu plano.`,
+        });
+      }
+    }
+  }, [contactsCount, subscriptionStatus.limits.networking, isPro, toast]);
+
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle className="dark:text-white">Redes Sociais</CardTitle>
-          <CardDescription>
-            Conecte seu perfil musical às suas redes sociais
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="instagram" className="flex items-center gap-2">
-              <Instagram size={16} /> Instagram
-            </Label>
-            <Input
-              id="instagram"
-              name="instagram"
-              placeholder="@seuusuario"
-              value={socialProfile.instagram || ''}
-              onChange={handleInputChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="facebook" className="flex items-center gap-2">
-              <Facebook size={16} /> Facebook
-            </Label>
-            <Input
-              id="facebook"
-              name="facebook"
-              placeholder="@seuusuario"
-              value={socialProfile.facebook || ''}
-              onChange={handleInputChange}
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={handleSaveSocialProfile} disabled={isLoading}>
-            {isLoading ? 'Salvando...' : 'Salvar Redes Sociais'}
-          </Button>
-        </CardFooter>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="dark:text-white">Plataformas de Streaming</CardTitle>
-          <CardDescription>
-            Conecte-se às plataformas onde sua música está disponível
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="spotify" className="flex items-center gap-2">
-              <Music size={16} /> Spotify
-            </Label>
-            <Input
-              id="spotify"
-              name="spotify"
-              placeholder="URL do seu perfil no Spotify"
-              value={socialProfile.spotify || ''}
-              onChange={handleInputChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="deezer" className="flex items-center gap-2">
-              <Music size={16} /> Deezer
-            </Label>
-            <Input
-              id="deezer"
-              name="deezer"
-              placeholder="URL do seu perfil no Deezer"
-              value={socialProfile.deezer || ''}
-              onChange={handleInputChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="youtube" className="flex items-center gap-2">
-              <Youtube size={16} /> YouTube
-            </Label>
-            <Input
-              id="youtube"
-              name="youtube"
-              placeholder="URL do seu canal no YouTube"
-              value={socialProfile.youtube || ''}
-              onChange={handleInputChange}
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={handleSaveSocialProfile} disabled={isLoading}>
-            {isLoading ? 'Salvando...' : 'Salvar Plataformas'}
-          </Button>
-        </CardFooter>
-      </Card>
-      
-      {hasLinks && (
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="dark:text-white">Seu Perfil Social</CardTitle>
+    <div className="space-y-4">
+      <LimitsInfo type="networking" currentCount={contactsCount} />
+
+      <Card className="shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-xl">Networking</CardTitle>
             <CardDescription>
-              Confira como seus links estão configurados
+              Gerencie seus contatos profissionais
             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-5">
-              {socialProfile.instagram && (
-                <a 
-                  href={`https://instagram.com/${socialProfile.instagram.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
-                  <Instagram size={24} className="mb-2" />
-                  <span className="text-sm font-medium dark:text-white">Instagram</span>
-                </a>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isPro && (
+              <div className="text-sm text-muted-foreground mr-2">
+                <span className="font-medium">{contactsCount}</span>
+                <span>/</span>
+                <span>{subscriptionStatus.limits.networking === -1 ? '∞' : subscriptionStatus.limits.networking}</span>
+                {isPro ? (
+                  <Crown className="inline-block ml-1 h-4 w-4 text-primary" />
+                ) : (
+                  <Lock className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleAddContact}
+              disabled={!isPro && !checkLimit('networking', contactsCount)}
+            >
+              <PlusCircle className="mr-1 h-4 w-4" />
+              Novo contato
+              {!isPro && !checkLimit('networking', contactsCount) && (
+                <Lock className="ml-1 h-3 w-3" />
               )}
-              
-              {socialProfile.facebook && (
-                <a 
-                  href={`https://facebook.com/${socialProfile.facebook.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
-                  <Facebook size={24} className="mb-2" />
-                  <span className="text-sm font-medium dark:text-white">Facebook</span>
-                </a>
-              )}
-              
-              {socialProfile.spotify && (
-                <a 
-                  href={socialProfile.spotify}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
-                  <Music size={24} className="mb-2" />
-                  <span className="text-sm font-medium dark:text-white">Spotify</span>
-                </a>
-              )}
-              
-              {socialProfile.deezer && (
-                <a 
-                  href={socialProfile.deezer}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
-                  <Music size={24} className="mb-2" />
-                  <span className="text-sm font-medium dark:text-white">Deezer</span>
-                </a>
-              )}
-              
-              {socialProfile.youtube && (
-                <a 
-                  href={socialProfile.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                >
-                  <Youtube size={24} className="mb-2" />
-                  <span className="text-sm font-medium dark:text-white">YouTube</span>
-                </a>
-              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <NetworkList />
+          
+          {contactsCount > 0 && (
+            <div className="mt-6 flex justify-end">
+              <Button
+                variant="outline"
+                className="border-destructive text-destructive hover:bg-destructive/10"
+                onClick={() => setIsDeleteAllDialogOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Deletar Tudo
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
       
-      {/* Informações do desenvolvedor */}
-      <div className="md:col-span-2 mt-6 text-center">
-        <div className="p-4 border-t border-border">
-          <p className="text-sm text-muted-foreground">Desenvolvido por <span className="font-semibold">Kainan Tamer</span></p>
-          <a 
-            href="https://instagram.com/kainan_tamer" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm flex items-center justify-center gap-1 mt-1 text-primary hover:underline"
-          >
-            <Instagram size={14} />
-            kainan_tamer
-          </a>
-        </div>
-      </div>
+      <ConfirmModal
+        open={isDeleteAllDialogOpen}
+        onOpenChange={setIsDeleteAllDialogOpen}
+        onConfirm={handleDeleteAll}
+        title="Deletar todos os contatos"
+        description="Tem certeza que deseja excluir TODOS os contatos? Essa ação não pode ser desfeita."
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        destructive={true}
+      />
+      
+      <PlanLimitModal
+        open={isPlanLimitModalOpen}
+        onOpenChange={setIsPlanLimitModalOpen}
+        feature="networking"
+      />
     </div>
   );
 };
