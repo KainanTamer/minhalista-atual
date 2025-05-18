@@ -19,10 +19,10 @@ export function checkLimit(
 
 export function getDefaultLimits(): SubscriptionLimits {
   return {
-    events: 5,
-    finances: 5,
-    repertoire: 5,
-    networking: 5,
+    events: 5,        // Alterado de 5 para o limite do Plano Básico
+    finances: 10,     // Alterado de 5 para 10
+    repertoire: 10,   // Alterado de 5 para 10
+    networking: 5,    // Mantido em 5
     showAds: true
   };
 }

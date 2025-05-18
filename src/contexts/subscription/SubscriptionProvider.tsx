@@ -24,7 +24,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [plansLoading, setPlansLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
     subscribed: false,
-    subscription_tier: null,
+    subscription_tier: "Básico", // Definido como Básico por padrão
     subscription_end: null,
     loading: true,
     error: null,
@@ -81,7 +81,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     } else {
       setSubscriptionStatus({
         subscribed: false,
-        subscription_tier: "Básico",
+        subscription_tier: "Básico", // Definido como Básico por padrão
         subscription_end: null,
         loading: false,
         error: null,

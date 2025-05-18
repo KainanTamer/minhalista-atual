@@ -35,7 +35,7 @@ export function useSubscriptionApi() {
     if (!userId) {
       return {
         subscribed: false,
-        subscription_tier: "Básico",
+        subscription_tier: "Básico", // Definido como Básico por padrão
         subscription_end: null,
         loading: false,
         error: null,
@@ -51,14 +51,15 @@ export function useSubscriptionApi() {
 
       if (error) throw new Error(error.message);
       
+      // Se não houver plano definido, use Básico como padrão
+      const tier = data.subscription_tier || "Básico";
+      
       // Use the subscription tier to determine limits
-      const limits = data.subscription_tier ? 
-        getPlanLimits(data.subscription_tier) : 
-        getDefaultLimits();
+      const limits = getPlanLimits(tier);
 
       return {
         subscribed: data.subscribed,
-        subscription_tier: data.subscription_tier,
+        subscription_tier: tier,
         subscription_end: data.subscription_end,
         loading: false,
         error: null,
