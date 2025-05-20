@@ -37,14 +37,28 @@ export function useRepertoire() {
         return [];
       }
     },
-    // Add these configs to improve performance
-    staleTime: 30000, // data stays fresh for 30 seconds
+    staleTime: 15000, // data stays fresh for 15 seconds
     refetchOnMount: true, 
     refetchOnWindowFocus: true
   });
   
   const addMutation = useMutation({
     mutationFn: async (newItem: Omit<RepertoireItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      // Immediately update UI with optimistic update
+      const optimisticItem = {
+        id: `temp-${Date.now()}`,
+        user_id: (await supabase.auth.getUser()).data.user?.id || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...newItem,
+      };
+      
+      // Optimistically add item to cache before API call
+      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
+        return [optimisticItem, ...(oldData || [])];
+      });
+      
+      // Actual API call
       const { data, error } = await supabase
         .from('repertoire')
         .insert([{
@@ -57,11 +71,15 @@ export function useRepertoire() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (newItem) => {
-      // Optimistic update - update the cache immediately
+    onSuccess: (newItem, _, context) => {
+      // Update query data with real item
       queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
-        return [newItem, ...(oldData || [])];
+        // Replace the optimistic item with the real one
+        return (oldData || []).map(item => 
+          item.id.startsWith('temp-') ? newItem : item
+        );
       });
+      
       queryClient.invalidateQueries({ queryKey: ['repertoire'] });
       toast({
         title: "Música adicionada",
@@ -75,11 +93,18 @@ export function useRepertoire() {
         description: "Não foi possível adicionar a música ao repertório.",
         variant: "destructive"
       });
+      // Revert optimistic update
+      queryClient.invalidateQueries({ queryKey: ['repertoire'] });
     }
   });
   
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updateData }: Partial<RepertoireItem> & { id: string }) => {
+      // Optimistically update UI
+      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
+        return oldData?.map(item => item.id === id ? { ...item, ...updateData } : item) || [];
+      });
+      
       const { data, error } = await supabase
         .from('repertoire')
         .update(updateData)
@@ -91,10 +116,6 @@ export function useRepertoire() {
       return data;
     },
     onSuccess: (updatedItem) => {
-      // Optimistic update
-      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
-        return oldData?.map(item => item.id === updatedItem.id ? updatedItem : item) || [];
-      });
       queryClient.invalidateQueries({ queryKey: ['repertoire'] });
       toast({
         title: "Música atualizada",
@@ -108,11 +129,18 @@ export function useRepertoire() {
         description: "Não foi possível atualizar a música.",
         variant: "destructive"
       });
+      // Revert optimistic update
+      queryClient.invalidateQueries({ queryKey: ['repertoire'] });
     }
   });
   
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Optimistic update
+      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
+        return oldData?.filter(item => item.id !== id) || [];
+      });
+      
       const { error } = await supabase
         .from('repertoire')
         .delete()
@@ -122,10 +150,6 @@ export function useRepertoire() {
       return id;
     },
     onSuccess: (deletedId) => {
-      // Optimistic update
-      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
-        return oldData?.filter(item => item.id !== deletedId) || [];
-      });
       queryClient.invalidateQueries({ queryKey: ['repertoire'] });
       toast({
         title: "Música removida",
@@ -139,6 +163,8 @@ export function useRepertoire() {
         description: "Não foi possível remover a música.",
         variant: "destructive"
       });
+      // Revert optimistic update
+      queryClient.invalidateQueries({ queryKey: ['repertoire'] });
     }
   });
 

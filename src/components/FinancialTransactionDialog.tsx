@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +10,7 @@ import {
   FinancialTransactionInsert, 
   FinancialTransaction 
 } from '@/services/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -80,6 +80,8 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   const isEditing = !!transaction;
 
   const form = useForm<TransactionFormValues>({
@@ -106,6 +108,7 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const transactionData: FinancialTransactionInsert = {
         description: values.description,
@@ -117,13 +120,37 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
         user_id: user.id
       };
 
+      // Optimistic update
+      const previousData = queryClient.getQueryData(['financial-transactions']);
+      
       if (isEditing && transaction) {
+        // For editing, update the local transaction
+        queryClient.setQueryData(['financial-transactions'], (old: any) => {
+          return old?.map((item: any) => 
+            item.id === transaction.id ? { ...item, ...transactionData } : item
+          );
+        });
+        
         await updateFinancialTransaction(transaction.id, transactionData);
         toast({
           title: "Transação atualizada",
           description: "A transação foi atualizada com sucesso.",
         });
       } else {
+        // For new transaction, create a temporary ID
+        const tempId = `temp-${Date.now()}`;
+        const tempTransaction = {
+          id: tempId,
+          ...transactionData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        // Add to local cache
+        queryClient.setQueryData(['financial-transactions'], (old: any) => {
+          return [tempTransaction, ...(old || [])];
+        });
+        
         await createFinancialTransaction(transactionData);
         toast({
           title: "Transação registrada",
@@ -131,17 +158,25 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
         });
       }
       
+      // Invalidate query to refresh data
+      queryClient.invalidateQueries({ queryKey: ['financial-transactions'] });
+      
       onOpenChange(false);
       if (onTransactionUpdated) {
         onTransactionUpdated();
       }
     } catch (error) {
       console.error("Erro ao salvar transação:", error);
+      // Revert optimistic update
+      queryClient.setQueryData(['financial-transactions'], previousData);
+      
       toast({
         title: "Erro",
         description: "Não foi possível salvar a transação. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,23 +185,36 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
       return;
     }
 
+    setIsSubmitting(true);
     try {
+      // Optimistic update - remove from local cache
+      const previousData = queryClient.getQueryData(['financial-transactions']);
+      queryClient.setQueryData(['financial-transactions'], (old: any) => {
+        return old?.filter((item: any) => item.id !== transaction.id);
+      });
+      
       await deleteFinancialTransaction(transaction.id);
       toast({
         title: "Transação excluída",
         description: "A transação foi excluída com sucesso.",
       });
+      
       onOpenChange(false);
       if (onTransactionUpdated) {
         onTransactionUpdated();
       }
     } catch (error) {
       console.error("Erro ao excluir transação:", error);
+      // Revert optimistic update
+      queryClient.setQueryData(['financial-transactions'], previousData);
+      
       toast({
         title: "Erro",
         description: "Não foi possível excluir a transação. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -191,7 +239,7 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Descrição da transação" />
+                    <Input {...field} placeholder="Descrição da transação" autoFocus />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -338,12 +386,13 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
                   variant="destructive" 
                   type="button" 
                   onClick={handleDelete}
+                  disabled={isSubmitting}
                 >
                   Excluir
                 </Button>
               )}
-              <Button type="submit">
-                {isEditing ? 'Salvar Alterações' : 'Registrar'}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Registrar'}
               </Button>
             </DialogFooter>
           </form>

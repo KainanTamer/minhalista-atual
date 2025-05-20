@@ -4,16 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/contexts/subscription';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Bell, LogOut, Settings } from 'lucide-react';
+import { Bell, LogOut, Settings, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
-import ThemeToggle from '@/components/profile/ThemeToggle';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const { subscriptionStatus } = useSubscription();
   const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
   
@@ -43,17 +52,15 @@ const DashboardHeader: React.FC = () => {
           )}
         </div>
         
-        <div className="flex flex-1 items-center justify-end space-x-1">
-          <nav className="flex items-center gap-1.5">
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <nav className="flex items-center gap-1">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => {}} 
-              className={cn(
-                "rounded-md hover:bg-accent",
-              )}
+              className="rounded-md hover:bg-accent"
             >
-              <Bell className="h-[1.15rem] w-[1.15rem]" />
+              <Bell className="h-4 w-4" />
               <span className="sr-only">Notificações</span>
             </Button>
             
@@ -61,39 +68,53 @@ const DashboardHeader: React.FC = () => {
               variant="ghost" 
               size="icon"
               onClick={() => navigate('/settings')} 
-              className={cn(
-                "rounded-md hover:bg-accent",
-              )}
+              className="rounded-md hover:bg-accent"
             >
-              <Settings className="h-[1.15rem] w-[1.15rem]" />
+              <Settings className="h-4 w-4" />
               <span className="sr-only">Configurações</span>
             </Button>
             
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={handleLogout} 
-              className={cn(
-                "rounded-md text-destructive hover:bg-destructive/10 hover:text-destructive",
-              )}
+              onClick={toggleTheme} 
+              className="rounded-md hover:bg-accent"
+              title="Mudar tema"
             >
-              <LogOut className="h-[1.15rem] w-[1.15rem]" />
-              <span className="sr-only">Logout</span>
+              {theme === 'light' ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+              <span className="sr-only">Alternar tema</span>
             </Button>
             
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate('/profile')} 
-              className={cn(
-                "rounded-md hover:bg-accent",
-              )}
-            >
-              <ProfileAvatar className="h-7 w-7" />
-              <span className="sr-only">Perfil</span>
-            </Button>
-            
-            <ThemeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="rounded-md hover:bg-accent h-8 w-8"
+                >
+                  <ProfileAvatar className="h-6 w-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  Configurações
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
       </div>

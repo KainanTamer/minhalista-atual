@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNetworking } from '@/hooks/useNetworking';
 import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SocialMediaLink } from '@/components/dialogs/NetworkingDialog';
 
 type ContactView = 'all' | 'musicians' | 'producers' | 'venues';
 
@@ -18,11 +19,18 @@ const NetworkTab: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<ContactView>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState<string | undefined>(undefined);
   const { subscriptionStatus } = useSubscription();
   const { contacts, isLoading } = useNetworking();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
 
   const handleAddContact = () => {
+    setSelectedContactId(undefined);
+    setDialogOpen(true);
+  };
+
+  const handleEditContact = (id: string) => {
+    setSelectedContactId(id);
     setDialogOpen(true);
   };
 
@@ -149,12 +157,13 @@ const NetworkTab: React.FC = () => {
                 <Card 
                   key={contact.id} 
                   className="bg-background/50 hover:bg-background/70 transition-colors cursor-pointer overflow-hidden"
+                  onClick={() => handleEditContact(contact.id)}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary/20 text-primary">
-                          {contact.name.split(' ').map(n => n[0]).join('')}
+                          {contact.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -186,7 +195,7 @@ const NetworkTab: React.FC = () => {
                       )}
                       {contact.contact_social_media && contact.contact_social_media.length > 0 && (
                         <div className="flex items-center gap-2 mt-2">
-                          {contact.contact_social_media.map((social, index) => (
+                          {contact.contact_social_media.map((social: SocialMediaLink, index: number) => (
                             <a 
                               key={index} 
                               href={social.url} 
@@ -194,6 +203,7 @@ const NetworkTab: React.FC = () => {
                               rel="noopener noreferrer"
                               className="p-1.5 bg-background/70 rounded-full hover:bg-primary/20 hover:text-primary transition-colors"
                               title={social.platform}
+                              onClick={(e) => e.stopPropagation()}
                             >
                               {renderSocialIcon(social.platform)}
                             </a>
@@ -209,7 +219,14 @@ const NetworkTab: React.FC = () => {
         </CardContent>
       </Card>
       
-      <NetworkingDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <NetworkingDialog 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen}
+        contactId={selectedContactId} 
+        onSave={() => {
+          setSelectedContactId(undefined);
+        }}
+      />
     </div>
   );
 };

@@ -1,9 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/toast';
+import { useToast } from '@/hooks/use-toast';
+import { SocialMediaLink } from '@/components/dialogs/NetworkingDialog';
 
-export interface NetworkContact {
+export interface NetworkingContact {
   id: string;
   user_id: string;
   name: string;
@@ -12,62 +13,144 @@ export interface NetworkContact {
   occupation?: string;
   company?: string;
   notes?: string;
+  contact_social_media?: SocialMediaLink[];
   created_at: string;
   updated_at: string;
 }
 
-export interface SocialMediaLink {
-  id: string;
-  contact_id: string;
-  platform: string;
-  url: string;
-  created_at: string;
-}
-
 export function useNetworking() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const { data: contacts = [], isLoading, error, refetch } = useQuery({
     queryKey: ['networking-contacts'],
     queryFn: async () => {
       try {
-        // Using any to bypass TypeScript error until Supabase types are updated
-        const { data, error } = await (supabase as any)
+        // Get all contacts
+        const { data: contactsData, error: contactsError } = await supabase
           .from('networking_contacts')
-          .select('*, contact_social_media(*)')
+          .select('*')
           .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (contactsError) throw contactsError;
         
-        return data || [];
+        // For each contact, get their social media links
+        const contactsWithSocial = await Promise.all(
+          contactsData.map(async (contact) => {
+            const { data: socialMedia, error: socialError } = await supabase
+              .from('contact_social_media')
+              .select('*')
+              .eq('contact_id', contact.id);
+            
+            if (socialError) {
+              console.error('Error fetching social media for contact:', socialError);
+              return { ...contact, contact_social_media: [] };
+            }
+            
+            return { ...contact, contact_social_media: socialMedia || [] };
+          })
+        );
+        
+        return contactsWithSocial || [];
       } catch (error) {
-        console.error('Error fetching contacts:', error);
+        console.error('Error fetching networking contacts:', error);
         return [];
       }
-    }
+    },
+    staleTime: 15000, // data stays fresh for 15 seconds
   });
+
+  const getContact = async (id: string) => {
+    try {
+      // Get contact details
+      const { data: contact, error: contactError } = await supabase
+        .from('networking_contacts')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (contactError) throw contactError;
+      
+      // Get social media links for the contact
+      const { data: socialMedia, error: socialError } = await supabase
+        .from('contact_social_media')
+        .select('*')
+        .eq('contact_id', id);
+      
+      if (socialError) throw socialError;
+      
+      return { ...contact, contact_social_media: socialMedia || [] };
+    } catch (error) {
+      console.error('Error fetching contact:', error);
+      return null;
+    }
+  };
   
-  const addContactMutation = useMutation({
-    mutationFn: async (newContact: Omit<NetworkContact, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { data, error } = await (supabase as any)
+  const addContact = useMutation({
+    mutationFn: async (contactData: Omit<NetworkingContact, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      const { contact_social_media, ...contactFields } = contactData;
+      
+      // Create optimistic contact for immediate UI update
+      const tempId = `temp-${Date.now()}`;
+      const optimisticContact = {
+        id: tempId,
+        user_id: (await supabase.auth.getUser()).data.user?.id || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        ...contactFields,
+        contact_social_media: contact_social_media || []
+      };
+      
+      // Add the optimistic contact to the cache
+      queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
+        return [optimisticContact, ...(oldData || [])];
+      });
+      
+      // Insert the contact
+      const { data: newContact, error: contactError } = await supabase
         .from('networking_contacts')
         .insert([{
-          ...newContact,
+          ...contactFields,
           user_id: (await supabase.auth.getUser()).data.user?.id
         }])
         .select()
         .single();
+      
+      if (contactError) throw contactError;
+      
+      // Insert social media links if any
+      if (contact_social_media && contact_social_media.length > 0) {
+        const socialLinksWithContactId = contact_social_media.map(link => ({
+          ...link,
+          contact_id: newContact.id
+        }));
         
-      if (error) throw error;
-      return data;
+        const { error: socialError } = await supabase
+          .from('contact_social_media')
+          .insert(socialLinksWithContactId);
+        
+        if (socialError) throw socialError;
+      }
+      
+      // Fetch the created contact with its social media links
+      const completeContact = await getContact(newContact.id);
+      return completeContact;
     },
-    onSuccess: () => {
+    onSuccess: (newContact) => {
+      if (newContact) {
+        // Update the query data with the real contact (replacing the temp one)
+        queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
+          return oldData?.map(contact => 
+            contact.id.startsWith('temp-') ? newContact : contact
+          ) || [];
+        });
+        
+        toast({
+          title: "Contato adicionado",
+          description: "O contato foi adicionado à sua rede."
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
-      toast({
-        title: "Contato adicionado",
-        description: "O contato foi adicionado à sua rede."
-      });
     },
     onError: (error) => {
       console.error('Error adding contact:', error);
@@ -76,31 +159,79 @@ export function useNetworking() {
         description: "Não foi possível adicionar o contato.",
         variant: "destructive"
       });
+      queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
     }
   });
-  
-  const updateContactMutation = useMutation({
-    mutationFn: async ({ id, ...updateData }: Partial<NetworkContact> & { id: string }) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { data, error } = await (supabase as any)
+
+  const updateContact = useMutation({
+    mutationFn: async (contactId: string, contactData: Partial<NetworkingContact>) => {
+      const { contact_social_media, ...contactFields } = contactData;
+      
+      // Save the current state for rollback
+      const previousData = queryClient.getQueryData(['networking-contacts']);
+      
+      // Optimistically update the UI
+      queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
+        return oldData?.map(contact => {
+          if (contact.id === contactId) {
+            return { 
+              ...contact, 
+              ...contactFields,
+              contact_social_media: contact_social_media || contact.contact_social_media
+            };
+          }
+          return contact;
+        }) || [];
+      });
+      
+      // Update the contact
+      const { error: contactError } = await supabase
         .from('networking_contacts')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
+        .update(contactFields)
+        .eq('id', contactId);
+      
+      if (contactError) throw contactError;
+      
+      // Handle social media links if provided
+      if (contact_social_media !== undefined) {
+        // Delete existing social media links
+        const { error: deleteError } = await supabase
+          .from('contact_social_media')
+          .delete()
+          .eq('contact_id', contactId);
         
-      if (error) throw error;
-      return data;
+        if (deleteError) throw deleteError;
+        
+        // Insert new social media links if any
+        if (contact_social_media && contact_social_media.length > 0) {
+          const socialLinksWithContactId = contact_social_media.map(link => ({
+            ...link,
+            contact_id: contactId
+          }));
+          
+          const { error: socialError } = await supabase
+            .from('contact_social_media')
+            .insert(socialLinksWithContactId);
+          
+          if (socialError) throw socialError;
+        }
+      }
+      
+      // Return the updated contact
+      const updatedContact = await getContact(contactId);
+      return updatedContact;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
       toast({
         title: "Contato atualizado",
-        description: "As alterações foram salvas com sucesso."
+        description: "As informações do contato foram atualizadas."
       });
     },
-    onError: (error) => {
+    onError: (error, _, context: any) => {
       console.error('Error updating contact:', error);
+      // Revert optimistic update
+      queryClient.setQueryData(['networking-contacts'], context.previousData);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o contato.",
@@ -108,17 +239,25 @@ export function useNetworking() {
       });
     }
   });
-  
-  const deleteContactMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { error } = await (supabase as any)
+
+  const deleteContact = useMutation({
+    mutationFn: async (contactId: string) => {
+      // Save current data for rollback
+      const previousData = queryClient.getQueryData(['networking-contacts']);
+      
+      // Optimistically update UI
+      queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
+        return oldData?.filter(contact => contact.id !== contactId) || [];
+      });
+      
+      // Delete the contact (cascades to social media links due to foreign key constraint)
+      const { error } = await supabase
         .from('networking_contacts')
         .delete()
-        .eq('id', id);
+        .eq('id', contactId);
         
       if (error) throw error;
-      return id;
+      return contactId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
@@ -127,61 +266,13 @@ export function useNetworking() {
         description: "O contato foi removido da sua rede."
       });
     },
-    onError: (error) => {
+    onError: (error, _, context: any) => {
       console.error('Error deleting contact:', error);
+      // Revert optimistic update
+      queryClient.setQueryData(['networking-contacts'], context.previousData);
       toast({
         title: "Erro",
         description: "Não foi possível remover o contato.",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Social Media Links
-  const addSocialMediaMutation = useMutation({
-    mutationFn: async (newLink: Omit<SocialMediaLink, 'id' | 'created_at'>) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { data, error } = await (supabase as any)
-        .from('contact_social_media')
-        .insert([newLink])
-        .select()
-        .single();
-        
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
-    },
-    onError: (error) => {
-      console.error('Error adding social media link:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o link de rede social.",
-        variant: "destructive"
-      });
-    }
-  });
-  
-  const deleteSocialMediaMutation = useMutation({
-    mutationFn: async (id: string) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { error } = await (supabase as any)
-        .from('contact_social_media')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
-      return id;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
-    },
-    onError: (error) => {
-      console.error('Error deleting social media link:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover o link de rede social.",
         variant: "destructive"
       });
     }
@@ -192,10 +283,9 @@ export function useNetworking() {
     isLoading,
     error,
     refetch,
-    addContact: addContactMutation.mutate,
-    updateContact: updateContactMutation.mutate,
-    deleteContact: deleteContactMutation.mutate,
-    addSocialMedia: addSocialMediaMutation.mutate,
-    deleteSocialMedia: deleteSocialMediaMutation.mutate
+    getContact,
+    addContact: addContact.mutate,
+    updateContact: updateContact.mutate,
+    deleteContact: deleteContact.mutate
   };
 }

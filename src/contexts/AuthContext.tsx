@@ -1,9 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
+  AuthError,
   AuthResponse,
   Session,
-  SignInCredentials,
-  SignUpCredentials,
   User,
 } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,8 +10,8 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signIn: (credentials: SignInCredentials) => Promise<AuthResponse>;
-  signUp: (credentials: SignUpCredentials) => Promise<AuthResponse>;
+  signIn: (credentials: { email: string; password: string }) => Promise<AuthResponse>;
+  signUp: (credentials: { email: string; password: string; options?: { data?: Record<string, any> } }) => Promise<AuthResponse>;
   signOut: () => Promise<{ error: Error | null }>;
   loading: boolean;
   refreshUser: () => Promise<void>;
@@ -21,9 +20,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
-  signIn: async () => ({ data: { user: null, session: null }, error: new Error('Not implemented') }),
-  signUp: async () => ({ data: { user: null, session: null }, error: new Error('Not implemented') }),
-  signOut: async () => ({ error: new Error('Not implemented') }),
+  signIn: async () => ({ data: { user: null, session: null }, error: null as unknown as AuthError }),
+  signUp: async () => ({ data: { user: null, session: null }, error: null as unknown as AuthError }),
+  signOut: async () => ({ error: null }),
   loading: true,
   refreshUser: async () => {}
 });
@@ -75,7 +74,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
 
-  const signIn = async (credentials: SignInCredentials): Promise<AuthResponse> => {
+  const signIn = async (credentials: { email: string; password: string }): Promise<AuthResponse> => {
     setLoading(true);
     try {
       const response = await supabase.auth.signInWithPassword(credentials);
@@ -85,10 +84,15 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUp = async (credentials: SignUpCredentials): Promise<AuthResponse> => {
+  const signUp = async (credentials: { email: string; password: string; options?: { data?: Record<string, any> } }): Promise<AuthResponse> => {
     setLoading(true);
     try {
-      const response = await supabase.auth.signUp(credentials);
+      const { email, password, options } = credentials;
+      const response = await supabase.auth.signUp({
+        email,
+        password,
+        options
+      });
       return response;
     } finally {
       setLoading(false);
