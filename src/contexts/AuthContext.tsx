@@ -108,15 +108,13 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = async () => {
     try {
       setLoading(true);
-      const { data: { user: refreshedUser, session: refreshedSession }, error } = await supabase.auth.getUser();
+      // Fixed: Use getSession instead of getUser to get both user and session
+      const { data } = await supabase.auth.getSession();
   
-      if (error) {
-        console.error("Error refreshing user:", error);
-        return;
+      if (data.session) {
+        setUser(data.session.user);
+        setSession(data.session);
       }
-  
-      setUser(refreshedUser);
-      setSession(refreshedSession);
     } catch (error) {
       console.error("Error refreshing user:", error);
     } finally {

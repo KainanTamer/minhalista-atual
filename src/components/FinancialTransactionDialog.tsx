@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -110,6 +109,9 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
     }
 
     setIsSubmitting(true);
+    // Define previousData outside the try block so it's accessible in the catch block
+    let previousData: any = null;
+    
     try {
       const transactionData: FinancialTransactionInsert = {
         description: values.description,
@@ -122,7 +124,7 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
       };
 
       // Store the previous data for possible rollback
-      const previousData = queryClient.getQueryData(['financial-transactions']);
+      previousData = queryClient.getQueryData(['financial-transactions']);
       
       if (isEditing && transaction) {
         // For editing, update the local transaction
@@ -189,9 +191,12 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
     }
 
     setIsSubmitting(true);
+    // Define previousData outside the try block so it's accessible in the catch block
+    let previousData: any = null;
+    
     try {
       // Optimistic update - remove from local cache
-      const previousData = queryClient.getQueryData(['financial-transactions']);
+      previousData = queryClient.getQueryData(['financial-transactions']);
       queryClient.setQueryData(['financial-transactions'], (old: any) => {
         return old?.filter((item: any) => item.id !== transaction.id);
       });
