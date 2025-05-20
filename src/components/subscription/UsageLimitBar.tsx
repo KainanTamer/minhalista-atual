@@ -1,8 +1,13 @@
 
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
-import { Crown } from 'lucide-react';
+import { Crown, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger 
+} from '@/components/ui/tooltip';
 
 interface UsageLimitBarProps {
   current: number;
@@ -51,6 +56,19 @@ const UsageLimitBar: React.FC<UsageLimitBarProps> = ({
           </span>
           <span>/</span>
           <span>{limit}</span>
+          
+          {(isNearLimit || isAtLimit) && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button className="ml-1 inline-flex">
+                  <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isNearLimit ? 'Seu limite está próximo de ser atingido' : 'Você atingiu o limite do plano básico'}
+              </TooltipContent>
+            </Tooltip>
+          )}
         </span>
         {isNearLimit && !isAtLimit && (
           <span className="text-orange-500 text-xs font-medium">80% usado</span>
