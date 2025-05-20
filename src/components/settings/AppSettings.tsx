@@ -29,7 +29,7 @@ const AppSettings = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Languages className="w-5 h-5 text-muted-foreground" />
+          <Languages className="w-5 h-5 text-muted-foreground dark:text-[#BB86FC]" />
           <span>Idioma</span>
         </div>
         <Select value={language} onValueChange={handleLanguageChange}>
@@ -46,9 +46,9 @@ const AppSettings = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {theme === 'dark' ? (
-            <Sun className="w-5 h-5" />
+            <Sun className="w-5 h-5 text-[#BB86FC]" />
           ) : (
-            <Moon className="w-5 h-5" />
+            <Moon className="w-5 h-5 text-[#6C757D]" />
           )}
           <span>Modo {theme === 'dark' ? 'claro' : 'escuro'}</span>
         </div>

@@ -20,18 +20,18 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col theme-transition">
       <Header />
       
       <main className="flex-1 container mx-auto py-10 px-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Seu perfil</h1>
+          <h1 className="text-3xl font-bold mb-8 dark:text-[#E9ECEF]">Seu perfil</h1>
           
           <div className="space-y-6">
-            <Card>
+            <Card className="shadow-card-light dark:shadow-card-dark border-[#E9ECEF] dark:border-[#333333] theme-transition">
               <CardHeader>
-                <CardTitle>Foto de perfil</CardTitle>
-                <CardDescription>
+                <CardTitle className="dark:text-[#E9ECEF]">Foto de perfil</CardTitle>
+                <CardDescription className="dark:text-[#ADB5BD]">
                   Adicione uma foto para personalizar seu perfil
                 </CardDescription>
               </CardHeader>
@@ -43,10 +43,10 @@ const Profile: React.FC = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="shadow-card-light dark:shadow-card-dark border-[#E9ECEF] dark:border-[#333333] theme-transition">
               <CardHeader>
-                <CardTitle>Informações pessoais</CardTitle>
-                <CardDescription>
+                <CardTitle className="dark:text-[#E9ECEF]">Informações pessoais</CardTitle>
+                <CardDescription className="dark:text-[#ADB5BD]">
                   Atualize suas informações de perfil
                 </CardDescription>
               </CardHeader>
@@ -55,23 +55,26 @@ const Profile: React.FC = () => {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="shadow-card-light dark:shadow-card-dark border-[#E9ECEF] dark:border-[#333333] theme-transition">
               <CardHeader>
-                <CardTitle>Aparência</CardTitle>
+                <CardTitle className="dark:text-[#E9ECEF]">Aparência</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex items-center justify-between">
+                <div className="flex items-center space-x-2 dark:text-[#E9ECEF]">
+                  <span>Tema da aplicação</span>
+                </div>
                 <ThemeToggle />
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="shadow-card-light dark:shadow-card-dark border-[#E9ECEF] dark:border-[#333333] theme-transition">
               <CardHeader>
-                <CardTitle>Segurança</CardTitle>
+                <CardTitle className="dark:text-[#E9ECEF]">Segurança</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
                   variant="outline" 
-                  className="w-full" 
+                  className="w-full border-[#4361EE] text-[#4361EE] dark:border-[#BB86FC] dark:text-[#BB86FC]"
                   onClick={() => navigate('/change-password')}
                 >
                   Alterar senha

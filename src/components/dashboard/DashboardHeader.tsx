@@ -44,12 +44,12 @@ const DashboardHeader: React.FC = () => {
   };
   
   return (
-    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-light dark:shadow-none">
       <div className="container flex h-14 items-center justify-between">
         <div className="mr-4 flex items-center">
           <div className="mr-2 font-bold text-foreground">Minha Agenda</div>
           {isPro && (
-            <div className="rounded-sm bg-gradient-to-r from-amber-400 to-amber-600 px-1.5 py-0.5 text-[0.65rem] font-bold text-black">
+            <div className="rounded-sm bg-gradient-to-r from-amber-400 to-amber-600 px-1.5 py-0.5 text-[0.65rem] font-bold text-black dark:from-amber-300 dark:to-amber-500">
               PRO
             </div>
           )}
@@ -61,14 +61,14 @@ const DashboardHeader: React.FC = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="rounded-full hover:bg-accent"
+              className="rounded-full hover:bg-accent dark:hover:bg-accent/20 theme-transition"
               aria-label="Notificações"
             >
-              <Bell className="h-[1.2rem] w-[1.2rem]" />
+              <Bell className="h-[1.2rem] w-[1.2rem] dark:text-[#BB86FC] dark:icon-glow" />
               <span className="sr-only">Notificações</span>
             </Button>
             
-            {/* Botão de tema - agora minimalista */}
+            {/* Botão de tema - agora com estilo conforme especificação */}
             <ThemeToggle />
             
             {/* Menu de perfil refinado */}
@@ -77,12 +77,12 @@ const DashboardHeader: React.FC = () => {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="rounded-full hover:bg-accent h-9 w-9 p-0.5 ml-1"
+                  className="rounded-full hover:bg-accent dark:hover:bg-accent/20 h-9 w-9 p-0.5 ml-1 theme-transition"
                 >
                   <ProfileAvatar className="h-full w-full transition-transform hover:scale-105" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-1">
+              <DropdownMenuContent align="end" className="w-56 mt-1 shadow-light dark:shadow-dark">
                 <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">

@@ -20,9 +20,9 @@ const ThemeToggle: React.FC = () => {
             aria-label="Alternar tema"
           >
             {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
+              <Sun className="h-5 w-5 text-[#BB86FC]" />
             ) : (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-5 w-5 text-[#6C757D]" />
             )}
             <span className="sr-only">Alternar tema</span>
           </Button>

@@ -62,7 +62,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Novas cores específicas
+				'theme-icon-light': '#6C757D',
+				'theme-icon-dark': '#BB86FC',
+				'theme-button': '#4361EE',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -95,15 +99,32 @@ export default {
 						opacity: '1',
 						transform: 'translateY(0)'
 					}
+				},
+				'theme-transition': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(0.95)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.5s ease-out'
+				'fade-in': 'fade-in 0.5s ease-out',
+				'theme-toggle': 'theme-transition 0.3s ease-out'
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif']
+			},
+			boxShadow: {
+				'light': '0 1px 3px rgba(0,0,0,0.1)',
+				'dark': '0 2px 8px rgba(187, 134, 252, 0.15)',
+				'card-light': '0 2px 5px rgba(0,0,0,0.05)',
+				'card-dark': '0 4px 12px rgba(0,0,0,0.3)',
 			}
 		}
 	},

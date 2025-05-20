@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -6,87 +7,87 @@
 
 @layer base {
   :root {
-    /* Modo claro - Cores melhoradas para contraste */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 12%;
+    /* Modo claro - Cores refinadas conforme especificação */
+    --background: 0 0% 97%; /* #F8F9FA */
+    --foreground: 210 11% 15%; /* #212529 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 210 11% 15%; /* #212529 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 210 11% 15%; /* #212529 */
 
-    --primary: 0 0% 12%;
+    --primary: 230 83% 60%; /* #4361EE */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 12%;
+    --secondary: 210 17% 98%; /* #F8F9FA mais claro */
+    --secondary-foreground: 210 11% 15%; /* #212529 */
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 46%; /* #495057 */
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 12%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 210 11% 15%; /* #212529 */
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 0 0% 12%;
+    --border: 220 13% 91%; /* #E9ECEF */
+    --input: 220 13% 91%; /* #E9ECEF */
+    --ring: 230 83% 60%; /* #4361EE */
 
     --radius: 0.5rem;
 
     /* Sidebar específica */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 0 0% 12%;
+    --sidebar-foreground: 210 11% 15%; /* #212529 */
+    --sidebar-primary: 210 11% 15%; /* #212529 */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 0 0% 12%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 210 11% 15%; /* #212529 */
+    --sidebar-border: 220 13% 91%; /* #E9ECEF */
+    --sidebar-ring: 210 11% 15%; /* #212529 */
   }
 
   .dark {
-    /* Modo escuro - Melhor contraste e visibilidade */
-    --background: 0 0% 7%;
-    --foreground: 0 0% 95%;
+    /* Modo escuro - Cores refinadas conforme especificação */
+    --background: 0 0% 7%; /* #121212 */
+    --foreground: 210 14% 93%; /* #E9ECEF */
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 12%; /* #1E1E1E */
+    --card-foreground: 210 14% 93%; /* #E9ECEF */
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 12%; /* #1E1E1E */
+    --popover-foreground: 210 14% 93%; /* #E9ECEF */
 
-    --primary: 0 0% 95%;
-    --primary-foreground: 0 0% 7%;
+    --primary: 230 83% 60%; /* #4361EE mantido, mas mais brilhante */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 0 0% 15%; /* Ligeiramente mais claro que o fundo */
+    --secondary-foreground: 210 14% 93%; /* #E9ECEF */
 
     --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 85%;
+    --muted-foreground: 220 8% 72%; /* #ADB5BD */
 
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 267 100% 76%; /* #BB86FC */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 0 0% 85%;
+    --border: 0 0% 20%; /* #333333 */
+    --input: 0 0% 20%; /* #333333 */
+    --ring: 267 100% 76%; /* #BB86FC */
     
     /* Sidebar específica */
     --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 0 0% 95%;
-    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-foreground: 210 14% 93%; /* #E9ECEF */
+    --sidebar-primary: 267 100% 76%; /* #BB86FC */
+    --sidebar-primary-foreground: 0 0% 7%; /* #121212 */
     --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 0 0% 85%;
+    --sidebar-accent-foreground: 210 14% 93%; /* #E9ECEF */
+    --sidebar-border: 0 0% 20%; /* #333333 */
+    --sidebar-ring: 267 100% 76%; /* #BB86FC */
   }
 }
 
@@ -98,11 +99,13 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   
   /* Melhorar visibilidade de textos */
   h1, h2, h3, .card-title {
     @apply font-semibold tracking-tight;
+    transition: font-size 0.3s ease;
   }
   
   /* Maior peso para textos importantes */
@@ -112,7 +115,31 @@
   
   /* Animações de transição suaves */
   .theme-transition {
-    @apply transition-colors duration-300;
+    @apply transition-all duration-300;
+  }
+
+  /* Estilo para cards no modo light e dark */
+  .card-light {
+    @apply bg-card border border-[#E9ECEF] shadow-card-light;
+  }
+  
+  .dark .card-light {
+    @apply bg-card border-[#333333] shadow-card-dark;
+  }
+  
+  /* Estilo para ícones com glow no modo dark */
+  .dark .icon-glow {
+    filter: drop-shadow(0 0 3px rgba(187, 134, 252, 0.5));
+  }
+  
+  /* Estilo específico para botões de ação */
+  .action-button {
+    @apply bg-[#4361EE] text-white hover:bg-[#3a50c7] transition-colors;
+  }
+  
+  .dark .action-button {
+    @apply bg-[#4361EE] text-white hover:bg-[#5370ff] transition-all;
+    filter: drop-shadow(0 0 4px rgba(67, 97, 238, 0.4));
   }
 }
 
@@ -162,9 +189,17 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.dark .event-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .calendar-card {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border: 1px solid hsl(var(--border));
+}
+
+.dark .calendar-card {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .event-list-card {
@@ -278,6 +313,11 @@
     padding: 1px 4px;
     font-size: 0.7rem;
   }
+}
+
+/* Ajustes de tipografia baseados no tema */
+.dark h1, .dark h2, .dark h3, .dark .card-title {
+  font-size: 110%; /* Ligeiramente maior no dark mode para melhor contraste */
 }
 
 /* CSS para ocultar elementos de branding Lovable */
