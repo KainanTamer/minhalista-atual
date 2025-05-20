@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -120,7 +121,7 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
         user_id: user.id
       };
 
-      // Optimistic update
+      // Store the previous data for possible rollback
       const previousData = queryClient.getQueryData(['financial-transactions']);
       
       if (isEditing && transaction) {
@@ -168,7 +169,9 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
     } catch (error) {
       console.error("Erro ao salvar transação:", error);
       // Revert optimistic update
-      queryClient.setQueryData(['financial-transactions'], previousData);
+      if (previousData) {
+        queryClient.setQueryData(['financial-transactions'], previousData);
+      }
       
       toast({
         title: "Erro",
@@ -206,7 +209,9 @@ const FinancialTransactionDialog: React.FC<FinancialTransactionDialogProps> = ({
     } catch (error) {
       console.error("Erro ao excluir transação:", error);
       // Revert optimistic update
-      queryClient.setQueryData(['financial-transactions'], previousData);
+      if (previousData) {
+        queryClient.setQueryData(['financial-transactions'], previousData);
+      }
       
       toast({
         title: "Erro",

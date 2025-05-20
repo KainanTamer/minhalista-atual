@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   AuthError,
@@ -41,16 +42,17 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         setLoading(true);
       
-      const { data: { session } } = await supabase.auth.getSession()
+        // Fixed: Properly handle the session data response
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
 
-      if (!session) {
-        setUser(null);
-        setSession(null);
-        return;
-      }
+        if (!currentSession) {
+          setUser(null);
+          setSession(null);
+          return;
+        }
 
-      setUser(session.user);
-      setSession(session);
+        setUser(currentSession.user);
+        setSession(currentSession);
       } catch (error) {
         console.error('Error loading user:', error);
       } finally {

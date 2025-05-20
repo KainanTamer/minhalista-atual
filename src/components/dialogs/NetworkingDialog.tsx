@@ -77,8 +77,10 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     
     try {
       if (isEditing && contactId) {
+        // Fixed: Pass parameters correctly to updateContact function
         await updateContact(contactId, contactData);
       } else {
+        // Fixed: No need for options object when calling addContact
         await addContact(contactData);
       }
       

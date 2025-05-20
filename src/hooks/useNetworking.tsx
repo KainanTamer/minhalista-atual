@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -164,7 +163,8 @@ export function useNetworking() {
   });
 
   const updateContact = useMutation({
-    mutationFn: async (contactId: string, contactData: Partial<NetworkingContact>) => {
+    mutationFn: async (variables: { contactId: string; contactData: Partial<NetworkingContact> }) => {
+      const { contactId, contactData } = variables;
       const { contact_social_media, ...contactFields } = contactData;
       
       // Save the current state for rollback
@@ -231,7 +231,9 @@ export function useNetworking() {
     onError: (error, _, context: any) => {
       console.error('Error updating contact:', error);
       // Revert optimistic update
-      queryClient.setQueryData(['networking-contacts'], context.previousData);
+      if (context.previousData) {
+        queryClient.setQueryData(['networking-contacts'], context.previousData);
+      }
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o contato.",
@@ -285,7 +287,8 @@ export function useNetworking() {
     refetch,
     getContact,
     addContact: addContact.mutate,
-    updateContact: updateContact.mutate,
+    updateContact: (contactId: string, contactData: Partial<NetworkingContact>) => 
+      updateContact.mutate({ contactId, contactData }),
     deleteContact: deleteContact.mutate
   };
 }

@@ -10,7 +10,7 @@ const ThemeToggle: React.FC = () => {
   
   return (
     <TooltipProvider>
-      <Tooltip>
+      <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
           <Button 
             variant="ghost" 
@@ -27,7 +27,7 @@ const ThemeToggle: React.FC = () => {
             <span className="sr-only">Alternar tema</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="bottom">
           <p>Mudar para modo {theme === 'light' ? 'escuro' : 'claro'}</p>
         </TooltipContent>
       </Tooltip>
