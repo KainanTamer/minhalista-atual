@@ -22,7 +22,7 @@ const NetworkTab: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState<string | undefined>(undefined);
   const { subscriptionStatus } = useSubscription();
-  const { contacts, isLoading } = useNetworking();
+  const { contacts, isLoading, deleteContact } = useNetworking();
   const { toast } = useToast();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
 

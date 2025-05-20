@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Sun, SunOff } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 
 const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -22,7 +22,7 @@ const ThemeToggle: React.FC = () => {
             {theme === 'dark' ? (
               <Sun className="h-5 w-5" />
             ) : (
-              <SunOff className="h-5 w-5" />
+              <Moon className="h-5 w-5" />
             )}
             <span className="sr-only">Alternar tema</span>
           </Button>

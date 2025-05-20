@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Languages, Sun, SunOff } from 'lucide-react';
+import { Languages, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -48,7 +48,7 @@ const AppSettings = () => {
           {theme === 'dark' ? (
             <Sun className="w-5 h-5" />
           ) : (
-            <SunOff className="w-5 h-5" />
+            <Moon className="w-5 h-5" />
           )}
           <span>Modo {theme === 'dark' ? 'claro' : 'escuro'}</span>
         </div>
