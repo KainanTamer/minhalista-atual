@@ -36,7 +36,11 @@ export function useRepertoire() {
         console.error('Error fetching repertoire:', error);
         return [];
       }
-    }
+    },
+    // Add these configs to improve performance
+    staleTime: 30000, // data stays fresh for 30 seconds
+    refetchOnMount: true, 
+    refetchOnWindowFocus: true
   });
   
   const addMutation = useMutation({
@@ -53,7 +57,11 @@ export function useRepertoire() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (newItem) => {
+      // Optimistic update - update the cache immediately
+      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
+        return [newItem, ...(oldData || [])];
+      });
       queryClient.invalidateQueries({ queryKey: ['repertoire'] });
       toast({
         title: "Música adicionada",
@@ -82,7 +90,11 @@ export function useRepertoire() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedItem) => {
+      // Optimistic update
+      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
+        return oldData?.map(item => item.id === updatedItem.id ? updatedItem : item) || [];
+      });
       queryClient.invalidateQueries({ queryKey: ['repertoire'] });
       toast({
         title: "Música atualizada",
@@ -109,7 +121,11 @@ export function useRepertoire() {
       if (error) throw error;
       return id;
     },
-    onSuccess: () => {
+    onSuccess: (deletedId) => {
+      // Optimistic update
+      queryClient.setQueryData(['repertoire'], (oldData: RepertoireItem[] | undefined) => {
+        return oldData?.filter(item => item.id !== deletedId) || [];
+      });
       queryClient.invalidateQueries({ queryKey: ['repertoire'] });
       toast({
         title: "Música removida",

@@ -7,23 +7,30 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProfileAvatarProps {
-  avatarUrl: string | null;
-  onAvatarUpdate: (url: string) => void;
+  className?: string;
+  avatarUrl?: string | null;
+  onAvatarUpdate?: (url: string) => void;
 }
 
-const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ avatarUrl, onAvatarUpdate }) => {
+const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ 
+  className = '', 
+  avatarUrl, 
+  onAvatarUpdate 
+}) => {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarClick = () => {
-    if (fileInputRef.current) {
+    if (onAvatarUpdate && fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
   const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!onAvatarUpdate) return;
+    
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -109,33 +116,40 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ avatarUrl, onAvatarUpdate
   };
 
   return (
-    <div className="relative cursor-pointer" onClick={handleAvatarClick}>
-      <Avatar className="h-32 w-32 border-2 border-border">
+    <div 
+      className={`relative ${onAvatarUpdate ? 'cursor-pointer' : ''} ${className}`} 
+      onClick={onAvatarUpdate ? handleAvatarClick : undefined}
+    >
+      <Avatar className="border-2 border-border">
         {avatarUrl ? (
           <AvatarImage src={avatarUrl} alt="Foto de perfil" />
         ) : (
-          <AvatarFallback className="text-4xl bg-muted">
-            <User size={64} className="text-muted-foreground" />
+          <AvatarFallback className="bg-muted">
+            <User className="text-muted-foreground" />
           </AvatarFallback>
         )}
       </Avatar>
       
-      <div className="absolute bottom-0 right-0 bg-primary rounded-full p-2 shadow-md hover:bg-primary/90 transition-colors">
-        {uploadingAvatar ? (
-          <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" />
-        ) : (
-          <Upload className="h-4 w-4 text-primary-foreground" />
-        )}
-      </div>
+      {onAvatarUpdate && (
+        <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1 shadow-md hover:bg-primary/90 transition-colors">
+          {uploadingAvatar ? (
+            <Loader2 className="h-3 w-3 text-primary-foreground animate-spin" />
+          ) : (
+            <Upload className="h-3 w-3 text-primary-foreground" />
+          )}
+        </div>
+      )}
       
-      <input 
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleAvatarChange}
-        disabled={uploadingAvatar}
-      />
+      {onAvatarUpdate && (
+        <input 
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarChange}
+          disabled={uploadingAvatar}
+        />
+      )}
     </div>
   );
 };

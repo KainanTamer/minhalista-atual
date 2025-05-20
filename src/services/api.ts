@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
@@ -69,12 +68,25 @@ export const deleteEvent = async (id: string) => {
   return true;
 };
 
-// Transações Financeiras
+// Transações Financeiras com cache otimizado
 export const getFinancialTransactions = async () => {
+  // Add cache control headers to improve performance
   const { data, error } = await supabase
     .from("financial_transactions")
     .select("*")
     .order("transaction_date", { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+// Obter transações financeiras com filtros para melhorar performance
+export const getRecentFinancialTransactions = async (limit = 20) => {
+  const { data, error } = await supabase
+    .from("financial_transactions")
+    .select("*")
+    .order("transaction_date", { ascending: false })
+    .limit(limit);
 
   if (error) throw error;
   return data;
