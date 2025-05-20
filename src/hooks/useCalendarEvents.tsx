@@ -68,7 +68,7 @@ export const useCalendarEvents = () => {
   return {
     events,
     isLoading,
-    fetchEvents
+    refetch: fetchEvents  // Expose the fetchEvents function as refetch
   };
 };
 
