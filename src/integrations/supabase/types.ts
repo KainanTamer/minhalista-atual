@@ -42,6 +42,38 @@ export type Database = {
           },
         ]
       }
+      contact_social_media: {
+        Row: {
+          contact_id: string
+          created_at: string
+          id: string
+          platform: string
+          url: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          id?: string
+          platform: string
+          url: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          id?: string
+          platform?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_social_media_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "networking_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           contract_file_url: string | null
@@ -269,6 +301,45 @@ export type Database = {
           },
         ]
       }
+      networking_contacts: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          occupation: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          occupation?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          occupation?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -317,6 +388,45 @@ export type Database = {
           state?: string | null
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      repertoire: {
+        Row: {
+          artist: string | null
+          bpm: number | null
+          created_at: string
+          genre: string | null
+          id: string
+          key: string | null
+          notes: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist?: string | null
+          bpm?: number | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          key?: string | null
+          notes?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist?: string | null
+          bpm?: number | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          key?: string | null
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

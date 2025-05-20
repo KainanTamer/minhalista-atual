@@ -10,9 +10,10 @@ import { useRepertoire } from '@/hooks/useRepertoire';
 interface RepertoireDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSave?: () => void;
 }
 
-const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, onOpenChange }) => {
+const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, onOpenChange, onSave }) => {
   const { addRepertoireItem } = useRepertoire();
   
   const [title, setTitle] = useState('');
@@ -36,6 +37,7 @@ const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, onOpenChange 
     
     resetForm();
     onOpenChange(false);
+    if (onSave) onSave();
   };
   
   const resetForm = () => {

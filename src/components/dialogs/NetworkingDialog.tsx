@@ -17,9 +17,10 @@ interface SocialMediaInput {
 interface NetworkingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSave?: () => void;
 }
 
-const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange }) => {
+const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange, onSave }) => {
   const { addContact } = useNetworking();
   
   const [name, setName] = useState('');
@@ -36,7 +37,7 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange 
     e.preventDefault();
     
     // First add the contact
-    const result = await addContact({
+    addContact({
       name,
       email,
       phone,
@@ -47,6 +48,7 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange 
     
     resetForm();
     onOpenChange(false);
+    if (onSave) onSave();
   };
   
   const resetForm = () => {

@@ -116,9 +116,9 @@ const RepertoireTab: React.FC = () => {
                   </CardHeader>
                   <CardContent className="p-4 pt-0">
                     <div className="flex gap-2 flex-wrap">
-                      <Badge variant="outline" className="bg-background/50">{music.genre}</Badge>
-                      <Badge variant="outline" className="bg-background/50">Tom: {music.key}</Badge>
-                      <Badge variant="outline" className="bg-background/50">{music.bpm} BPM</Badge>
+                      {music.genre && <Badge variant="outline" className="bg-background/50">{music.genre}</Badge>}
+                      {music.key && <Badge variant="outline" className="bg-background/50">Tom: {music.key}</Badge>}
+                      {music.bpm && <Badge variant="outline" className="bg-background/50">{music.bpm} BPM</Badge>}
                     </div>
                   </CardContent>
                 </Card>
@@ -136,8 +136,8 @@ const RepertoireTab: React.FC = () => {
                     <div className="text-sm text-muted-foreground">{music.artist}</div>
                   </div>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="bg-background/50">{music.genre}</Badge>
-                    <Badge variant="outline" className="bg-background/50">Tom: {music.key}</Badge>
+                    {music.genre && <Badge variant="outline" className="bg-background/50">{music.genre}</Badge>}
+                    {music.key && <Badge variant="outline" className="bg-background/50">Tom: {music.key}</Badge>}
                   </div>
                 </div>
               ))}

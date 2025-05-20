@@ -11,7 +11,6 @@ import { useCalendarEvents } from '@/hooks';
 import { useRepertoire } from '@/hooks/useRepertoire';
 import { useNetworking } from '@/hooks/useNetworking';
 import { useQuery } from '@tanstack/react-query';
-import DashboardWrapperWithAds from '@/components/dashboard/DashboardWrapperWithAds';
 import { useSubscription } from '@/contexts/subscription';
 import RepertoireDialog from '@/components/dialogs/RepertoireDialog';
 import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
@@ -25,7 +24,6 @@ const Dashboard: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { subscriptionStatus } = useSubscription();
-  const isPro = subscriptionStatus.subscription_tier === 'Pro';
   
   // Get events
   const { events, isLoading: eventsLoading, refetch: refetchEvents } = useCalendarEvents();
@@ -116,11 +114,25 @@ const Dashboard: React.FC = () => {
       <RepertoireDialog
         open={repertoireDialogOpen}
         onOpenChange={setRepertoireDialogOpen}
+        onSave={() => {
+          refetchRepertoire();
+          toast({
+            title: "Música adicionada",
+            description: "A música foi adicionada ao seu repertório."
+          });
+        }}
       />
       
       <NetworkingDialog
         open={contactDialogOpen}
         onOpenChange={setContactDialogOpen}
+        onSave={() => {
+          refetchContacts();
+          toast({
+            title: "Contato adicionado",
+            description: "O contato foi adicionado à sua rede."
+          });
+        }}
       />
     </div>
   );

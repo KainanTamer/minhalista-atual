@@ -1,105 +1,58 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, LogOut, Moon, Sun, Music } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/contexts/subscription';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { UserCircle, Bell } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import ProfileAvatar from '@/components/profile/ProfileAvatar';
+import ThemeToggle from '@/components/profile/ThemeToggle';
 
 const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const { toast } = useToast();
   const { subscriptionStatus } = useSubscription();
-
-  const handleGoBack = () => {
-    navigate('/');
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso."
-      });
-      navigate('/');
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      toast({
-        title: "Erro ao sair",
-        description: "Não foi possível fazer logout. Tente novamente.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const navigateToProfile = () => {
-    navigate('/profile');
-  };
-
+  const isPro = subscriptionStatus.subscription_tier === 'Pro';
+  
   return (
-    <header className="bg-background border-b px-4 py-3 sticky top-0 z-10 shadow-sm">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={handleGoBack}
-            className="p-2 rounded-full hover:bg-accent transition-colors"
-            aria-label="Voltar"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h1 className="font-bold text-lg flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-              <Music size={16} />
+    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center justify-between">
+        <div className="mr-4 hidden md:flex">
+          <div className="mr-1 font-bold">MusicSchedule</div>
+          {isPro && (
+            <div className="rounded-sm bg-gradient-to-r from-amber-400 to-amber-600 px-1.5 py-0.5 text-[0.65rem] font-bold text-black">
+              PRO
             </div>
-            Minha Agenda
-          </h1>
-          
-          {/* Mostrar o plano de assinatura atual */}
-          {subscriptionStatus && (
-            <Badge variant={subscriptionStatus.subscription_tier === "Pro" ? "default" : "outline"} className="ml-2">
-              Plano {subscriptionStatus.subscription_tier || "Básico"}
-            </Badge>
           )}
         </div>
         
-        <div className="flex items-center gap-4">
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full hover:bg-accent transition-colors"
-            aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
-          >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} className="text-gray-700" />}
-          </button>
-          
-          <button 
-            onClick={handleSignOut}
-            className="p-2 rounded-full hover:bg-accent transition-colors md:flex items-center gap-1 hidden"
-            aria-label="Sair"
-          >
-            <LogOut size={18} />
-            <span className="text-sm">Sair</span>
-          </button>
-
-          <button
-            onClick={navigateToProfile}
-            className="flex items-center gap-2"
-          >
-            <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-              <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt="Avatar" />
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {user?.user_metadata?.first_name?.[0]?.toUpperCase() || 'M'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm font-medium hidden md:inline-block">
-              {user?.user_metadata?.first_name || 'Perfil'}
-            </span>
-          </button>
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <nav className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => {}} 
+              className={cn(
+                "rounded-full hover:bg-accent",
+              )}
+            >
+              <Bell className="h-[1.2rem] w-[1.2rem]" />
+              <span className="sr-only">Notificações</span>
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate('/profile')} 
+              className={cn(
+                "rounded-full hover:bg-accent",
+              )}
+            >
+              <ProfileAvatar className="h-8 w-8" />
+              <span className="sr-only">Perfil</span>
+            </Button>
+            
+            <ThemeToggle />
+          </nav>
         </div>
       </div>
     </header>

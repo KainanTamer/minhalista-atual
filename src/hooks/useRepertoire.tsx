@@ -1,30 +1,30 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/toast';
+import { useToast } from '@/hooks/use-toast';
 
 export interface RepertoireItem {
   id: string;
   user_id: string;
   title: string;
-  artist: string;
-  genre: string;
-  key: string;
-  bpm: number;
-  notes: string;
+  artist?: string;
+  genre?: string;
+  key?: string;
+  bpm?: number;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
 
 export function useRepertoire() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const { data: repertoire = [], isLoading, error, refetch } = useQuery({
     queryKey: ['repertoire'],
     queryFn: async () => {
       try {
-        // Using any to bypass TypeScript error until Supabase types are updated
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from('repertoire')
           .select('*')
           .order('created_at', { ascending: false });
@@ -41,8 +41,7 @@ export function useRepertoire() {
   
   const addMutation = useMutation({
     mutationFn: async (newItem: Omit<RepertoireItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('repertoire')
         .insert([{
           ...newItem,
@@ -73,8 +72,7 @@ export function useRepertoire() {
   
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updateData }: Partial<RepertoireItem> & { id: string }) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('repertoire')
         .update(updateData)
         .eq('id', id)
@@ -103,8 +101,7 @@ export function useRepertoire() {
   
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Using any to bypass TypeScript error until Supabase types are updated
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('repertoire')
         .delete()
         .eq('id', id);

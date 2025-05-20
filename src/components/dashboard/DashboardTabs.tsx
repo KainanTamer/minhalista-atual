@@ -30,10 +30,6 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
     const today = new Date();
     return eventDate.toDateString() === today.toDateString();
   });
-
-  // Simulated counts - in a real implementation, these would come from API calls
-  const repertoireCount = 5;
-  const contactsCount = 3;
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -81,11 +77,6 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
         >
           <Music size={16} className="md:mr-1" />
           <span className="hidden md:inline">Repertório</span>
-          {repertoireCount > 0 && (
-            <Badge variant="outline" className="ml-1 h-5 px-1 rounded-full flex items-center justify-center text-xs bg-background/50">
-              {repertoireCount}
-            </Badge>
-          )}
         </TabsTrigger>
         
         <TabsTrigger 
@@ -97,11 +88,6 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
         >
           <User size={16} className="md:mr-1" />
           <span className="hidden md:inline">Networking</span>
-          {contactsCount > 0 && (
-            <Badge variant="outline" className="ml-1 h-5 px-1 rounded-full flex items-center justify-center text-xs bg-background/50">
-              {contactsCount}
-            </Badge>
-          )}
         </TabsTrigger>
       </TabsList>
       
