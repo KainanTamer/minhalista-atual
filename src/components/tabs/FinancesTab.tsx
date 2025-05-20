@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/toast';
 import { Trash2, Lock, Crown, PlusCircle } from 'lucide-react';
@@ -11,11 +12,14 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 import PlanLimitModal from '@/components/subscription/PlanLimitModal';
 import LimitsInfo from '@/components/dashboard/LimitsInfo';
 import { supabase } from '@/integrations/supabase/client';
+import TransactionHistory from '@/components/transactions/TransactionHistory';
+import CancelAllButton from '@/components/transactions/CancelAllButton';
+import ShareButton from '@/components/transactions/ShareButton';
 
 const FinancesTab: React.FC = () => {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
-  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
   const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
+  const [cancellationsUsed, setCancellationsUsed] = useState(0);
   const { toast } = useToast();
   const { subscriptionStatus, checkLimit } = useSubscription();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
@@ -34,6 +38,12 @@ const FinancesTab: React.FC = () => {
         .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all transactions
         
       if (error) throw error;
+      
+      // Se não for Pro, incrementar contador de cancelamentos
+      if (!isPro) {
+        setCancellationsUsed(prev => prev + 1);
+      }
+      
       return true;
     },
     onSuccess: () => {
@@ -54,7 +64,7 @@ const FinancesTab: React.FC = () => {
   });
 
   const handleDeleteAll = async () => {
-    deleteAllMutation.mutate();
+    await deleteAllMutation.mutateAsync();
   };
 
   const handleAddTransaction = () => {
@@ -64,6 +74,15 @@ const FinancesTab: React.FC = () => {
     }
     setIsTransactionDialogOpen(true);
   };
+  
+  // Simular o histórico de transações (em um caso real, isso viria da API)
+  const transactionHistory = transactions.map(t => ({
+    id: t.id,
+    description: `Transação ${t.amount > 0 ? 'de receita' : 'de despesa'}: ${t.description}`,
+    timestamp: new Date(t.transaction_date),
+    status: 'completed' as const,
+    type: 'add' as const
+  }));
 
   // Verificação de 80% do limite atingido
   useEffect(() => {
@@ -81,6 +100,13 @@ const FinancesTab: React.FC = () => {
   return (
     <div className="space-y-4">
       <LimitsInfo type="finances" currentCount={transactions.length} />
+      
+      {transactionHistory.length > 0 && (
+        <TransactionHistory 
+          transactions={transactionHistory}
+          sectionName="Finanças"
+        />
+      )}
 
       <Card className="shadow-md">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -149,15 +175,24 @@ const FinancesTab: React.FC = () => {
           )}
           
           {transactions.length > 0 && (
-            <div className="mt-6 flex justify-end">
-              <Button
-                variant="outline"
-                className="border-destructive text-destructive hover:bg-destructive/10"
-                onClick={() => setIsDeleteAllDialogOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Deletar Tudo
-              </Button>
+            <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
+              <ShareButton 
+                sectionName="Finanças"
+                onShare={async (email) => {
+                  toast({
+                    title: "Link compartilhado",
+                    description: `Um convite foi enviado para ${email}.`
+                  });
+                }}
+              />
+              
+              <CancelAllButton
+                onConfirm={handleDeleteAll}
+                itemCount={transactions.length}
+                sectionName="Finanças"
+                limitType="finances"
+                cancellationsUsed={cancellationsUsed}
+              />
             </div>
           )}
         </CardContent>
@@ -166,17 +201,6 @@ const FinancesTab: React.FC = () => {
       <FinancialTransactionDialog
         open={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}
-      />
-      
-      <ConfirmModal
-        open={isDeleteAllDialogOpen}
-        onOpenChange={setIsDeleteAllDialogOpen}
-        onConfirm={handleDeleteAll}
-        title="Deletar todas as transações"
-        description="Tem certeza que deseja excluir TODAS as transações financeiras? Essa ação não pode ser desfeita."
-        confirmLabel="Confirmar"
-        cancelLabel="Cancelar"
-        destructive={true}
       />
       
       <PlanLimitModal

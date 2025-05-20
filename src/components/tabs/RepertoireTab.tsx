@@ -9,6 +9,9 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 import PlanLimitModal from '@/components/subscription/PlanLimitModal';
 import LimitsInfo from '@/components/dashboard/LimitsInfo';
 import { supabase } from '@/integrations/supabase/client';
+import TransactionHistory from '@/components/transactions/TransactionHistory';
+import CancelAllButton from '@/components/transactions/CancelAllButton';
+import ShareButton from '@/components/transactions/ShareButton';
 
 // Componente temporário - substitua pelo seu componente real
 const RepertoireList = () => (
@@ -21,6 +24,7 @@ const RepertoireTab: React.FC = () => {
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
   const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
   const [repertoireCount, setRepertoireCount] = useState(0);
+  const [cancellationsUsed, setCancellationsUsed] = useState(0);
   const { toast } = useToast();
   const { subscriptionStatus, checkLimit } = useSubscription();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
@@ -31,10 +35,40 @@ const RepertoireTab: React.FC = () => {
     setRepertoireCount(3);
   }, []);
 
+  // Simular o histórico de transações (em um caso real, isso viria da API)
+  const transactionHistory = [
+    {
+      id: '1',
+      description: 'Música "Garota de Ipanema" adicionada',
+      timestamp: new Date(Date.now() - 1 * 60000), // 1 minuto atrás
+      status: 'completed' as const,
+      type: 'add' as const
+    },
+    {
+      id: '2',
+      description: 'Música "Hey Jude" adicionada',
+      timestamp: new Date(Date.now() - 3 * 3600000), // 3 horas atrás
+      status: 'completed' as const,
+      type: 'add' as const
+    },
+    {
+      id: '3',
+      description: 'Música "Imagine" adicionada',
+      timestamp: new Date(Date.now() - 1 * 86400000), // 1 dia atrás
+      status: 'completed' as const,
+      type: 'add' as const
+    }
+  ];
+
   const handleDeleteAll = async () => {
     try {
       // Implemente a lógica para excluir todo o repertório
       // await supabase.from('repertoire').delete().eq('user_id', user.id);
+      
+      // Se não for Pro, incrementar contador de cancelamentos
+      if (!isPro) {
+        setCancellationsUsed(prev => prev + 1);
+      }
       
       toast({
         title: "Sucesso!",
@@ -79,6 +113,13 @@ const RepertoireTab: React.FC = () => {
   return (
     <div className="space-y-4">
       <LimitsInfo type="repertoire" currentCount={repertoireCount} />
+      
+      {transactionHistory.length > 0 && (
+        <TransactionHistory 
+          transactions={transactionHistory}
+          sectionName="Repertório"
+        />
+      )}
 
       <Card className="shadow-md">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -119,30 +160,28 @@ const RepertoireTab: React.FC = () => {
           <RepertoireList />
           
           {repertoireCount > 0 && (
-            <div className="mt-6 flex justify-end">
-              <Button
-                variant="outline"
-                className="border-destructive text-destructive hover:bg-destructive/10"
-                onClick={() => setIsDeleteAllDialogOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Deletar Tudo
-              </Button>
+            <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
+              <ShareButton 
+                sectionName="Repertório"
+                onShare={async (email) => {
+                  toast({
+                    title: "Link compartilhado",
+                    description: `Um convite foi enviado para ${email}.`
+                  });
+                }}
+              />
+              
+              <CancelAllButton
+                onConfirm={handleDeleteAll}
+                itemCount={repertoireCount}
+                sectionName="Repertório"
+                limitType="repertoire"
+                cancellationsUsed={cancellationsUsed}
+              />
             </div>
           )}
         </CardContent>
       </Card>
-      
-      <ConfirmModal
-        open={isDeleteAllDialogOpen}
-        onOpenChange={setIsDeleteAllDialogOpen}
-        onConfirm={handleDeleteAll}
-        title="Deletar todo o repertório"
-        description="Tem certeza que deseja excluir TODAS as músicas do seu repertório? Essa ação não pode ser desfeita."
-        confirmLabel="Confirmar"
-        cancelLabel="Cancelar"
-        destructive={true}
-      />
       
       <PlanLimitModal
         open={isPlanLimitModalOpen}
