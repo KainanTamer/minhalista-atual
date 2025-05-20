@@ -19,16 +19,16 @@ const ThemeToggle: React.FC = () => {
             className="rounded-full h-8 w-8 theme-transition"
             aria-label="Alternar tema"
           >
-            {theme === 'light' ? (
-              <Moon className="h-[1.2rem] w-[1.2rem] text-foreground transition-transform hover:scale-110" />
-            ) : (
+            {theme === 'dark' ? (
               <Sun className="h-[1.2rem] w-[1.2rem] text-primary/90 transition-transform hover:scale-110" />
+            ) : (
+              <Moon className="h-[1.2rem] w-[1.2rem] text-foreground transition-transform hover:scale-110" />
             )}
             <span className="sr-only">Alternar tema</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom">
-          <p>Mudar para modo {theme === 'light' ? 'escuro' : 'claro'}</p>
+          <p>Mudar para modo {theme === 'dark' ? 'claro' : 'escuro'}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

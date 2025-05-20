@@ -10,17 +10,49 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRepertoire } from '@/hooks/useRepertoire';
 import RepertoireDialog from '@/components/dialogs/RepertoireDialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import CancelAllButton from '@/components/transactions/CancelAllButton';
+import { useToast } from '@/hooks/use-toast';
 
 const RepertoireTab: React.FC = () => {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [dialogOpen, setDialogOpen] = useState(false);
   const { subscriptionStatus } = useSubscription();
-  const { repertoire, isLoading } = useRepertoire();
+  const { repertoire, isLoading, deleteRepertoireItem } = useRepertoire();
+  const { toast } = useToast();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
+
+  // Used for cancel all functionality
+  const [cancellationsUsed, setCancellationsUsed] = useState(0);
 
   const handleAddRepertoire = () => {
     setDialogOpen(true);
+  };
+
+  const handleCancelAll = async () => {
+    try {
+      // Create an array of promises for all delete operations
+      const deletePromises = repertoire.map(item => deleteRepertoireItem(item.id));
+      
+      // Wait for all delete operations to complete
+      await Promise.all(deletePromises);
+      
+      // Increment cancellations used counter
+      setCancellationsUsed(prev => prev + 1);
+      
+      // Show success message
+      toast({
+        title: "Repertório apagado",
+        description: "Todos os itens do repertório foram removidos com sucesso."
+      });
+    } catch (error) {
+      console.error('Error deleting all repertoire items:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao tentar remover os itens do repertório.",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredRepertoire = repertoire.filter(
@@ -43,15 +75,25 @@ const RepertoireTab: React.FC = () => {
               Gerencie suas músicas e setlists
             </CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleAddRepertoire}
-            className="group hover:bg-primary/20 hover:text-primary transition-colors"
-          >
-            <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
-            Novo repertório
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleAddRepertoire}
+              className="group hover:bg-primary/20 hover:text-primary transition-colors"
+            >
+              <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
+              Novo repertório
+            </Button>
+            
+            <CancelAllButton 
+              onConfirm={handleCancelAll}
+              itemCount={repertoire.length}
+              sectionName="Repertório"
+              limitType="repertoire"
+              cancellationsUsed={cancellationsUsed}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-2 mb-4 items-start sm:items-center justify-between">
@@ -125,13 +167,17 @@ const RepertoireTab: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-2">
-              {filteredRepertoire.map((music) => (
+            <div className="space-y-2 setlist-container p-2 bg-background/30 rounded-md border border-border/30">
+              <h3 className="text-sm font-medium text-primary/80 mb-2 pl-2">Setlist</h3>
+              {filteredRepertoire.map((music, index) => (
                 <div 
                   key={music.id} 
-                  className="flex items-center justify-between p-3 bg-background/50 rounded-md hover:bg-background/70 transition-colors cursor-pointer"
+                  className="flex items-center p-3 bg-background/50 rounded-md hover:bg-background/70 transition-colors cursor-pointer"
                 >
-                  <div>
+                  <div className="mr-3 text-sm font-mono text-primary/60 w-5 text-center">
+                    {index + 1}.
+                  </div>
+                  <div className="flex-1">
                     <div className="font-medium">{music.title}</div>
                     <div className="text-sm text-muted-foreground">{music.artist}</div>
                   </div>
