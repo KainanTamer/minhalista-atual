@@ -46,11 +46,11 @@ const AppSettings = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {theme === 'dark' ? (
-            <Sun className="w-5 h-5 text-[#BB86FC]" />
+            <Moon className="w-5 h-5 text-[#BB86FC]" />
           ) : (
-            <Moon className="w-5 h-5 text-[#6C757D]" />
+            <Sun className="w-5 h-5 text-[#FFD700]" />
           )}
-          <span>Modo {theme === 'dark' ? 'claro' : 'escuro'}</span>
+          <span>Modo {theme === 'dark' ? 'escuro' : 'claro'}</span>
         </div>
         <Switch 
           checked={theme === 'dark'}

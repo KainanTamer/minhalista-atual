@@ -19,10 +19,11 @@ const ThemeToggle: React.FC = () => {
             className="rounded-full h-8 w-8 theme-transition"
             aria-label="Alternar tema"
           >
+            {/* Mostra o ícone que representa o tema atual */}
             {theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-[#BB86FC]" />
+              <Moon className="h-5 w-5 text-[#BB86FC] animate-theme-toggle" />
             ) : (
-              <Moon className="h-5 w-5 text-[#6C757D]" />
+              <Sun className="h-5 w-5 text-[#FFD700] animate-theme-toggle" />
             )}
             <span className="sr-only">Alternar tema</span>
           </Button>

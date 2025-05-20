@@ -109,13 +109,24 @@ export default {
 						opacity: '1',
 						transform: 'scale(1)'
 					}
+				},
+				'theme-toggle': {
+					'0%': {
+						transform: 'rotate(-15deg) scale(0.95)',
+						opacity: '0.7'
+					},
+					'100%': {
+						transform: 'rotate(0) scale(1)',
+						opacity: '1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
-				'theme-toggle': 'theme-transition 0.3s ease-out'
+				'theme-toggle': 'theme-toggle 0.3s ease-out',
+				'theme-transition': 'theme-transition 0.3s ease-out'
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif']
