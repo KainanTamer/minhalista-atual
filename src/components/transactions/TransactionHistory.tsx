@@ -1,18 +1,16 @@
 
 import React, { useState } from 'react';
-import { Check, Clock, X, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp, Clock, Check, AlertTriangle, X } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-export type TransactionStatus = 'completed' | 'pending' | 'canceled';
-export type TransactionType = 'add' | 'update' | 'delete' | 'share';
+type TransactionStatus = 'completed' | 'pending' | 'failed' | 'cancelled';
+type TransactionType = 'add' | 'update' | 'delete' | 'share';
 
-export interface Transaction {
+interface Transaction {
   id: string;
   description: string;
   timestamp: Date;
@@ -23,120 +21,116 @@ export interface Transaction {
 interface TransactionHistoryProps {
   transactions: Transaction[];
   sectionName: string;
-  maxItems?: number;
+  compact?: boolean;
 }
 
-const TransactionHistory: React.FC<TransactionHistoryProps> = ({
-  transactions,
+const TransactionHistory: React.FC<TransactionHistoryProps> = ({ 
+  transactions, 
   sectionName,
-  maxItems = 3
+  compact = false
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   if (transactions.length === 0) {
     return null;
   }
-
-  // Ordenar transações por data (mais recentes primeiro)
-  const sortedTransactions = [...transactions].sort((a, b) => 
-    b.timestamp.getTime() - a.timestamp.getTime()
-  );
   
-  // Limitar número de itens se não estiver expandido
-  const displayTransactions = isOpen 
-    ? sortedTransactions 
-    : sortedTransactions.slice(0, maxItems);
-
-  const getStatusIcon = (status: TransactionStatus) => {
+  const displayedTransactions = isExpanded ? transactions : transactions.slice(0, compact ? 3 : 5);
+  
+  const getTransactionIcon = (status: TransactionStatus) => {
     switch (status) {
       case 'completed':
-        return <Check className="h-4 w-4 text-green-500" />;
+        return <Check className="h-3.5 w-3.5 text-green-500" />;
       case 'pending':
-        return <Clock className="h-4 w-4 text-amber-500" />;
-      case 'canceled':
-        return <X className="h-4 w-4 text-destructive" />;
+        return <Clock className="h-3.5 w-3.5 text-amber-500" />;
+      case 'failed':
+        return <AlertTriangle className="h-3.5 w-3.5 text-red-500" />;
+      case 'cancelled':
+        return <X className="h-3.5 w-3.5 text-gray-500" />;
+      default:
+        return <Clock className="h-3.5 w-3.5 text-muted-foreground" />;
     }
   };
   
-  const formatTimestamp = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.round(diffMs / 60000);
-    const diffHours = Math.round(diffMs / 3600000);
-    const diffDays = Math.round(diffMs / 86400000);
-    
-    if (diffMins < 60) {
-      return diffMins <= 1 ? 'agora mesmo' : `há ${diffMins} minutos`;
-    } else if (diffHours < 24) {
-      return `há ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`;
-    } else if (diffDays < 7) {
-      return `há ${diffDays} ${diffDays === 1 ? 'dia' : 'dias'}`;
-    } else {
-      return date.toLocaleDateString('pt-BR');
+  const getStatusBadge = (status: TransactionStatus) => {
+    switch (status) {
+      case 'completed':
+        return <Badge variant="default" className="bg-green-500 text-white">Concluído</Badge>;
+      case 'pending':
+        return <Badge variant="outline" className="border-amber-500 text-amber-500">Pendente</Badge>;
+      case 'failed':
+        return <Badge variant="destructive">Falhou</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="border-gray-500 text-gray-500">Cancelado</Badge>;
+      default:
+        return null;
     }
   };
-
+  
   return (
-    <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      className="bg-muted/50 rounded-md p-2 mb-4 transition-all duration-200"
-    >
+    <div className={cn("space-y-3", compact ? "text-sm" : "")}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium flex items-center text-muted-foreground">
-          Atividades Recentes em {sectionName}
+        <h3 className={cn(
+          "font-medium flex items-center gap-1.5",
+          compact ? "text-sm" : "text-base"
+        )}>
+          <Clock className={cn("text-muted-foreground", compact ? "h-4 w-4" : "h-5 w-5")} />
+          {compact ? `Atividades Recentes` : `Histórico de ${sectionName}`}
         </h3>
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            <span className="sr-only">{isOpen ? 'Fechar' : 'Expandir'} histórico</span>
+        {transactions.length > (compact ? 3 : 5) && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-xs h-7 px-2"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? (
+              <>Mostrar menos <ChevronUp className="h-3 w-3 ml-1" /></>
+            ) : (
+              <>Ver tudo <ChevronDown className="h-3 w-3 ml-1" /></>
+            )}
           </Button>
-        </CollapsibleTrigger>
+        )}
       </div>
       
-      <div className="mt-1">
-        {displayTransactions.map((transaction) => (
+      <div className={cn(
+        "space-y-1.5 rounded-md border", 
+        compact ? "max-h-[110px] overflow-y-auto p-2" : "p-3"
+      )}>
+        {displayedTransactions.map((transaction) => (
           <div 
             key={transaction.id}
-            className="py-2 flex items-center justify-between border-t border-border/30 first:border-t-0 animate-fade-in"
+            className="flex items-center gap-2 py-1.5 group animate-fade-in"
           >
-            <div className="flex items-center gap-2">
-              <div className="rounded-full bg-background p-1">
-                {getStatusIcon(transaction.status)}
-              </div>
-              <div>
-                <p className="text-sm">{transaction.description}</p>
-                <p className="text-xs text-muted-foreground">{formatTimestamp(transaction.timestamp)}</p>
-              </div>
+            <div className="flex-shrink-0">
+              {getTransactionIcon(transaction.status)}
             </div>
-            {transaction.type === 'share' && (
-              <Button variant="ghost" size="icon" className="h-6 w-6">
-                <Share2 className="h-3.5 w-3.5" />
-                <span className="sr-only">Compartilhar</span>
-              </Button>
+            
+            <div className="flex-grow min-w-0">
+              <p className="text-sm truncate">{transaction.description}</p>
+              <span className="text-xs text-muted-foreground">
+                {formatDistanceToNow(transaction.timestamp, { 
+                  addSuffix: true,
+                  locale: ptBR
+                })}
+              </span>
+            </div>
+            
+            {!compact && (
+              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                {getStatusBadge(transaction.status)}
+              </div>
             )}
           </div>
         ))}
-      </div>
-      
-      <CollapsibleContent>
-        {sortedTransactions.length > maxItems && (
-          <div className="pt-2 text-center border-t border-border/30 mt-2">
-            <Button variant="ghost" size="sm" className="text-xs" onClick={() => setIsOpen(false)}>
-              Mostrar menos
-            </Button>
+        
+        {displayedTransactions.length === 0 && (
+          <div className="py-2 text-center text-muted-foreground text-sm">
+            Nenhuma atividade recente
           </div>
         )}
-      </CollapsibleContent>
-      
-      {!isOpen && sortedTransactions.length > maxItems && (
-        <div className="pt-2 text-center border-t border-border/30 mt-2">
-          <Button variant="ghost" size="sm" className="text-xs" onClick={() => setIsOpen(true)}>
-            Ver todas ({sortedTransactions.length})
-          </Button>
-        </div>
-      )}
-    </Collapsible>
+      </div>
+    </div>
   );
 };
 

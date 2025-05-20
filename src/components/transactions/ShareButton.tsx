@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Share2, CopyIcon, CheckIcon } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -9,55 +9,55 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ShareButtonProps {
   sectionName: string;
-  sectionId?: string;
-  onShare?: (email: string) => Promise<void>;
+  onShare: (email: string) => Promise<void>;
 }
 
-const ShareButton: React.FC<ShareButtonProps> = ({
-  sectionName,
-  sectionId,
-  onShare
-}) => {
+const ShareButton: React.FC<ShareButtonProps> = ({ sectionName, onShare }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
   
   const handleShare = async () => {
-    if (onShare && email) {
-      try {
-        setIsLoading(true);
-        await onShare(email);
-        setEmail('');
-        setIsDialogOpen(false);
-      } finally {
-        setIsLoading(false);
-      }
+    if (!email) {
+      setError('Insira um email válido');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Email inválido');
+      return;
+    }
+    
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      await onShare(email);
+      setIsDialogOpen(false);
+      setEmail('');
+    } catch (err) {
+      setError('Erro ao compartilhar. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  const copyShareLink = () => {
-    // Gera um link de compartilhamento (pode ser personalizado conforme necessário)
-    const shareLink = `${window.location.origin}/share/${sectionName.toLowerCase()}/${sectionId || ''}`;
-    navigator.clipboard.writeText(shareLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="gap-2"
+      <Button
+        variant="outline"
+        className="border-primary/30 text-primary hover:bg-primary/5"
         onClick={() => setIsDialogOpen(true)}
       >
-        <Share2 className="h-4 w-4" />
+        <Share2 className="mr-2 h-4 w-4" />
         Compartilhar {sectionName}
       </Button>
       
@@ -66,53 +66,42 @@ const ShareButton: React.FC<ShareButtonProps> = ({
           <DialogHeader>
             <DialogTitle>Compartilhar {sectionName}</DialogTitle>
             <DialogDescription>
-              Compartilhe seus dados de {sectionName.toLowerCase()} com outros usuários ou copie o link para acesso direto.
+              {sectionName === 'Agenda' ? 'Compartilhe sua agenda com outras pessoas. Elas terão acesso somente para visualização.' :
+               sectionName === 'Finanças' ? 'Compartilhe seus registros financeiros com outras pessoas. Elas terão acesso somente para visualização.' :
+               sectionName === 'Repertório' ? 'Compartilhe seu repertório musical com outras pessoas. Elas terão acesso somente para visualização.' :
+               'Compartilhe seus contatos profissionais com outras pessoas. Elas terão acesso somente para visualização.'}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <span className="text-sm font-medium col-span-4 md:col-span-1">
-                Link:
-              </span>
-              <div className="flex gap-2 col-span-4 md:col-span-3">
-                <Input
-                  readOnly
-                  value={`${window.location.origin}/share/${sectionName.toLowerCase()}/${sectionId || ''}`}
-                  className="col-span-3"
-                />
-                <Button 
-                  type="button" 
-                  size="icon" 
-                  variant="outline"
-                  onClick={copyShareLink}
-                >
-                  {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <span className="text-sm font-medium col-span-4 md:col-span-1">
-                Por email:
-              </span>
-              <div className="col-span-4 md:col-span-3">
-                <Input
-                  type="email"
-                  placeholder="email@exemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email para compartilhar</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="email@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {error && <p className="text-destructive text-sm">{error}</p>}
             </div>
           </div>
           
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setIsDialogOpen(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
-            <Button type="submit" onClick={handleShare} disabled={!email || isLoading}>
-              {isLoading ? "Enviando..." : "Enviar convite"}
+            <Button 
+              type="button"
+              onClick={handleShare}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Enviando...' : 'Compartilhar'}
             </Button>
           </DialogFooter>
         </DialogContent>
