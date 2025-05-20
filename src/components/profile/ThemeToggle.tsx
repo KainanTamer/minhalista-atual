@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Moon, Sun } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const ThemeToggle: React.FC = () => {
@@ -19,11 +18,9 @@ const ThemeToggle: React.FC = () => {
             className="rounded-full h-8 w-8 theme-transition"
             aria-label="Alternar tema"
           >
-            {theme === 'dark' ? (
-              <Moon className="h-[1.2rem] w-[1.2rem] text-primary/90 transition-transform hover:scale-110" />
-            ) : (
-              <Sun className="h-[1.2rem] w-[1.2rem] text-foreground transition-transform hover:scale-110" />
-            )}
+            <span className="text-xl">
+              {theme === 'dark' ? '🌙' : '🌞'}
+            </span>
             <span className="sr-only">Alternar tema</span>
           </Button>
         </TooltipTrigger>

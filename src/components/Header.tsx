@@ -1,6 +1,5 @@
-
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, MusicIcon, LogOut, User, Moon, Sun, CreditCard } from 'lucide-react';
+import { Menu, X, MusicIcon, LogOut, User, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -89,17 +88,10 @@ const Header = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                    {theme === 'dark' ? (
-                      <>
-                        <Sun className="mr-2 h-4 w-4" />
-                        <span>Modo claro</span>
-                      </>
-                    ) : (
-                      <>
-                        <Moon className="mr-2 h-4 w-4" />
-                        <span>Modo escuro</span>
-                      </>
-                    )}
+                    <span className="mr-2 text-base">
+                      {theme === 'dark' ? '🌞' : '🌙'}
+                    </span>
+                    <span>Modo {theme === 'dark' ? 'claro' : 'escuro'}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -142,7 +134,10 @@ const Header = () => {
                   Assinaturas
                 </Button>
                 <Button variant="ghost" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                  {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+                  <span className="mr-2 text-base">
+                    {theme === 'dark' ? '🌞' : '🌙'}
+                  </span>
+                  Modo {theme === 'dark' ? 'claro' : 'escuro'}
                 </Button>
                 <Button 
                   variant="destructive" 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Languages, Moon, Sun } from 'lucide-react';
+import { Languages } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -45,11 +45,7 @@ const AppSettings = () => {
       
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          {theme === 'dark' ? (
-            <Moon className="w-5 h-5 text-blue-300" />
-          ) : (
-            <Sun className="w-5 h-5 text-yellow-500" />
-          )}
+          <span className="text-lg">{theme === 'dark' ? '🌙' : '🌞'}</span>
           <span>{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</span>
         </div>
         <Switch 

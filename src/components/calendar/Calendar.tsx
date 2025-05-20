@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
-import { PlusCircle, Calendar as CalendarIcon, Lock, Crown, Trash2, Music } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, Lock, Crown, Trash2 } from 'lucide-react';
 import { Event } from '@/services/api';
 import { useCalendarEvents } from '@/hooks';
 import EventDialog from '@/components/EventDialog';
@@ -196,17 +195,6 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
                 <div className="event-legend-item flex items-center gap-1">
                   <span className="event-legend-color w-3 h-3 rounded-full" style={{backgroundColor: '#94a3b8'}}></span>
                   <span className="text-xs">Outro</span>
-                </div>
-                <div className="ml-auto">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-6 text-xs px-2 hover:bg-primary/20 hover:text-primary"
-                    onClick={handleAddEvent}
-                  >
-                    <Music className="h-3 w-3 mr-1" />
-                    Novo
-                  </Button>
                 </div>
               </div>
               

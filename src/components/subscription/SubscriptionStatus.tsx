@@ -1,19 +1,52 @@
 
 import React from 'react';
-import { ArrowRight, CalendarIcon } from 'lucide-react';
+import { ArrowRight, CalendarIcon, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSubscription } from '@/contexts/subscription';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const SubscriptionStatus: React.FC = () => {
   const { subscriptionStatus, openCustomerPortal } = useSubscription();
+  const { toast } = useToast();
   
   const handleManageSubscription = async () => {
     const url = await openCustomerPortal();
     if (url) {
       window.open(url, '_blank');
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    try {
+      const url = await openCustomerPortal();
+      if (url) {
+        window.open(url, '_blank');
+        toast({
+          title: "Redirecionando para o portal de assinatura",
+          description: "Você será redirecionado para cancelar sua assinatura.",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao abrir portal de assinatura:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível abrir o portal de assinatura. Tente novamente mais tarde.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -54,16 +87,44 @@ const SubscriptionStatus: React.FC = () => {
           )}
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className={subscriptionStatus.subscription_tier === 'Pro' ? "flex gap-2 flex-col sm:flex-row" : ""}>
         {subscriptionStatus.subscription_tier === 'Pro' ? (
-          <Button
-            onClick={handleManageSubscription}
-            variant="outline"
-            className="w-full flex items-center justify-center"
-          >
-            Gerenciar Assinatura
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <>
+            <Button
+              onClick={handleManageSubscription}
+              variant="outline"
+              className="w-full flex items-center justify-center"
+            >
+              Gerenciar Assinatura
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+                >
+                  Cancelar Assinatura
+                  <XCircle className="ml-2 h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancelar Assinatura Pro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Você está prestes a cancelar sua assinatura. Você continuará tendo acesso aos recursos Pro até o final do período atual.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Voltar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleCancelSubscription} className="bg-destructive hover:bg-destructive/90">
+                    Confirmar Cancelamento
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         ) : (
           <Button
             onClick={() => window.location.href = '/subscriptions'}

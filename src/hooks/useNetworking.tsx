@@ -100,9 +100,12 @@ export function useNetworking() {
         contact_social_media: contact_social_media || []
       };
       
-      // Add the optimistic contact to the cache
+      // Add the optimistic contact to the cache with animation classes
       queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
-        return [optimisticContact, ...(oldData || [])];
+        return [
+          { ...optimisticContact, className: 'animate-fade-in' }, 
+          ...(oldData?.map(contact => ({ ...contact })) || [])
+        ];
       });
       
       // Insert the contact
@@ -140,7 +143,7 @@ export function useNetworking() {
         // Update the query data with the real contact (replacing the temp one)
         queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
           return oldData?.map(contact => 
-            contact.id.startsWith('temp-') ? newContact : contact
+            contact.id.startsWith('temp-') ? { ...newContact, className: 'animate-fade-in' } : contact
           ) || [];
         });
         
@@ -170,14 +173,15 @@ export function useNetworking() {
       // Save the current state for rollback
       const previousData = queryClient.getQueryData(['networking-contacts']);
       
-      // Optimistically update the UI
+      // Optimistically update the UI with animation
       queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
         return oldData?.map(contact => {
           if (contact.id === contactId) {
             return { 
               ...contact, 
               ...contactFields,
-              contact_social_media: contact_social_media || contact.contact_social_media
+              contact_social_media: contact_social_media || contact.contact_social_media,
+              className: 'animate-pulse'
             };
           }
           return contact;
@@ -221,7 +225,17 @@ export function useNetworking() {
       const updatedContact = await getContact(contactId);
       return updatedContact;
     },
-    onSuccess: () => {
+    onSuccess: (updatedContact) => {
+      // Remove animation class and update data
+      queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
+        return oldData?.map(contact => {
+          if (contact.id === updatedContact?.id) {
+            return { ...updatedContact };
+          }
+          return contact;
+        }) || [];
+      });
+      
       queryClient.invalidateQueries({ queryKey: ['networking-contacts'] });
       toast({
         title: "Contato atualizado",
@@ -247,7 +261,20 @@ export function useNetworking() {
       // Save current data for rollback
       const previousData = queryClient.getQueryData(['networking-contacts']);
       
-      // Optimistically update UI
+      // Optimistically update UI with fade-out animation
+      queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
+        return oldData?.map(contact => {
+          if (contact.id === contactId) {
+            return { ...contact, className: 'animate-fade-out pointer-events-none opacity-50' };
+          }
+          return contact;
+        }) || [];
+      });
+      
+      // Short delay to allow animation to play
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Now remove from UI
       queryClient.setQueryData(['networking-contacts'], (oldData: NetworkingContact[] | undefined) => {
         return oldData?.filter(contact => contact.id !== contactId) || [];
       });
