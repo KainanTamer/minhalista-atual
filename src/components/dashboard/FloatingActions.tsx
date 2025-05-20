@@ -172,7 +172,7 @@ const FloatingActions: React.FC<FloatingActionsProps> = ({
                 size="sm"
               >
                 <Music size={16} />
-                <span>Nova Música</span>
+                <span>Novo Repertório</span>
               </Button>
             )}
 

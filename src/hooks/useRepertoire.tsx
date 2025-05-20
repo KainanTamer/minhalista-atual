@@ -23,7 +23,8 @@ export function useRepertoire() {
     queryKey: ['repertoire'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        // Using any to bypass TypeScript error until Supabase types are updated
+        const { data, error } = await (supabase as any)
           .from('repertoire')
           .select('*')
           .order('created_at', { ascending: false });
@@ -40,9 +41,13 @@ export function useRepertoire() {
   
   const addMutation = useMutation({
     mutationFn: async (newItem: Omit<RepertoireItem, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
+      // Using any to bypass TypeScript error until Supabase types are updated
+      const { data, error } = await (supabase as any)
         .from('repertoire')
-        .insert([newItem])
+        .insert([{
+          ...newItem,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }])
         .select()
         .single();
         
@@ -68,7 +73,8 @@ export function useRepertoire() {
   
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updateData }: Partial<RepertoireItem> & { id: string }) => {
-      const { data, error } = await supabase
+      // Using any to bypass TypeScript error until Supabase types are updated
+      const { data, error } = await (supabase as any)
         .from('repertoire')
         .update(updateData)
         .eq('id', id)
@@ -97,7 +103,8 @@ export function useRepertoire() {
   
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      // Using any to bypass TypeScript error until Supabase types are updated
+      const { error } = await (supabase as any)
         .from('repertoire')
         .delete()
         .eq('id', id);

@@ -8,25 +8,35 @@ import EventDialog from '@/components/EventDialog';
 import { useToast } from '@/hooks/use-toast';
 import FloatingActions from '@/components/dashboard/FloatingActions';
 import { useCalendarEvents } from '@/hooks';
+import { useRepertoire } from '@/hooks/useRepertoire';
+import { useNetworking } from '@/hooks/useNetworking';
 import { useQuery } from '@tanstack/react-query';
-import TransactionHistory from '@/components/transactions/TransactionHistory';
-import { Card } from '@/components/ui/card';
 import DashboardWrapperWithAds from '@/components/dashboard/DashboardWrapperWithAds';
 import { useSubscription } from '@/contexts/subscription';
+import RepertoireDialog from '@/components/dialogs/RepertoireDialog';
+import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
 
 const Dashboard: React.FC = () => {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [financeDialogOpen, setFinanceDialogOpen] = useState(false);
+  const [repertoireDialogOpen, setRepertoireDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('agenda');
   const { toast } = useToast();
   const navigate = useNavigate();
   const { subscriptionStatus } = useSubscription();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
   
-  // Get events for count
+  // Get events
   const { events, isLoading: eventsLoading, refetch: refetchEvents } = useCalendarEvents();
   
-  // Get financial transactions for count
+  // Get repertoire
+  const { repertoire, isLoading: repertoireLoading, refetch: refetchRepertoire } = useRepertoire();
+  
+  // Get networking contacts
+  const { contacts, isLoading: contactsLoading, refetch: refetchContacts } = useNetworking();
+  
+  // Get financial transactions
   const { data: finances = [], isLoading: financesLoading } = useQuery({
     queryKey: ['financial-transactions'],
     queryFn: async () => {
@@ -40,35 +50,22 @@ const Dashboard: React.FC = () => {
     }
   });
 
-  // Collect all transactions from different sections
-  const allTransactions = [
-    // Events transactions
-    ...events.map(event => ({
-      id: event.id,
-      description: `Evento "${event.title}" criado`,
-      timestamp: new Date(event.created_at),
-      status: 'completed' as const,
-      type: 'add' as const
-    })),
-    
-    // Finance transactions (placeholder)
-    ...finances.map(finance => ({
-      id: finance.id,
-      description: `Transação financeira adicionada`,
-      timestamp: new Date(),
-      status: 'completed' as const,
-      type: 'add' as const
-    })),
-    
-    // Placeholder for repertoire and network transactions
-  ].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
   const handleNewEvent = () => {
     setEventDialogOpen(true);
   };
 
   const handleNewFinance = () => {
     setFinanceDialogOpen(true);
+  };
+  
+  const handleNewRepertoire = () => {
+    setRepertoireDialogOpen(true);
+    setActiveTab('repertoire');
+  };
+  
+  const handleNewContact = () => {
+    setContactDialogOpen(true);
+    setActiveTab('network');
   };
 
   const handleTabChange = (value: string) => {
@@ -96,23 +93,34 @@ const Dashboard: React.FC = () => {
       <FloatingActions 
         onAddEvent={handleNewEvent}
         onAddFinance={handleNewFinance}
+        onAddRepertoire={handleNewRepertoire}
+        onAddContact={handleNewContact}
         eventsCount={events.length}
         financesCount={finances.length}
-        repertoireCount={3} // Placeholder until real implementation
-        contactsCount={2} // Placeholder until real implementation 
+        repertoireCount={repertoire.length}
+        contactsCount={contacts.length}
       />
       
       <EventDialog 
         open={eventDialogOpen} 
         onOpenChange={setEventDialogOpen} 
         onEventUpdated={() => {
-          // Update calendar
           refetchEvents();
           toast({
             title: "Evento criado",
             description: "O evento foi adicionado à sua agenda."
           });
         }}
+      />
+      
+      <RepertoireDialog
+        open={repertoireDialogOpen}
+        onOpenChange={setRepertoireDialogOpen}
+      />
+      
+      <NetworkingDialog
+        open={contactDialogOpen}
+        onOpenChange={setContactDialogOpen}
       />
     </div>
   );

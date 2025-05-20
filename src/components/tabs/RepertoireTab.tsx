@@ -5,37 +5,27 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Music, Search, Filter, List, Grid } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSubscription } from '@/contexts/subscription';
-import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// Sample data - will be replaced with API data later
-const sampleRepertoire = [
-  { id: '1', title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'Bossa Nova', key: 'F', bpm: 120 },
-  { id: '2', title: 'Águas de Março', artist: 'Elis Regina', genre: 'MPB', key: 'C', bpm: 110 },
-  { id: '3', title: 'Aquarela', artist: 'Toquinho', genre: 'MPB', key: 'G', bpm: 95 },
-  { id: '4', title: 'Chega de Saudade', artist: 'João Gilberto', genre: 'Bossa Nova', key: 'D', bpm: 128 },
-  { id: '5', title: 'Evidências', artist: 'Chitãozinho e Xororó', genre: 'Sertanejo', key: 'E', bpm: 135 },
-];
+import { useRepertoire } from '@/hooks/useRepertoire';
+import RepertoireDialog from '@/components/dialogs/RepertoireDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RepertoireTab: React.FC = () => {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { subscriptionStatus } = useSubscription();
-  const { toast } = useToast();
+  const { repertoire, isLoading } = useRepertoire();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
 
-  const handleAddMusic = () => {
-    // This will be implemented with the proper form/dialog
-    toast({
-      title: "Adicionar música",
-      description: "Funcionalidade em desenvolvimento."
-    });
+  const handleAddRepertoire = () => {
+    setDialogOpen(true);
   };
 
-  const filteredRepertoire = sampleRepertoire.filter(
+  const filteredRepertoire = repertoire.filter(
     item => item.title.toLowerCase().includes(search.toLowerCase()) || 
-           item.artist.toLowerCase().includes(search.toLowerCase())
+           item.artist?.toLowerCase().includes(search.toLowerCase() || '')
   );
 
   return (
@@ -56,11 +46,11 @@ const RepertoireTab: React.FC = () => {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={handleAddMusic}
+            onClick={handleAddRepertoire}
             className="group hover:bg-primary/20 hover:text-primary transition-colors"
           >
             <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
-            Nova música
+            Novo repertório
           </Button>
         </CardHeader>
         <CardContent>
@@ -94,9 +84,27 @@ const RepertoireTab: React.FC = () => {
             </div>
           </div>
 
-          {filteredRepertoire.length === 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="bg-background/50">
+                  <CardHeader className="p-4 pb-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-4 w-32 mt-2" />
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <div className="flex gap-2 flex-wrap">
+                      <Skeleton className="h-6 w-16" />
+                      <Skeleton className="h-6 w-20" />
+                      <Skeleton className="h-6 w-16" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredRepertoire.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground bg-background/30 rounded-lg">
-              Nenhuma música encontrada.
+              {search ? "Nenhuma música encontrada para essa busca." : "Seu repertório está vazio. Adicione suas músicas!"}
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -137,6 +145,8 @@ const RepertoireTab: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      
+      <RepertoireDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 };

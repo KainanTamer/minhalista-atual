@@ -5,83 +5,42 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Users, Search, Mail, Phone, Link as LinkIcon, Instagram, Twitter, Facebook, Youtube, Music } from 'lucide-react';
 import { useSubscription } from '@/contexts/subscription';
-import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-
-// Sample data - will be replaced with API data later
-const sampleContacts = [
-  { 
-    id: '1', 
-    name: 'João Silva', 
-    occupation: 'Baixista', 
-    company: 'Banda Meio Tom', 
-    email: 'joao@meiotom.com',
-    phone: '11 99999-1234',
-    socialMedia: [
-      { platform: 'instagram', url: 'https://instagram.com/joaosilva' },
-      { platform: 'youtube', url: 'https://youtube.com/joaosilva' }
-    ]
-  },
-  { 
-    id: '2', 
-    name: 'Maria Oliveira', 
-    occupation: 'Vocalista', 
-    company: 'Solo Artist', 
-    email: 'maria@musica.com',
-    phone: '11 98765-4321',
-    socialMedia: [
-      { platform: 'instagram', url: 'https://instagram.com/mariaoliveira' },
-      { platform: 'spotify', url: 'https://spotify.com/artist/mariaoliveira' }
-    ]
-  },
-  { 
-    id: '3', 
-    name: 'Carlos Drummond', 
-    occupation: 'Produtor Musical', 
-    company: 'Estúdio Sonora', 
-    email: 'carlos@sonora.com',
-    phone: '21 99876-5432',
-    socialMedia: [
-      { platform: 'facebook', url: 'https://facebook.com/carlosdrummond' },
-      { platform: 'twitter', url: 'https://twitter.com/carlosdrummond' }
-    ]
-  },
-];
+import { useNetworking } from '@/hooks/useNetworking';
+import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type ContactView = 'all' | 'musicians' | 'producers' | 'venues';
 
 const NetworkTab: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<ContactView>('all');
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { subscriptionStatus } = useSubscription();
-  const { toast } = useToast();
+  const { contacts, isLoading } = useNetworking();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
 
   const handleAddContact = () => {
-    // This will be implemented with the proper form/dialog
-    toast({
-      title: "Adicionar contato",
-      description: "Funcionalidade em desenvolvimento."
-    });
+    setDialogOpen(true);
   };
 
   // Filter contacts based on search and active tab
-  const filteredContacts = sampleContacts.filter(contact => {
+  const filteredContacts = contacts.filter(contact => {
     const matchesSearch = contact.name.toLowerCase().includes(search.toLowerCase()) || 
-                         contact.occupation.toLowerCase().includes(search.toLowerCase());
+                         (contact.occupation && contact.occupation.toLowerCase().includes(search.toLowerCase()));
                          
     // Apply category filter if not showing all
     if (activeTab === 'musicians') {
-      return matchesSearch && ['Baixista', 'Vocalista', 'Baterista', 'Guitarrista'].some(
-        role => contact.occupation.toLowerCase().includes(role.toLowerCase())
+      return matchesSearch && contact.occupation && ['Baixista', 'Vocalista', 'Baterista', 'Guitarrista'].some(
+        role => contact.occupation?.toLowerCase().includes(role.toLowerCase())
       );
     } else if (activeTab === 'producers') {
-      return matchesSearch && contact.occupation.toLowerCase().includes('produtor');
+      return matchesSearch && contact.occupation?.toLowerCase().includes('produtor');
     } else if (activeTab === 'venues') {
       return matchesSearch && ['venue', 'casa', 'teatro', 'bar'].some(
-        term => contact.company.toLowerCase().includes(term.toLowerCase())
+        term => contact.company?.toLowerCase().includes(term.toLowerCase())
       );
     }
     
@@ -158,9 +117,31 @@ const NetworkTab: React.FC = () => {
             </Tabs>
           </div>
           
-          {filteredContacts.length === 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="bg-background/50 overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div>
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24 mt-2" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-2">
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredContacts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground bg-background/30 rounded-lg">
-              Nenhum contato encontrado.
+              {search ? "Nenhum contato encontrado para essa busca." : "Sua rede está vazia. Adicione seus contatos!"}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -203,9 +184,9 @@ const NetworkTab: React.FC = () => {
                           <a href={`tel:${contact.phone}`} className="hover:text-primary">{contact.phone}</a>
                         </div>
                       )}
-                      {contact.socialMedia && contact.socialMedia.length > 0 && (
+                      {contact.contact_social_media && contact.contact_social_media.length > 0 && (
                         <div className="flex items-center gap-2 mt-2">
-                          {contact.socialMedia.map((social, index) => (
+                          {contact.contact_social_media.map((social, index) => (
                             <a 
                               key={index} 
                               href={social.url} 
@@ -227,6 +208,8 @@ const NetworkTab: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      
+      <NetworkingDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 };
