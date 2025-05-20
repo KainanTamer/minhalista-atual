@@ -40,14 +40,14 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'personal' | 'social'>('personal');
   
-  // Adicionando estado para as redes sociais específicas
+  // Estado para as redes sociais específicas
   const [socialMedia, setSocialMedia] = useState({
     instagram: { enabled: false, url: '' },
     facebook: { enabled: false, url: '' },
     youtube: { enabled: false, url: '' }
   });
   
-  // Adicionando estado para plataformas de streaming
+  // Estado para plataformas de streaming
   const [streamingPlatforms, setStreamingPlatforms] = useState({
     spotify: { enabled: false, url: '' },
     deezer: { enabled: false, url: '' }
@@ -235,6 +235,7 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     }));
   };
   
+  // Sugestões para campos de formulário
   const platformsDB = [
     'Spotify', 
     'Apple Music', 

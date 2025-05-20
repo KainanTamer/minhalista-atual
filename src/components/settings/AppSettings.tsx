@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Languages } from 'lucide-react';
+import { Languages, Sun, SunOff } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -45,7 +45,11 @@ const AppSettings = () => {
       
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="text-lg">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          {theme === 'dark' ? (
+            <Sun className="w-5 h-5" />
+          ) : (
+            <SunOff className="w-5 h-5" />
+          )}
           <span>Modo {theme === 'dark' ? 'claro' : 'escuro'}</span>
         </div>
         <Switch 

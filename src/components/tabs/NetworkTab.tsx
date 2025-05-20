@@ -12,6 +12,7 @@ import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SocialMediaLink } from '@/components/dialogs/NetworkingDialog';
 import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type ContactView = 'all' | 'musicians' | 'producers' | 'venues';
 
@@ -33,6 +34,20 @@ const NetworkTab: React.FC = () => {
   const handleEditContact = (id: string) => {
     setSelectedContactId(id);
     setDialogOpen(true);
+  };
+
+  const handleClearAllContacts = () => {
+    // Esta função será chamada após confirmação do alerta
+    if (contacts.length > 0) {
+      contacts.forEach(contact => {
+        deleteContact(contact.id);
+      });
+      
+      toast({
+        title: "Contatos removidos",
+        description: "Todos os contatos foram removidos da sua rede."
+      });
+    }
   };
 
   // Filter contacts based on search and active tab
@@ -90,6 +105,33 @@ const NetworkTab: React.FC = () => {
             </CardDescription>
           </div>
           <div className="flex gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  disabled={contacts.length === 0}
+                  className="hover:bg-destructive/10 hover:text-destructive transition-colors"
+                >
+                  Limpar tudo
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Remover todos os contatos?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Todos os contatos serão permanentemente removidos da sua rede.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearAllContacts} className="bg-destructive text-destructive-foreground">
+                    Confirmar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            
             <Button 
               variant="outline" 
               size="sm" 
