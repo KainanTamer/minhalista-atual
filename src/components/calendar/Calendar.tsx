@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +29,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
   const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
   
-  const { events, isLoading, fetchEvents } = useCalendarEvents();
+  const { events, isLoading, refetch } = useCalendarEvents();
   const { subscriptionStatus, checkLimit } = useSubscription();
   const { toast } = useToast();
   
@@ -76,7 +77,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
         description: "Todos os eventos foram excluídos.",
       });
       
-      fetchEvents();
+      refetch();
     } catch (error) {
       console.error("Erro ao excluir eventos:", error);
       toast({
@@ -224,7 +225,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
         open={eventDialogOpen} 
         onOpenChange={setEventDialogOpen} 
         event={selectedEvent}
-        onEventUpdated={fetchEvents}
+        onEventUpdated={refetch}
         defaultDate={date}
       />
       
