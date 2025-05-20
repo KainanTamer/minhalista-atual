@@ -77,7 +77,7 @@ const Dashboard: React.FC = () => {
       <DashboardHeader />
       
       <main className="flex-1 container mx-auto py-6 px-4">
-        <DashboardWrapperWithAds>
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-col gap-6">
             <WelcomeCard onNewEvent={handleNewEvent} />
             
@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
               onTabChange={handleTabChange} 
             />
           </div>
-        </DashboardWrapperWithAds>
+        </div>
       </main>
 
       {/* Floating action button with menu */}
