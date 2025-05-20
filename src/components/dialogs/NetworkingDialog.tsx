@@ -9,6 +9,8 @@ import { useNetworking } from '@/hooks/useNetworking';
 import { PlusCircle, Trash2, Link as LinkIcon, Instagram, Youtube, Music } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 
 export interface SocialMediaLink {
   platform: string;
@@ -38,6 +40,19 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'personal' | 'social'>('personal');
   
+  // Adicionando estado para as redes sociais específicas
+  const [socialMedia, setSocialMedia] = useState({
+    instagram: { enabled: false, url: '' },
+    facebook: { enabled: false, url: '' },
+    youtube: { enabled: false, url: '' }
+  });
+  
+  // Adicionando estado para plataformas de streaming
+  const [streamingPlatforms, setStreamingPlatforms] = useState({
+    spotify: { enabled: false, url: '' },
+    deezer: { enabled: false, url: '' }
+  });
+  
   useEffect(() => {
     const loadContact = async () => {
       if (contactId) {
@@ -49,7 +64,35 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
           setOccupation(contact.occupation || '');
           setCompany(contact.company || '');
           setNotes(contact.notes || '');
-          setSocialLinks(contact.contact_social_media || []);
+          
+          // Inicializar redes sociais com valores existentes
+          const socialMediaTemp = { ...socialMedia };
+          const streamingTemp = { ...streamingPlatforms };
+          
+          if (contact.contact_social_media && contact.contact_social_media.length > 0) {
+            setSocialLinks(contact.contact_social_media || []);
+            
+            // Preencher informações de redes sociais específicas
+            contact.contact_social_media.forEach((social: SocialMediaLink) => {
+              const platform = social.platform.toLowerCase();
+              if (platform === 'instagram' || platform === 'facebook' || platform === 'youtube') {
+                socialMediaTemp[platform as keyof typeof socialMediaTemp] = {
+                  enabled: true,
+                  url: social.url
+                };
+              }
+              else if (platform === 'spotify' || platform === 'deezer') {
+                streamingTemp[platform as keyof typeof streamingTemp] = {
+                  enabled: true,
+                  url: social.url
+                };
+              }
+            });
+            
+            setSocialMedia(socialMediaTemp);
+            setStreamingPlatforms(streamingTemp);
+          }
+          
           setIsEditing(true);
         }
       } else {
@@ -67,6 +110,37 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     e.preventDefault();
     setIsSaving(true);
     
+    // Preparar links de redes sociais combinando as específicas e as genéricas
+    const allSocialLinks: SocialMediaLink[] = [];
+    
+    // Adicionar redes sociais especificas
+    Object.entries(socialMedia).forEach(([platform, data]) => {
+      if (data.enabled && data.url) {
+        allSocialLinks.push({
+          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+          url: data.url
+        });
+      }
+    });
+    
+    // Adicionar plataformas de streaming
+    Object.entries(streamingPlatforms).forEach(([platform, data]) => {
+      if (data.enabled && data.url) {
+        allSocialLinks.push({
+          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+          url: data.url
+        });
+      }
+    });
+    
+    // Adicionar outros links personalizados
+    socialLinks.forEach(link => {
+      const platform = link.platform.toLowerCase();
+      if (!['instagram', 'facebook', 'youtube', 'spotify', 'deezer'].includes(platform)) {
+        allSocialLinks.push(link);
+      }
+    });
+    
     const contactData = {
       name,
       email,
@@ -74,7 +148,7 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
       occupation,
       company,
       notes,
-      contact_social_media: socialLinks
+      contact_social_media: allSocialLinks
     };
     
     try {
@@ -104,6 +178,15 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     setSocialLinks([]);
     setNewPlatform('');
     setNewUrl('');
+    setSocialMedia({
+      instagram: { enabled: false, url: '' },
+      facebook: { enabled: false, url: '' },
+      youtube: { enabled: false, url: '' }
+    });
+    setStreamingPlatforms({
+      spotify: { enabled: false, url: '' },
+      deezer: { enabled: false, url: '' }
+    });
     setActiveTab('personal');
   };
   
@@ -132,7 +215,27 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     }
   };
   
-  const streamingPlatforms = [
+  const handleSocialMediaChange = (platform: keyof typeof socialMedia, field: 'enabled' | 'url', value: boolean | string) => {
+    setSocialMedia(prev => ({
+      ...prev,
+      [platform]: {
+        ...prev[platform],
+        [field]: value
+      }
+    }));
+  };
+  
+  const handleStreamingChange = (platform: keyof typeof streamingPlatforms, field: 'enabled' | 'url', value: boolean | string) => {
+    setStreamingPlatforms(prev => ({
+      ...prev,
+      [platform]: {
+        ...prev[platform],
+        [field]: value
+      }
+    }));
+  };
+  
+  const platformsDB = [
     'Spotify', 
     'Apple Music', 
     'YouTube Music', 
@@ -142,7 +245,7 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     'SoundCloud'
   ];
   
-  const socialNetworks = [
+  const socialNetworksDB = [
     'Instagram',
     'YouTube',
     'TikTok',
@@ -263,31 +366,227 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
             )}
             
             {activeTab === 'social' && (
-              <div className="grid gap-4">
-                {/* Social media links */}
-                <div className="grid gap-3">
-                  <div className="flex justify-between items-center">
-                    <Label>Redes Sociais e Plataformas</Label>
-                    <div className="text-xs text-muted-foreground">{socialLinks.length} link(s) adicionado(s)</div>
+              <div className="space-y-6">
+                {/* Seção de Redes Sociais */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Redes Sociais</h3>
+                  
+                  <div className="space-y-3">
+                    {/* Instagram */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="instagram" 
+                          checked={socialMedia.instagram.enabled}
+                          onCheckedChange={(checked) => 
+                            handleSocialMediaChange('instagram', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="instagram" className="font-medium cursor-pointer">
+                          Instagram
+                        </Label>
+                      </div>
+                      {socialMedia.instagram.enabled && (
+                        <Input
+                          value={socialMedia.instagram.url}
+                          onChange={(e) => handleSocialMediaChange('instagram', 'url', e.target.value)}
+                          placeholder="https://instagram.com/usuario"
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Facebook */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="facebook" 
+                          checked={socialMedia.facebook.enabled}
+                          onCheckedChange={(checked) => 
+                            handleSocialMediaChange('facebook', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="facebook" className="font-medium cursor-pointer">
+                          Facebook
+                        </Label>
+                      </div>
+                      {socialMedia.facebook.enabled && (
+                        <Input
+                          value={socialMedia.facebook.url}
+                          onChange={(e) => handleSocialMediaChange('facebook', 'url', e.target.value)}
+                          placeholder="https://facebook.com/pagina"
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* YouTube */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="youtube" 
+                          checked={socialMedia.youtube.enabled}
+                          onCheckedChange={(checked) => 
+                            handleSocialMediaChange('youtube', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="youtube" className="font-medium cursor-pointer">
+                          YouTube
+                        </Label>
+                      </div>
+                      {socialMedia.youtube.enabled && (
+                        <Input
+                          value={socialMedia.youtube.url}
+                          onChange={(e) => handleSocialMediaChange('youtube', 'url', e.target.value)}
+                          placeholder="https://youtube.com/canal"
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
                   </div>
+                  
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Salvar redes sociais atualizadas para socialLinks
+                      const updatedSocialLinks = [...socialLinks];
+                      Object.entries(socialMedia).forEach(([platform, data]) => {
+                        if (data.enabled && data.url) {
+                          const index = updatedSocialLinks.findIndex(
+                            link => link.platform.toLowerCase() === platform.toLowerCase()
+                          );
+                          if (index >= 0) {
+                            updatedSocialLinks[index].url = data.url;
+                          } else {
+                            updatedSocialLinks.push({
+                              platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+                              url: data.url
+                            });
+                          }
+                        }
+                      });
+                      setSocialLinks(updatedSocialLinks);
+                    }}
+                  >
+                    Salvar Redes Sociais
+                  </Button>
+                </div>
+                
+                <Separator />
+                
+                {/* Seção de Plataformas de Streaming */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Plataformas de Streaming</h3>
+                  
+                  <div className="space-y-3">
+                    {/* Spotify */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="spotify" 
+                          checked={streamingPlatforms.spotify.enabled}
+                          onCheckedChange={(checked) => 
+                            handleStreamingChange('spotify', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="spotify" className="font-medium cursor-pointer">
+                          Spotify
+                        </Label>
+                      </div>
+                      {streamingPlatforms.spotify.enabled && (
+                        <Input
+                          value={streamingPlatforms.spotify.url}
+                          onChange={(e) => handleStreamingChange('spotify', 'url', e.target.value)}
+                          placeholder="https://open.spotify.com/artist/..."
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Deezer */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="deezer" 
+                          checked={streamingPlatforms.deezer.enabled}
+                          onCheckedChange={(checked) => 
+                            handleStreamingChange('deezer', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="deezer" className="font-medium cursor-pointer">
+                          Deezer
+                        </Label>
+                      </div>
+                      {streamingPlatforms.deezer.enabled && (
+                        <Input
+                          value={streamingPlatforms.deezer.url}
+                          onChange={(e) => handleStreamingChange('deezer', 'url', e.target.value)}
+                          placeholder="https://www.deezer.com/artist/..."
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Salvar plataformas atualizadas para socialLinks
+                      const updatedSocialLinks = [...socialLinks];
+                      Object.entries(streamingPlatforms).forEach(([platform, data]) => {
+                        if (data.enabled && data.url) {
+                          const index = updatedSocialLinks.findIndex(
+                            link => link.platform.toLowerCase() === platform.toLowerCase()
+                          );
+                          if (index >= 0) {
+                            updatedSocialLinks[index].url = data.url;
+                          } else {
+                            updatedSocialLinks.push({
+                              platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+                              url: data.url
+                            });
+                          }
+                        }
+                      });
+                      setSocialLinks(updatedSocialLinks);
+                    }}
+                  >
+                    Salvar Plataformas
+                  </Button>
+                </div>
+                
+                <Separator />
+                
+                {/* Seção de Links Personalizados */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Outros Links</h3>
                   
                   {socialLinks.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {socialLinks.map((link, index) => (
-                        <Badge key={index} variant="outline" className="pl-2 flex items-center gap-1 bg-background/80">
-                          {getSocialIcon(link.platform)}
-                          <span className="max-w-[150px] truncate">{link.platform}</span>
-                          <Button
-                            type="button"
-                            variant="ghost" 
-                            size="sm"
-                            className="h-5 w-5 p-0 ml-1 hover:bg-destructive/10 hover:text-destructive rounded-full"
-                            onClick={() => removeSocialLink(index)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                            <span className="sr-only">Remover</span>
-                          </Button>
-                        </Badge>
+                      {socialLinks
+                        .filter(link => 
+                          !['instagram', 'facebook', 'youtube', 'spotify', 'deezer']
+                            .includes(link.platform.toLowerCase())
+                        )
+                        .map((link, index) => (
+                          <Badge key={index} variant="outline" className="pl-2 flex items-center gap-1 bg-background/80">
+                            {getSocialIcon(link.platform)}
+                            <span className="max-w-[150px] truncate">{link.platform}</span>
+                            <Button
+                              type="button"
+                              variant="ghost" 
+                              size="sm"
+                              className="h-5 w-5 p-0 ml-1 hover:bg-destructive/10 hover:text-destructive rounded-full"
+                              onClick={() => removeSocialLink(index)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              <span className="sr-only">Remover</span>
+                            </Button>
+                          </Badge>
                       ))}
                     </div>
                   )}
@@ -300,12 +599,17 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                         value={newPlatform}
                         onChange={(e) => setNewPlatform(e.target.value)}
                         className="bg-background"
-                        placeholder="Instagram, YouTube, Spotify..."
+                        placeholder="TikTok, SoundCloud..."
                         list="platform-suggestions"
                       />
                       <datalist id="platform-suggestions">
-                        {[...socialNetworks, ...streamingPlatforms].map((platform, idx) => (
-                          <option key={idx} value={platform} />
+                        {[...socialNetworksDB, ...platformsDB]
+                          .filter(platform => 
+                            !['Instagram', 'Facebook', 'YouTube', 'Spotify', 'Deezer']
+                              .includes(platform)
+                          )
+                          .map((platform, idx) => (
+                            <option key={idx} value={platform} />
                         ))}
                       </datalist>
                     </div>
@@ -332,52 +636,6 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                       <PlusCircle className="h-4 w-4" />
                       <span className="sr-only">Adicionar</span>
                     </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-sm font-medium">Redes Sociais Populares</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {socialNetworks.map((platform) => (
-                        <Button
-                          key={platform}
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => {
-                            setNewPlatform(platform);
-                            document.getElementById('socialUrl')?.focus();
-                          }}
-                        >
-                          {getSocialIcon(platform)}
-                          <span className="ml-1">{platform}</span>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col gap-2">
-                    <Label className="text-sm font-medium">Plataformas de Streaming</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {streamingPlatforms.map((platform) => (
-                        <Button
-                          key={platform}
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => {
-                            setNewPlatform(platform);
-                            document.getElementById('socialUrl')?.focus();
-                          }}
-                        >
-                          {getSocialIcon(platform)}
-                          <span className="ml-1">{platform}</span>
-                        </Button>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>

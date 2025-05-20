@@ -19,7 +19,7 @@ const ThemeToggle: React.FC = () => {
             aria-label="Alternar tema"
           >
             <span className="text-xl">
-              {theme === 'dark' ? '🌙' : '🌞'}
+              {theme === 'dark' ? '☀️' : '🌙'}
             </span>
             <span className="sr-only">Alternar tema</span>
           </Button>

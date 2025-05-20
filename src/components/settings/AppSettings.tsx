@@ -45,8 +45,8 @@ const AppSettings = () => {
       
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="text-lg">{theme === 'dark' ? '🌙' : '🌞'}</span>
-          <span>{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</span>
+          <span className="text-lg">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          <span>Modo {theme === 'dark' ? 'claro' : 'escuro'}</span>
         </div>
         <Switch 
           checked={theme === 'dark'}

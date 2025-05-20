@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Music, DollarSign, Users, Sun, Moon } from 'lucide-react';
+import { ArrowRight, Calendar, Music, DollarSign, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -50,7 +49,7 @@ const Index: React.FC = () => {
               className="absolute top-0 right-0 p-2 rounded-full bg-accent hover:bg-accent/80 transition-colors"
               aria-label={theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              <span className="text-xl">{theme === 'dark' ? '☀️' : '🌙'}</span>
             </button>
           </div>
           
