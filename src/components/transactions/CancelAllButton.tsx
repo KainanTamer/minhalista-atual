@@ -6,6 +6,7 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 import { useSubscription } from '@/contexts/subscription';
 import PlanLimitModal from '@/components/subscription/PlanLimitModal';
 import UsageLimitBar from '@/components/subscription/UsageLimitBar';
+import { cn } from '@/lib/utils';
 
 interface CancelAllButtonProps {
   onConfirm: () => Promise<void>;
