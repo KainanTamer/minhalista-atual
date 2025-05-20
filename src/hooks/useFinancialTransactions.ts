@@ -56,11 +56,14 @@ export const useFinancialTransactions = (
           );
         });
         
-        await updateFinancialTransaction(transaction.id, transactionData);
+        const updatedTransaction = await updateFinancialTransaction(transaction.id, transactionData);
         toast({
           title: "Transação atualizada",
           description: "A transação foi atualizada com sucesso.",
         });
+        
+        // Update specific transaction in the cache
+        queryClient.setQueryData(['financial-transactions', transaction.id], updatedTransaction);
       } else {
         // For new transaction, create a temporary ID
         const tempId = `temp-${Date.now()}`;
@@ -76,10 +79,17 @@ export const useFinancialTransactions = (
           return [tempTransaction, ...(old || [])];
         });
         
-        await createFinancialTransaction(transactionData);
+        const newTransaction = await createFinancialTransaction(transactionData);
         toast({
           title: "Transação registrada",
           description: "A transação foi registrada com sucesso.",
+        });
+        
+        // Replace temp transaction with real one
+        queryClient.setQueryData(['financial-transactions'], (old: any) => {
+          return old?.map((item: any) => 
+            item.id === tempId ? newTransaction : item
+          );
         });
       }
       

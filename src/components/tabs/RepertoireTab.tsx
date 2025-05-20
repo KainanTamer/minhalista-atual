@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRepertoire } from '@/hooks/useRepertoire';
 import RepertoireDialog from '@/components/dialogs/RepertoireDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import CancelAllButton from '@/components/transactions/CancelAllButton';
 import { useToast } from '@/hooks/use-toast';
 
 const RepertoireTab: React.FC = () => {
@@ -18,41 +16,12 @@ const RepertoireTab: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [dialogOpen, setDialogOpen] = useState(false);
   const { subscriptionStatus } = useSubscription();
-  const { repertoire, isLoading, deleteRepertoireItem } = useRepertoire();
+  const { repertoire, isLoading } = useRepertoire();
   const { toast } = useToast();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
 
-  // Used for cancel all functionality
-  const [cancellationsUsed, setCancellationsUsed] = useState(0);
-
   const handleAddRepertoire = () => {
     setDialogOpen(true);
-  };
-
-  const handleCancelAll = async () => {
-    try {
-      // Create an array of promises for all delete operations
-      const deletePromises = repertoire.map(item => deleteRepertoireItem(item.id));
-      
-      // Wait for all delete operations to complete
-      await Promise.all(deletePromises);
-      
-      // Increment cancellations used counter
-      setCancellationsUsed(prev => prev + 1);
-      
-      // Show success message
-      toast({
-        title: "Repertório apagado",
-        description: "Todos os itens do repertório foram removidos com sucesso."
-      });
-    } catch (error) {
-      console.error('Error deleting all repertoire items:', error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao tentar remover os itens do repertório.",
-        variant: "destructive"
-      });
-    }
   };
 
   const filteredRepertoire = repertoire.filter(
@@ -85,14 +54,6 @@ const RepertoireTab: React.FC = () => {
               <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
               Novo repertório
             </Button>
-            
-            <CancelAllButton 
-              onConfirm={handleCancelAll}
-              itemCount={repertoire.length}
-              sectionName="Repertório"
-              limitType="repertoire"
-              cancellationsUsed={cancellationsUsed}
-            />
           </div>
         </CardHeader>
         <CardContent>

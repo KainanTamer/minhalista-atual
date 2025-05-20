@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { useNetworking } from '@/hooks/useNetworking';
 import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import CancelAllButton from '@/components/transactions/CancelAllButton';
 import { SocialMediaLink } from '@/components/dialogs/NetworkingDialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,12 +21,9 @@ const NetworkTab: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState<string | undefined>(undefined);
   const { subscriptionStatus } = useSubscription();
-  const { contacts, isLoading, deleteContact } = useNetworking();
+  const { contacts, isLoading } = useNetworking();
   const { toast } = useToast();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
-  
-  // Used for cancel all functionality
-  const [cancellationsUsed, setCancellationsUsed] = useState(0);
 
   const handleAddContact = () => {
     setSelectedContactId(undefined);
@@ -38,32 +33,6 @@ const NetworkTab: React.FC = () => {
   const handleEditContact = (id: string) => {
     setSelectedContactId(id);
     setDialogOpen(true);
-  };
-
-  const handleCancelAll = async () => {
-    try {
-      // Create an array of promises for all delete operations
-      const deletePromises = contacts.map(contact => deleteContact(contact.id));
-      
-      // Wait for all delete operations to complete
-      await Promise.all(deletePromises);
-      
-      // Increment cancellations used counter
-      setCancellationsUsed(prev => prev + 1);
-      
-      // Show success message
-      toast({
-        title: "Contatos apagados",
-        description: "Todos os contatos foram removidos com sucesso."
-      });
-    } catch (error) {
-      console.error('Error deleting all contacts:', error);
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao tentar remover os contatos.",
-        variant: "destructive"
-      });
-    }
   };
 
   // Filter contacts based on search and active tab
@@ -130,14 +99,6 @@ const NetworkTab: React.FC = () => {
               <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
               Novo contato
             </Button>
-            
-            <CancelAllButton 
-              onConfirm={handleCancelAll}
-              itemCount={contacts.length}
-              sectionName="Networking"
-              limitType="networking"
-              cancellationsUsed={cancellationsUsed}
-            />
           </div>
         </CardHeader>
         <CardContent>

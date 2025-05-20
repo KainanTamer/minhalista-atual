@@ -14,6 +14,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useSubscription } from '@/contexts/subscription';
 import RepertoireDialog from '@/components/dialogs/RepertoireDialog';
 import NetworkingDialog from '@/components/dialogs/NetworkingDialog';
+import FinancialTransactionDialog from '@/components/FinancialTransactionDialog';
+import { getFinancialTransactions } from '@/services/api';
 
 const Dashboard: React.FC = () => {
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
@@ -35,17 +37,9 @@ const Dashboard: React.FC = () => {
   const { contacts, isLoading: contactsLoading, refetch: refetchContacts } = useNetworking();
   
   // Get financial transactions
-  const { data: finances = [], isLoading: financesLoading } = useQuery({
+  const { data: finances = [], isLoading: financesLoading, refetch: refetchFinances } = useQuery({
     queryKey: ['financial-transactions'],
-    queryFn: async () => {
-      try {
-        // Simulation of data until the real API is implemented
-        return [];
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-        return [];
-      }
-    }
+    queryFn: getFinancialTransactions
   });
 
   const handleNewEvent = () => {
@@ -54,6 +48,7 @@ const Dashboard: React.FC = () => {
 
   const handleNewFinance = () => {
     setFinanceDialogOpen(true);
+    setActiveTab('finances');
   };
   
   const handleNewRepertoire = () => {
@@ -107,6 +102,18 @@ const Dashboard: React.FC = () => {
           toast({
             title: "Evento criado",
             description: "O evento foi adicionado à sua agenda."
+          });
+        }}
+      />
+      
+      <FinancialTransactionDialog
+        open={financeDialogOpen}
+        onOpenChange={setFinanceDialogOpen}
+        onTransactionUpdated={() => {
+          refetchFinances();
+          toast({
+            title: "Transação registrada",
+            description: "A transação financeira foi registrada com sucesso."
           });
         }}
       />
