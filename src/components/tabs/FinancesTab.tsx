@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/toast';
-import { Trash2, Lock, Crown, PlusCircle } from 'lucide-react';
+import { Trash2, Lock, Crown, PlusCircle, DollarSign, Filter, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useSubscription } from '@/contexts/subscription';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFinancialTransactions, deleteFinancialTransaction } from '@/services/api';
@@ -12,14 +12,15 @@ import ConfirmModal from '@/components/ui/confirm-modal';
 import PlanLimitModal from '@/components/subscription/PlanLimitModal';
 import LimitsInfo from '@/components/dashboard/LimitsInfo';
 import { supabase } from '@/integrations/supabase/client';
-import TransactionHistory from '@/components/transactions/TransactionHistory';
-import CancelAllButton from '@/components/transactions/CancelAllButton';
-import ShareButton from '@/components/transactions/ShareButton';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 const FinancesTab: React.FC = () => {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
-  const [cancellationsUsed, setCancellationsUsed] = useState(0);
+  const [selectedTransactionType, setSelectedTransactionType] = useState<'all' | 'receita' | 'despesa'>('all');
+  const [search, setSearch] = useState('');
   const { toast } = useToast();
   const { subscriptionStatus, checkLimit } = useSubscription();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
@@ -35,15 +36,9 @@ const FinancesTab: React.FC = () => {
       const { error } = await supabase
         .from('financial_transactions')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all transactions
+        .neq('id', '00000000-0000-0000-0000-000000000000');
         
       if (error) throw error;
-      
-      // Se não for Pro, incrementar contador de cancelamentos
-      if (!isPro) {
-        setCancellationsUsed(prev => prev + 1);
-      }
-      
       return true;
     },
     onSuccess: () => {
@@ -74,53 +69,94 @@ const FinancesTab: React.FC = () => {
     }
     setIsTransactionDialogOpen(true);
   };
-  
-  // Simular o histórico de transações (em um caso real, isso viria da API)
-  const transactionHistory = transactions.map(t => ({
-    id: t.id,
-    description: `Transação ${t.amount > 0 ? 'de receita' : 'de despesa'}: ${t.description}`,
-    timestamp: new Date(t.transaction_date),
-    status: 'completed' as const,
-    type: 'add' as const
-  }));
 
-  // Verificação de 80% do limite atingido
-  useEffect(() => {
-    if (!isPro) {
-      const limit = subscriptionStatus.limits.finances;
-      if (limit > 0 && transactions.length >= limit * 0.8 && transactions.length < limit) {
-        toast({
-          title: "Limite próximo",
-          description: `Você já usou ${transactions.length}/${limit} transações financeiras disponíveis no seu plano.`,
-        });
-      }
-    }
-  }, [transactions.length, subscriptionStatus.limits.finances, isPro, toast]);
+  // Calculate financial summary
+  const totalIncome = transactions
+    .filter(t => t.transaction_type === 'receita')
+    .reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
+    
+  const totalExpenses = transactions
+    .filter(t => t.transaction_type === 'despesa')
+    .reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
+    
+  const balance = totalIncome - totalExpenses;
+  
+  // Filter transactions based on type and search
+  const filteredTransactions = transactions.filter(transaction => {
+    const matchesType = selectedTransactionType === 'all' || transaction.transaction_type === selectedTransactionType;
+    const matchesSearch = transaction.description.toLowerCase().includes(search.toLowerCase());
+    return matchesType && matchesSearch;
+  });
 
   return (
     <div className="space-y-4">
       <LimitsInfo type="finances" currentCount={transactions.length} />
       
-      {transactionHistory.length > 0 && (
-        <TransactionHistory 
-          transactions={transactionHistory}
-          sectionName="Finanças"
-        />
-      )}
+      {/* Financial Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="bg-green-500/10 border-green-500/30 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-green-600">Receitas</p>
+                <p className="text-2xl font-bold mt-1">R$ {totalIncome.toFixed(2)}</p>
+              </div>
+              <div className="bg-green-500/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-red-500/10 border-red-500/30 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-red-600">Despesas</p>
+                <p className="text-2xl font-bold mt-1">R$ {totalExpenses.toFixed(2)}</p>
+              </div>
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className={`${balance >= 0 ? 'bg-blue-500/10 border-blue-500/30' : 'bg-amber-500/10 border-amber-500/30'} shadow-sm hover:shadow-md transition-shadow`}>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium">{balance >= 0 ? 'Saldo' : 'Déficit'}</p>
+                <p className={`text-2xl font-bold mt-1 ${balance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                  R$ {Math.abs(balance).toFixed(2)}
+                </p>
+              </div>
+              <div className={`${balance >= 0 ? 'bg-blue-500/20' : 'bg-amber-500/20'} p-2 rounded-full`}>
+                <BarChart2 className={`h-5 w-5 ${balance >= 0 ? 'text-blue-600' : 'text-amber-600'}`} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card className="shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <Card className="shadow-md bg-card/90 backdrop-blur-sm border border-border/50 transition-all hover:shadow-lg">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
           <div>
-            <CardTitle className="text-xl">Finanças</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <div className="bg-primary/20 p-2 rounded-full">
+                <DollarSign className="h-5 w-5 text-primary" />
+              </div>
+              Finanças
+            </CardTitle>
             <CardDescription>
               Gerencie suas receitas e despesas
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {!isPro && (
-              <div className="text-sm text-muted-foreground mr-2">
+              <div className="text-sm text-muted-foreground mr-2 bg-background/70 rounded-full px-3 py-0.5 flex items-center">
                 <span className="font-medium">{transactions.length}</span>
-                <span>/</span>
+                <span className="mx-1">/</span>
                 <span>{subscriptionStatus.limits.finances === -1 ? '∞' : subscriptionStatus.limits.finances}</span>
                 {isPro ? (
                   <Crown className="inline-block ml-1 h-4 w-4 text-primary" />
@@ -134,8 +170,9 @@ const FinancesTab: React.FC = () => {
               size="sm" 
               onClick={handleAddTransaction}
               disabled={!isPro && !checkLimit('finances', transactions.length)}
+              className="group hover:bg-primary/20 hover:text-primary transition-colors"
             >
-              <PlusCircle className="mr-1 h-4 w-4" />
+              <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
               Nova transação
               {!isPro && !checkLimit('finances', transactions.length) && (
                 <Lock className="ml-1 h-3 w-3" />
@@ -143,59 +180,84 @@ const FinancesTab: React.FC = () => {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pb-0">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:max-w-xs">
+              <Filter className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Filtrar transações..." 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 bg-background/50"
+              />
+            </div>
+            
+            <Tabs 
+              defaultValue="all" 
+              value={selectedTransactionType}
+              onValueChange={(v) => setSelectedTransactionType(v as 'all' | 'receita' | 'despesa')} 
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="all">Todas</TabsTrigger>
+                <TabsTrigger value="receita">Receitas</TabsTrigger>
+                <TabsTrigger value="despesa">Despesas</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
           {isLoading ? (
             <div className="flex justify-center p-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : transactions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhuma transação financeira registrada ainda.
+          ) : filteredTransactions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground bg-background/30 rounded-lg">
+              Nenhuma transação financeira encontrada.
             </div>
           ) : (
-            <div className="space-y-4">
-              {transactions.map((transaction) => (
-                <Card key={transaction.id} className="bg-muted/50">
-                  <CardHeader>
-                    <CardTitle>{transaction.description}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              {filteredTransactions.map((transaction) => (
+                <Card key={transaction.id} className={`bg-muted/30 hover:bg-background/50 transition-colors cursor-pointer`}>
+                  <CardContent className="p-3 flex flex-col sm:flex-row justify-between gap-2">
                     <div>
-                      <p className="text-sm font-medium">Valor:</p>
-                      <p>R$ {transaction.amount}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={transaction.transaction_type === 'receita' ? 'default' : 'destructive'} className="px-1.5 py-0.5">
+                          {transaction.transaction_type === 'receita' ? 'Receita' : 'Despesa'}
+                        </Badge>
+                        <Badge variant="outline">{transaction.category}</Badge>
+                      </div>
+                      <p className="font-medium mt-1">{transaction.description}</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">Data:</p>
-                      <p>{new Date(transaction.transaction_date).toLocaleDateString()}</p>
+                    <div className="flex flex-col items-end">
+                      <p className={`font-bold ${transaction.transaction_type === 'receita' ? 'text-green-600' : 'text-red-600'}`}>
+                        R$ {parseFloat(transaction.amount.toString()).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(transaction.transaction_date).toLocaleDateString()}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           )}
-          
-          {transactions.length > 0 && (
-            <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
-              <ShareButton 
-                sectionName="Finanças"
-                onShare={async (email) => {
-                  toast({
-                    title: "Link compartilhado",
-                    description: `Um convite foi enviado para ${email}.`
-                  });
-                }}
-              />
-              
-              <CancelAllButton
-                onConfirm={handleDeleteAll}
-                itemCount={transactions.length}
-                sectionName="Finanças"
-                limitType="finances"
-                cancellationsUsed={cancellationsUsed}
-              />
-            </div>
-          )}
         </CardContent>
+        
+        {transactions.length > 0 && (
+          <CardFooter className="pt-4 pb-4">
+            <div className="w-full flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-destructive text-destructive hover:bg-destructive/10 group transition-all"
+                onClick={handleDeleteAll}
+              >
+                <Trash2 className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                Limpar Transações
+              </Button>
+            </div>
+          </CardFooter>
+        )}
       </Card>
       
       <FinancialTransactionDialog

@@ -1,186 +1,232 @@
 
-import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/toast';
-import { Trash2, Lock, Crown, PlusCircle, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { PlusCircle, Users, Search, Mail, Phone, Link as LinkIcon, Instagram, Twitter, Facebook, Youtube, Music } from 'lucide-react';
 import { useSubscription } from '@/contexts/subscription';
-import ConfirmModal from '@/components/ui/confirm-modal';
-import PlanLimitModal from '@/components/subscription/PlanLimitModal';
-import LimitsInfo from '@/components/dashboard/LimitsInfo';
-import { supabase } from '@/integrations/supabase/client';
-import TransactionHistory from '@/components/transactions/TransactionHistory';
-import CancelAllButton from '@/components/transactions/CancelAllButton';
-import ShareButton from '@/components/transactions/ShareButton';
+import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
-// Componente temporário - substitua pelo seu componente real
-const NetworkList = () => (
-  <div className="text-center py-8 text-muted-foreground">
-    Funcionalidade de networking em desenvolvimento.
-  </div>
-);
+// Sample data - will be replaced with API data later
+const sampleContacts = [
+  { 
+    id: '1', 
+    name: 'João Silva', 
+    occupation: 'Baixista', 
+    company: 'Banda Meio Tom', 
+    email: 'joao@meiotom.com',
+    phone: '11 99999-1234',
+    socialMedia: [
+      { platform: 'instagram', url: 'https://instagram.com/joaosilva' },
+      { platform: 'youtube', url: 'https://youtube.com/joaosilva' }
+    ]
+  },
+  { 
+    id: '2', 
+    name: 'Maria Oliveira', 
+    occupation: 'Vocalista', 
+    company: 'Solo Artist', 
+    email: 'maria@musica.com',
+    phone: '11 98765-4321',
+    socialMedia: [
+      { platform: 'instagram', url: 'https://instagram.com/mariaoliveira' },
+      { platform: 'spotify', url: 'https://spotify.com/artist/mariaoliveira' }
+    ]
+  },
+  { 
+    id: '3', 
+    name: 'Carlos Drummond', 
+    occupation: 'Produtor Musical', 
+    company: 'Estúdio Sonora', 
+    email: 'carlos@sonora.com',
+    phone: '21 99876-5432',
+    socialMedia: [
+      { platform: 'facebook', url: 'https://facebook.com/carlosdrummond' },
+      { platform: 'twitter', url: 'https://twitter.com/carlosdrummond' }
+    ]
+  },
+];
+
+type ContactView = 'all' | 'musicians' | 'producers' | 'venues';
 
 const NetworkTab: React.FC = () => {
-  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
-  const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
-  const [contactsCount, setContactsCount] = useState(0);
-  const [cancellationsUsed, setCancellationsUsed] = useState(0);
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<ContactView>('all');
+  const { subscriptionStatus } = useSubscription();
   const { toast } = useToast();
-  const { subscriptionStatus, checkLimit } = useSubscription();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
-  
-  // Simula obtenção de dados de contatos
-  useEffect(() => {
-    // Simula o número de contatos - substituir por consulta real
-    setContactsCount(2);
-  }, []);
-
-  // Simular o histórico de transações (em um caso real, isso viria da API)
-  const transactionHistory = [
-    {
-      id: '1',
-      description: 'Contato "João Silva" adicionado',
-      timestamp: new Date(Date.now() - 5 * 60000), // 5 minutos atrás
-      status: 'completed' as const,
-      type: 'add' as const
-    },
-    {
-      id: '2',
-      description: 'Contato "Maria Oliveira" adicionado',
-      timestamp: new Date(Date.now() - 2 * 3600000), // 2 horas atrás
-      status: 'completed' as const,
-      type: 'add' as const
-    }
-  ];
-
-  const handleDeleteAll = async () => {
-    try {
-      // Implemente a lógica para excluir todos os contatos
-      // await supabase.from('connections').delete().eq('follower_id', user.id);
-      
-      // Se não for Pro, incrementar contador de cancelamentos
-      if (!isPro) {
-        setCancellationsUsed(prev => prev + 1);
-      }
-      
-      toast({
-        title: "Sucesso!",
-        description: "Todos os contatos foram excluídos.",
-      });
-      setContactsCount(0);
-    } catch (error) {
-      console.error("Erro ao excluir os contatos:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir os contatos. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleAddContact = () => {
-    if (!isPro && !checkLimit('networking', contactsCount)) {
-      setIsPlanLimitModalOpen(true);
-      return;
-    }
-    // Adicionar contato (implementar diálogo/formulário)
+    // This will be implemented with the proper form/dialog
     toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "Adicionar contato será implementado em breve.",
+      title: "Adicionar contato",
+      description: "Funcionalidade em desenvolvimento."
     });
   };
 
-  // Verificação de 80% do limite atingido
-  useEffect(() => {
-    if (!isPro) {
-      const limit = subscriptionStatus.limits.networking;
-      if (limit > 0 && contactsCount >= limit * 0.8 && contactsCount < limit) {
-        toast({
-          title: "Limite próximo",
-          description: `Você já usou ${contactsCount}/${limit} contatos disponíveis no seu plano.`,
-        });
-      }
+  // Filter contacts based on search and active tab
+  const filteredContacts = sampleContacts.filter(contact => {
+    const matchesSearch = contact.name.toLowerCase().includes(search.toLowerCase()) || 
+                         contact.occupation.toLowerCase().includes(search.toLowerCase());
+                         
+    // Apply category filter if not showing all
+    if (activeTab === 'musicians') {
+      return matchesSearch && ['Baixista', 'Vocalista', 'Baterista', 'Guitarrista'].some(
+        role => contact.occupation.toLowerCase().includes(role.toLowerCase())
+      );
+    } else if (activeTab === 'producers') {
+      return matchesSearch && contact.occupation.toLowerCase().includes('produtor');
+    } else if (activeTab === 'venues') {
+      return matchesSearch && ['venue', 'casa', 'teatro', 'bar'].some(
+        term => contact.company.toLowerCase().includes(term.toLowerCase())
+      );
     }
-  }, [contactsCount, subscriptionStatus.limits.networking, isPro, toast]);
+    
+    return matchesSearch;
+  });
+
+  // Function to render social media icons
+  const renderSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'instagram':
+        return <Instagram className="h-4 w-4" />;
+      case 'twitter':
+        return <Twitter className="h-4 w-4" />;
+      case 'facebook':
+        return <Facebook className="h-4 w-4" />;
+      case 'youtube':
+        return <Youtube className="h-4 w-4" />;
+      case 'spotify':
+        return <Music className="h-4 w-4" />;
+      default:
+        return <LinkIcon className="h-4 w-4" />;
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <LimitsInfo type="networking" currentCount={contactsCount} />
-      
-      {transactionHistory.length > 0 && (
-        <TransactionHistory 
-          transactions={transactionHistory}
-          sectionName="Networking"
-        />
-      )}
-
-      <Card className="shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <Card className="shadow-md bg-card/90 backdrop-blur-sm border border-border/50 transition-all hover:shadow-lg">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
           <div>
-            <CardTitle className="text-xl">Networking</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <div className="bg-primary/20 p-2 rounded-full">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              Networking
+            </CardTitle>
             <CardDescription>
-              Gerencie seus contatos profissionais
+              Gerencie seus contatos e conexões musicais
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            {!isPro && (
-              <div className="text-sm text-muted-foreground mr-2">
-                <span className="font-medium">{contactsCount}</span>
-                <span>/</span>
-                <span>{subscriptionStatus.limits.networking === -1 ? '∞' : subscriptionStatus.limits.networking}</span>
-                {isPro ? (
-                  <Crown className="inline-block ml-1 h-4 w-4 text-primary" />
-                ) : (
-                  <Lock className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-            )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleAddContact}
-              disabled={!isPro && !checkLimit('networking', contactsCount)}
-            >
-              <PlusCircle className="mr-1 h-4 w-4" />
-              Novo contato
-              {!isPro && !checkLimit('networking', contactsCount) && (
-                <Lock className="ml-1 h-3 w-3" />
-              )}
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleAddContact}
+            className="group hover:bg-primary/20 hover:text-primary transition-colors"
+          >
+            <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
+            Novo contato
+          </Button>
         </CardHeader>
         <CardContent>
-          <NetworkList />
+          <div className="flex flex-col sm:flex-row gap-3 mb-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar contatos..." 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 bg-background/50"
+              />
+            </div>
+            
+            <Tabs 
+              defaultValue="all" 
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as ContactView)} 
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid grid-cols-4 w-full">
+                <TabsTrigger value="all">Todos</TabsTrigger>
+                <TabsTrigger value="musicians">Músicos</TabsTrigger>
+                <TabsTrigger value="producers">Produtores</TabsTrigger>
+                <TabsTrigger value="venues">Locais</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           
-          {contactsCount > 0 && (
-            <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
-              <ShareButton 
-                sectionName="Networking"
-                onShare={async (email) => {
-                  toast({
-                    title: "Link compartilhado",
-                    description: `Um convite foi enviado para ${email}.`
-                  });
-                }}
-              />
-              
-              <CancelAllButton
-                onConfirm={handleDeleteAll}
-                itemCount={contactsCount}
-                sectionName="Networking"
-                limitType="networking"
-                cancellationsUsed={cancellationsUsed}
-              />
+          {filteredContacts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground bg-background/30 rounded-lg">
+              Nenhum contato encontrado.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredContacts.map((contact) => (
+                <Card 
+                  key={contact.id} 
+                  className="bg-background/50 hover:bg-background/70 transition-colors cursor-pointer overflow-hidden"
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-primary/20 text-primary">
+                          {contact.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-base">{contact.name}</CardTitle>
+                        <CardDescription>{contact.occupation}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-2">
+                    <div className="space-y-2 text-sm">
+                      {contact.company && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="px-2 py-0 h-5 text-xs bg-background/50">
+                            {contact.company}
+                          </Badge>
+                        </div>
+                      )}
+                      {contact.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                          <a href={`mailto:${contact.email}`} className="hover:text-primary">{contact.email}</a>
+                        </div>
+                      )}
+                      {contact.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                          <a href={`tel:${contact.phone}`} className="hover:text-primary">{contact.phone}</a>
+                        </div>
+                      )}
+                      {contact.socialMedia && contact.socialMedia.length > 0 && (
+                        <div className="flex items-center gap-2 mt-2">
+                          {contact.socialMedia.map((social, index) => (
+                            <a 
+                              key={index} 
+                              href={social.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="p-1.5 bg-background/70 rounded-full hover:bg-primary/20 hover:text-primary transition-colors"
+                              title={social.platform}
+                            >
+                              {renderSocialIcon(social.platform)}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
-      
-      <PlanLimitModal
-        open={isPlanLimitModalOpen}
-        onOpenChange={setIsPlanLimitModalOpen}
-        feature="networking"
-      />
     </div>
   );
 };

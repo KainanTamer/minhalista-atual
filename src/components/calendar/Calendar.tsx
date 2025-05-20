@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
-import { PlusCircle, Calendar as CalendarIcon, Lock, Crown, Trash2 } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, Lock, Crown, Trash2, Music } from 'lucide-react';
 import { Event } from '@/services/api';
 import { useCalendarEvents } from '@/hooks';
 import EventDialog from '@/components/EventDialog';
@@ -120,17 +120,19 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
     <div className={cn("flex flex-col items-center calendar-wrapper", className)}>
       <LimitsInfo type="events" currentCount={events.length} />
       
-      <Card className="overflow-hidden calendar-card w-full max-w-3xl mx-auto">
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+      <Card className="overflow-hidden calendar-card w-full max-w-3xl mx-auto bg-card/90 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
           <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
+            <div className="bg-primary/20 p-2 rounded-full">
+              <CalendarIcon className="h-5 w-5 text-primary" />
+            </div>
             <CardTitle className="text-lg">
-              Calendário
+              Agenda Musical
             </CardTitle>
             {!isPro && (
-              <div className="text-sm text-muted-foreground ml-4">
+              <div className="text-sm text-muted-foreground ml-4 bg-background/70 rounded-full px-3 py-0.5 flex items-center">
                 <span className="font-medium">{events.length}</span>
-                <span>/</span>
+                <span className="mx-1">/</span>
                 <span>{subscriptionStatus.limits.events === -1 ? '∞' : subscriptionStatus.limits.events}</span>
                 {isPro ? (
                   <Crown className="inline-block ml-1 h-4 w-4 text-primary" />
@@ -143,20 +145,20 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className="h-8 w-8 p-0 group hover:bg-primary/20 hover:text-primary transition-colors" 
             onClick={handleAddEvent}
             disabled={!isPro && !checkLimit('events', events.length)}
             title={!isPro && !checkLimit('events', events.length) ? "Limite de eventos atingido" : "Adicionar evento"}
           >
-            <PlusCircle size={18} />
+            <PlusCircle size={18} className="group-hover:scale-110 transition-transform" />
             {!isPro && !checkLimit('events', events.length) && (
               <Lock className="absolute bottom-0 right-0 h-3 w-3" />
             )}
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="calendar-container p-2 md:w-3/5 w-full mx-auto">
+            <div className="calendar-container p-2 md:w-3/5 w-full mx-auto bg-background/30 rounded-lg shadow-inner">
               {isLoading ? (
                 <div className="flex justify-center items-center h-48">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -178,22 +180,33 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
             
             <div className="md:w-2/5 w-full">
               {/* Legenda de cores para tipos de eventos */}
-              <div className="event-legend mb-3 flex flex-wrap justify-center md:justify-start">
-                <div className="event-legend-item">
-                  <span className="event-legend-color" style={{backgroundColor: '#4ade80'}}></span>
-                  <span>Show</span>
+              <div className="event-legend mb-3 flex flex-wrap gap-2 justify-center md:justify-start bg-background/30 p-2 rounded-md">
+                <div className="event-legend-item flex items-center gap-1">
+                  <span className="event-legend-color w-3 h-3 rounded-full" style={{backgroundColor: '#4ade80'}}></span>
+                  <span className="text-xs">Show</span>
                 </div>
-                <div className="event-legend-item">
-                  <span className="event-legend-color" style={{backgroundColor: '#60a5fa'}}></span>
-                  <span>Ensaio</span>
+                <div className="event-legend-item flex items-center gap-1">
+                  <span className="event-legend-color w-3 h-3 rounded-full" style={{backgroundColor: '#60a5fa'}}></span>
+                  <span className="text-xs">Ensaio</span>
                 </div>
-                <div className="event-legend-item">
-                  <span className="event-legend-color" style={{backgroundColor: '#c084fc'}}></span>
-                  <span>Gravação</span>
+                <div className="event-legend-item flex items-center gap-1">
+                  <span className="event-legend-color w-3 h-3 rounded-full" style={{backgroundColor: '#c084fc'}}></span>
+                  <span className="text-xs">Gravação</span>
                 </div>
-                <div className="event-legend-item">
-                  <span className="event-legend-color" style={{backgroundColor: '#94a3b8'}}></span>
-                  <span>Outro</span>
+                <div className="event-legend-item flex items-center gap-1">
+                  <span className="event-legend-color w-3 h-3 rounded-full" style={{backgroundColor: '#94a3b8'}}></span>
+                  <span className="text-xs">Outro</span>
+                </div>
+                <div className="ml-auto">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 text-xs px-2 hover:bg-primary/20 hover:text-primary"
+                    onClick={handleAddEvent}
+                  >
+                    <Music className="h-3 w-3 mr-1" />
+                    Novo
+                  </Button>
                 </div>
               </div>
               
@@ -210,11 +223,11 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-destructive text-destructive hover:bg-destructive/10"
+                className="border-destructive text-destructive hover:bg-destructive/10 group transition-all"
                 onClick={() => setIsDeleteAllDialogOpen(true)}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Deletar Todos os Eventos
+                <Trash2 className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                Limpar Agenda
               </Button>
             </div>
           )}
@@ -233,7 +246,7 @@ const Calendar: React.FC<CalendarProps> = ({ className }) => {
         open={isDeleteAllDialogOpen}
         onOpenChange={setIsDeleteAllDialogOpen}
         onConfirm={handleDeleteAllEvents}
-        title="Deletar todos os eventos"
+        title="Limpar agenda"
         description="Tem certeza que deseja excluir TODOS os eventos da sua agenda? Essa ação não pode ser desfeita."
         confirmLabel="Confirmar"
         cancelLabel="Cancelar"

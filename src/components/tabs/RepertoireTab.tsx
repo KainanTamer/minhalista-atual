@@ -1,193 +1,142 @@
 
-import React, { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/toast';
-import { Trash2, Lock, Crown, PlusCircle, Music } from 'lucide-react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PlusCircle, Music, Search, Filter, List, Grid } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useSubscription } from '@/contexts/subscription';
-import ConfirmModal from '@/components/ui/confirm-modal';
-import PlanLimitModal from '@/components/subscription/PlanLimitModal';
-import LimitsInfo from '@/components/dashboard/LimitsInfo';
-import { supabase } from '@/integrations/supabase/client';
-import TransactionHistory from '@/components/transactions/TransactionHistory';
-import CancelAllButton from '@/components/transactions/CancelAllButton';
-import ShareButton from '@/components/transactions/ShareButton';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Componente temporário - substitua pelo seu componente real
-const RepertoireList = () => (
-  <div className="text-center py-8 text-muted-foreground">
-    Funcionalidade de repertório em desenvolvimento.
-  </div>
-);
+// Sample data - will be replaced with API data later
+const sampleRepertoire = [
+  { id: '1', title: 'Garota de Ipanema', artist: 'Tom Jobim', genre: 'Bossa Nova', key: 'F', bpm: 120 },
+  { id: '2', title: 'Águas de Março', artist: 'Elis Regina', genre: 'MPB', key: 'C', bpm: 110 },
+  { id: '3', title: 'Aquarela', artist: 'Toquinho', genre: 'MPB', key: 'G', bpm: 95 },
+  { id: '4', title: 'Chega de Saudade', artist: 'João Gilberto', genre: 'Bossa Nova', key: 'D', bpm: 128 },
+  { id: '5', title: 'Evidências', artist: 'Chitãozinho e Xororó', genre: 'Sertanejo', key: 'E', bpm: 135 },
+];
 
 const RepertoireTab: React.FC = () => {
-  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
-  const [isPlanLimitModalOpen, setIsPlanLimitModalOpen] = useState(false);
-  const [repertoireCount, setRepertoireCount] = useState(0);
-  const [cancellationsUsed, setCancellationsUsed] = useState(0);
+  const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { subscriptionStatus } = useSubscription();
   const { toast } = useToast();
-  const { subscriptionStatus, checkLimit } = useSubscription();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
-  
-  // Simula obtenção de dados do repertório
-  useEffect(() => {
-    // Simula o número de itens no repertório - substituir por consulta real
-    setRepertoireCount(3);
-  }, []);
 
-  // Simular o histórico de transações (em um caso real, isso viria da API)
-  const transactionHistory = [
-    {
-      id: '1',
-      description: 'Música "Garota de Ipanema" adicionada',
-      timestamp: new Date(Date.now() - 1 * 60000), // 1 minuto atrás
-      status: 'completed' as const,
-      type: 'add' as const
-    },
-    {
-      id: '2',
-      description: 'Música "Hey Jude" adicionada',
-      timestamp: new Date(Date.now() - 3 * 3600000), // 3 horas atrás
-      status: 'completed' as const,
-      type: 'add' as const
-    },
-    {
-      id: '3',
-      description: 'Música "Imagine" adicionada',
-      timestamp: new Date(Date.now() - 1 * 86400000), // 1 dia atrás
-      status: 'completed' as const,
-      type: 'add' as const
-    }
-  ];
-
-  const handleDeleteAll = async () => {
-    try {
-      // Implemente a lógica para excluir todo o repertório
-      // await supabase.from('repertoire').delete().eq('user_id', user.id);
-      
-      // Se não for Pro, incrementar contador de cancelamentos
-      if (!isPro) {
-        setCancellationsUsed(prev => prev + 1);
-      }
-      
-      toast({
-        title: "Sucesso!",
-        description: "Todo o repertório foi excluído.",
-      });
-      setRepertoireCount(0);
-    } catch (error) {
-      console.error("Erro ao excluir o repertório:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir o repertório. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleAddToRepertoire = () => {
-    if (!isPro && !checkLimit('repertoire', repertoireCount)) {
-      setIsPlanLimitModalOpen(true);
-      return;
-    }
-    // Adicionar música ao repertório (implementar diálogo/formulário)
+  const handleAddMusic = () => {
+    // This will be implemented with the proper form/dialog
     toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "Adicionar música ao repertório será implementado em breve.",
+      title: "Adicionar música",
+      description: "Funcionalidade em desenvolvimento."
     });
   };
 
-  // Verificação de 80% do limite atingido
-  useEffect(() => {
-    if (!isPro) {
-      const limit = subscriptionStatus.limits.repertoire;
-      if (limit > 0 && repertoireCount >= limit * 0.8 && repertoireCount < limit) {
-        toast({
-          title: "Limite próximo",
-          description: `Você já usou ${repertoireCount}/${limit} músicas disponíveis no seu plano.`,
-        });
-      }
-    }
-  }, [repertoireCount, subscriptionStatus.limits.repertoire, isPro, toast]);
+  const filteredRepertoire = sampleRepertoire.filter(
+    item => item.title.toLowerCase().includes(search.toLowerCase()) || 
+           item.artist.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
-      <LimitsInfo type="repertoire" currentCount={repertoireCount} />
-      
-      {transactionHistory.length > 0 && (
-        <TransactionHistory 
-          transactions={transactionHistory}
-          sectionName="Repertório"
-        />
-      )}
-
-      <Card className="shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <Card className="shadow-md bg-card/90 backdrop-blur-sm border border-border/50 transition-all hover:shadow-lg">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
           <div>
-            <CardTitle className="text-xl">Repertório</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <div className="bg-primary/20 p-2 rounded-full">
+                <Music className="h-5 w-5 text-primary" />
+              </div>
+              Repertório
+            </CardTitle>
             <CardDescription>
               Gerencie suas músicas e setlists
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            {!isPro && (
-              <div className="text-sm text-muted-foreground mr-2">
-                <span className="font-medium">{repertoireCount}</span>
-                <span>/</span>
-                <span>{subscriptionStatus.limits.repertoire === -1 ? '∞' : subscriptionStatus.limits.repertoire}</span>
-                {isPro ? (
-                  <Crown className="inline-block ml-1 h-4 w-4 text-primary" />
-                ) : (
-                  <Lock className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-            )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleAddToRepertoire}
-              disabled={!isPro && !checkLimit('repertoire', repertoireCount)}
-            >
-              <PlusCircle className="mr-1 h-4 w-4" />
-              Nova música
-              {!isPro && !checkLimit('repertoire', repertoireCount) && (
-                <Lock className="ml-1 h-3 w-3" />
-              )}
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleAddMusic}
+            className="group hover:bg-primary/20 hover:text-primary transition-colors"
+          >
+            <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
+            Nova música
+          </Button>
         </CardHeader>
         <CardContent>
-          <RepertoireList />
-          
-          {repertoireCount > 0 && (
-            <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
-              <ShareButton 
-                sectionName="Repertório"
-                onShare={async (email) => {
-                  toast({
-                    title: "Link compartilhado",
-                    description: `Um convite foi enviado para ${email}.`
-                  });
-                }}
+          <div className="flex flex-col sm:flex-row gap-2 mb-4 items-start sm:items-center justify-between">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar música ou artista..." 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 bg-background/50"
               />
+            </div>
+            
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="ghost" size="sm" className="text-xs">
+                <Filter className="mr-1 h-3 w-3" />
+                Filtros
+              </Button>
               
-              <CancelAllButton
-                onConfirm={handleDeleteAll}
-                itemCount={repertoireCount}
-                sectionName="Repertório"
-                limitType="repertoire"
-                cancellationsUsed={cancellationsUsed}
-              />
+              <Tabs defaultValue={viewMode} onValueChange={(v) => setViewMode(v as 'grid' | 'list')} className="ml-auto">
+                <TabsList className="h-8">
+                  <TabsTrigger value="grid" className="h-7 w-7 p-0">
+                    <Grid className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="list" className="h-7 w-7 p-0">
+                    <List className="h-4 w-4" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {filteredRepertoire.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground bg-background/30 rounded-lg">
+              Nenhuma música encontrada.
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRepertoire.map((music) => (
+                <Card key={music.id} className="bg-background/50 hover:bg-background/70 transition-colors cursor-pointer">
+                  <CardHeader className="p-4 pb-2">
+                    <CardTitle className="text-base">{music.title}</CardTitle>
+                    <CardDescription>{music.artist}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <div className="flex gap-2 flex-wrap">
+                      <Badge variant="outline" className="bg-background/50">{music.genre}</Badge>
+                      <Badge variant="outline" className="bg-background/50">Tom: {music.key}</Badge>
+                      <Badge variant="outline" className="bg-background/50">{music.bpm} BPM</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredRepertoire.map((music) => (
+                <div 
+                  key={music.id} 
+                  className="flex items-center justify-between p-3 bg-background/50 rounded-md hover:bg-background/70 transition-colors cursor-pointer"
+                >
+                  <div>
+                    <div className="font-medium">{music.title}</div>
+                    <div className="text-sm text-muted-foreground">{music.artist}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="bg-background/50">{music.genre}</Badge>
+                    <Badge variant="outline" className="bg-background/50">Tom: {music.key}</Badge>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
       </Card>
-      
-      <PlanLimitModal
-        open={isPlanLimitModalOpen}
-        onOpenChange={setIsPlanLimitModalOpen}
-        feature="repertório"
-      />
     </div>
   );
 };

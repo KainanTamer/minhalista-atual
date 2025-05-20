@@ -32,8 +32,8 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
   });
 
   // Simulated counts - in a real implementation, these would come from API calls
-  const repertoireCount = 3;
-  const contactsCount = 2;
+  const repertoireCount = 5;
+  const contactsCount = 3;
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -44,12 +44,12 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
   return (
     <Tabs defaultValue={initialTab} value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="mb-4 flex overflow-x-auto pb-1 w-full justify-start lg:justify-center gap-1 md:gap-2">
+      <TabsList className="mb-4 flex overflow-x-auto pb-1 w-full justify-start lg:justify-center gap-1 md:gap-2 bg-background/50 p-1 rounded-full">
         <TabsTrigger 
           value="agenda" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm",
-            activeTab === 'agenda' && "font-medium"
+            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
+            activeTab === 'agenda' && "font-medium bg-primary/20 text-primary"
           )}
         >
           <CalendarIcon size={16} className="md:mr-1" /> 
@@ -64,8 +64,8 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
         <TabsTrigger 
           value="finances" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm",
-            activeTab === 'finances' && "font-medium"
+            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
+            activeTab === 'finances' && "font-medium bg-primary/20 text-primary"
           )}
         >
           <BarChart size={16} className="md:mr-1" />
@@ -75,14 +75,14 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
         <TabsTrigger 
           value="repertoire" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm",
-            activeTab === 'repertoire' && "font-medium"
+            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
+            activeTab === 'repertoire' && "font-medium bg-primary/20 text-primary"
           )}
         >
           <Music size={16} className="md:mr-1" />
           <span className="hidden md:inline">Repertório</span>
           {repertoireCount > 0 && (
-            <Badge variant="outline" className="ml-1 h-5 px-1 rounded-full flex items-center justify-center text-xs">
+            <Badge variant="outline" className="ml-1 h-5 px-1 rounded-full flex items-center justify-center text-xs bg-background/50">
               {repertoireCount}
             </Badge>
           )}
@@ -91,14 +91,14 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
         <TabsTrigger 
           value="network" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm",
-            activeTab === 'network' && "font-medium"
+            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
+            activeTab === 'network' && "font-medium bg-primary/20 text-primary"
           )}
         >
           <User size={16} className="md:mr-1" />
           <span className="hidden md:inline">Networking</span>
           {contactsCount > 0 && (
-            <Badge variant="outline" className="ml-1 h-5 px-1 rounded-full flex items-center justify-center text-xs">
+            <Badge variant="outline" className="ml-1 h-5 px-1 rounded-full flex items-center justify-center text-xs bg-background/50">
               {contactsCount}
             </Badge>
           )}

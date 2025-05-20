@@ -76,23 +76,13 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-secondary/50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-background/80">
       <DashboardHeader />
       
       <main className="flex-1 container mx-auto py-6 px-4">
         <DashboardWrapperWithAds>
           <div className="flex flex-col gap-6">
             <WelcomeCard onNewEvent={handleNewEvent} />
-            
-            {allTransactions.length > 0 && (
-              <Card className="p-4 shadow-sm bg-background/90 border-muted animate-fade-in">
-                <TransactionHistory 
-                  transactions={allTransactions.slice(0, 5)} 
-                  sectionName="Recentes"
-                  compact={true}
-                />
-              </Card>
-            )}
             
             <DashboardTabs 
               initialTab={activeTab} 
