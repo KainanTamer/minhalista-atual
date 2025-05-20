@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/contexts/subscription';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Bell, LogOut, Settings, Moon, Sun } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
-import { useTheme } from '@/contexts/ThemeContext';
+import ThemeToggle from '@/components/profile/ThemeToggle';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -22,7 +22,6 @@ const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const { subscriptionStatus } = useSubscription();
   const { signOut, user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const isPro = subscriptionStatus.subscription_tier === 'Pro';
   
@@ -30,6 +29,10 @@ const DashboardHeader: React.FC = () => {
     try {
       await signOut();
       navigate('/login');
+      toast({
+        title: "Sessão encerrada",
+        description: "Você foi desconectado com sucesso."
+      });
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       toast({
@@ -41,10 +44,10 @@ const DashboardHeader: React.FC = () => {
   };
   
   return (
-    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
       <div className="container flex h-14 items-center justify-between">
-        <div className="mr-4 hidden md:flex">
-          <div className="mr-1 font-bold">Minha Lista</div>
+        <div className="mr-4 flex items-center">
+          <div className="mr-2 font-bold text-foreground">Minha Agenda</div>
           {isPro && (
             <div className="rounded-sm bg-gradient-to-r from-amber-400 to-amber-600 px-1.5 py-0.5 text-[0.65rem] font-bold text-black">
               PRO
@@ -52,64 +55,47 @@ const DashboardHeader: React.FC = () => {
           )}
         </div>
         
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-3">
           <nav className="flex items-center gap-1">
+            {/* Botão de notificações */}
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => {}} 
-              className="rounded-md hover:bg-accent"
+              className="rounded-full hover:bg-accent"
+              aria-label="Notificações"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-[1.2rem] w-[1.2rem]" />
               <span className="sr-only">Notificações</span>
             </Button>
             
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate('/settings')} 
-              className="rounded-md hover:bg-accent"
-            >
-              <Settings className="h-4 w-4" />
-              <span className="sr-only">Configurações</span>
-            </Button>
+            {/* Botão de tema - agora minimalista */}
+            <ThemeToggle />
             
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={toggleTheme} 
-              className="rounded-md hover:bg-accent"
-              title="Mudar tema"
-            >
-              {theme === 'light' ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-              <span className="sr-only">Alternar tema</span>
-            </Button>
-            
+            {/* Menu de perfil refinado */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="rounded-md hover:bg-accent h-8 w-8"
+                  className="rounded-full hover:bg-accent h-9 w-9 p-0.5 ml-1"
                 >
-                  <ProfileAvatar className="h-6 w-6" />
+                  <ProfileAvatar className="h-full w-full transition-transform hover:scale-105" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56 mt-1">
                 <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
                   Perfil
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
                   Configurações
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/subscriptions')} className="cursor-pointer">
+                  Assinatura
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
                 </DropdownMenuItem>

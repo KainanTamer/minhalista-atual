@@ -56,24 +56,26 @@ const FloatingActions: React.FC<FloatingActionsProps> = ({
   };
   
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-6 right-6 z-50">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg p-3 h-14 w-14" 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg p-3 h-14 w-14 transition-all hover:scale-105" 
             onClick={() => setIsOpen(true)}
           >
             <PlusCircle className="h-7 w-7" />
             <span className="sr-only">Adicionar</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="mb-2 mr-2">
+        <DropdownMenuContent align="end" className="mb-2 mr-2 bg-popover border border-border shadow-lg rounded-lg">
           <DropdownMenuItem 
             onClick={() => handleAction(onAddEvent, canAddEvent, "eventos")}
-            className="flex items-center cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer py-2.5 font-medium"
             disabled={!canAddEvent}
           >
-            <Calendar className="mr-2 h-4 w-4 text-blue-500" />
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full">
+              <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
             <span>Novo Evento</span>
           </DropdownMenuItem>
           
@@ -81,10 +83,12 @@ const FloatingActions: React.FC<FloatingActionsProps> = ({
           
           <DropdownMenuItem 
             onClick={() => handleAction(onAddFinance, canAddFinance, "transações financeiras")}
-            className="flex items-center cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer py-2.5 font-medium"
             disabled={!canAddFinance}
           >
-            <DollarSign className="mr-2 h-4 w-4 text-green-500" />
+            <div className="bg-green-100 dark:bg-green-900/30 p-1.5 rounded-full">
+              <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </div>
             <span>Nova Transação</span>
           </DropdownMenuItem>
           
@@ -92,10 +96,12 @@ const FloatingActions: React.FC<FloatingActionsProps> = ({
           
           <DropdownMenuItem 
             onClick={() => handleAction(onAddRepertoire, canAddRepertoire, "músicas no repertório")}
-            className="flex items-center cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer py-2.5 font-medium"
             disabled={!canAddRepertoire}
           >
-            <Music className="mr-2 h-4 w-4 text-purple-500" />
+            <div className="bg-purple-100 dark:bg-purple-900/30 p-1.5 rounded-full">
+              <Music className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </div>
             <span>Nova Música</span>
           </DropdownMenuItem>
           
@@ -103,10 +109,12 @@ const FloatingActions: React.FC<FloatingActionsProps> = ({
           
           <DropdownMenuItem 
             onClick={() => handleAction(onAddContact, canAddContact, "contatos no networking")}
-            className="flex items-center cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer py-2.5 font-medium"
             disabled={!canAddContact}
           >
-            <Users className="mr-2 h-4 w-4 text-amber-500" />
+            <div className="bg-amber-100 dark:bg-amber-900/30 p-1.5 rounded-full">
+              <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            </div>
             <span>Novo Contato</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

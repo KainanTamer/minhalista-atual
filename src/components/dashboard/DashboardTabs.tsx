@@ -40,18 +40,20 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
   return (
     <Tabs defaultValue={initialTab} value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="mb-4 flex overflow-x-auto pb-1 w-full justify-start lg:justify-center gap-1 md:gap-2 bg-background/50 p-1 rounded-full">
+      <TabsList className="mb-4 flex overflow-x-auto pb-1 w-full justify-start lg:justify-center gap-1 md:gap-2 bg-background/50 p-1.5 rounded-full shadow-sm border border-border/40">
         <TabsTrigger 
           value="agenda" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
-            activeTab === 'agenda' && "font-medium bg-primary/20 text-primary"
+            "flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium rounded-full transition-all",
+            activeTab === 'agenda' 
+              ? "bg-primary/20 text-primary shadow-sm" 
+              : "hover:bg-accent/80 hover:text-accent-foreground"
           )}
         >
-          <CalendarIcon size={16} className="md:mr-1" /> 
+          <CalendarIcon size={18} className="md:mr-1" /> 
           <span className="hidden md:inline">Agenda</span>
           {todayEvents.length > 0 && (
-            <Badge variant="default" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+            <Badge variant="default" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary/90 text-primary-foreground">
               {todayEvents.length}
             </Badge>
           )}
@@ -60,33 +62,39 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({
         <TabsTrigger 
           value="finances" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
-            activeTab === 'finances' && "font-medium bg-primary/20 text-primary"
+            "flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium rounded-full transition-all",
+            activeTab === 'finances' 
+              ? "bg-primary/20 text-primary shadow-sm" 
+              : "hover:bg-accent/80 hover:text-accent-foreground"
           )}
         >
-          <BarChart size={16} className="md:mr-1" />
+          <BarChart size={18} className="md:mr-1" />
           <span className="hidden md:inline">Finanças</span>
         </TabsTrigger>
         
         <TabsTrigger 
           value="repertoire" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
-            activeTab === 'repertoire' && "font-medium bg-primary/20 text-primary"
+            "flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium rounded-full transition-all",
+            activeTab === 'repertoire' 
+              ? "bg-primary/20 text-primary shadow-sm" 
+              : "hover:bg-accent/80 hover:text-accent-foreground"
           )}
         >
-          <Music size={16} className="md:mr-1" />
+          <Music size={18} className="md:mr-1" />
           <span className="hidden md:inline">Repertório</span>
         </TabsTrigger>
         
         <TabsTrigger 
           value="network" 
           className={cn(
-            "flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 text-sm rounded-full transition-all",
-            activeTab === 'network' && "font-medium bg-primary/20 text-primary"
+            "flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium rounded-full transition-all",
+            activeTab === 'network' 
+              ? "bg-primary/20 text-primary shadow-sm" 
+              : "hover:bg-accent/80 hover:text-accent-foreground"
           )}
         >
-          <User size={16} className="md:mr-1" />
+          <User size={18} className="md:mr-1" />
           <span className="hidden md:inline">Networking</span>
         </TabsTrigger>
       </TabsList>
