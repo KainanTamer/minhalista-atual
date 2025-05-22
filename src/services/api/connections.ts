@@ -51,7 +51,7 @@ export const unfollowUser = async (followerId: string) => {
 export const getFollowingProfiles = async (userId: string): Promise<ProfileWithMetadata[]> => {
   const { data, error } = await supabase
     .from("connections")
-    .select("following_id, profiles!connections_following_id_fkey(id, username, full_name, avatar_url)")
+    .select("following_id, profiles!connections_following_id_fkey(*)")
     .eq("follower_id", userId);
 
   if (error) throw error;
@@ -64,6 +64,16 @@ export const getFollowingProfiles = async (userId: string): Promise<ProfileWithM
       username: profile.username,
       full_name: profile.full_name,
       avatar_url: profile.avatar_url,
+      bio: profile.bio || null,
+      city: profile.city || null,
+      state: profile.state || null,
+      contact_email: profile.contact_email || null,
+      phone_number: profile.phone_number || null,
+      social_links: profile.social_links || null,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+      instrument: profile.instrument || null,
+      musical_genre: profile.musical_genre || null,
       isFollowing: true // Since these are profiles the user is following
     };
   });
