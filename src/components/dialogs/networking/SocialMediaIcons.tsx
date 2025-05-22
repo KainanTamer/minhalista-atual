@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, Youtube, Twitter, Facebook, Music, LinkIcon, TiktokIcon } from 'lucide-react';
+import { Instagram, Youtube, Twitter, Facebook, Music, LinkIcon } from 'lucide-react';
 
 export const getSocialIcon = (platform: string): React.ReactNode => {
   switch (platform.toLowerCase()) {
