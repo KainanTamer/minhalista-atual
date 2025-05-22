@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, Youtube, Twitter, Facebook, Music, LinkIcon, Spotify, AtSign } from 'lucide-react';
+import { Instagram, Youtube, Twitter, Facebook, Music, LinkIcon, AtSign } from 'lucide-react';
 
 export const getSocialIcon = (platform: string): React.ReactNode => {
   switch (platform.toLowerCase()) {
@@ -18,7 +18,7 @@ export const getSocialIcon = (platform: string): React.ReactNode => {
     case 'tiktok':
       return <AtSign className="h-4 w-4" />;
     case 'spotify':
-      return <Spotify className="h-4 w-4" />;
+      return <Music className="h-4 w-4" />;
     case 'apple music':
     case 'applemusic':
     case 'deezer':
