@@ -1,9 +1,8 @@
-
 import { useMutation, QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NetworkingContact } from '@/types/networking';
 import { SocialMediaLink } from '@/components/dialogs/networking/types';
-import { Toast } from '@/hooks/use-toast';
+import type { Toast } from '@/hooks/networking/types';
 
 export function useContactMutations(
   queryClient: QueryClient, 

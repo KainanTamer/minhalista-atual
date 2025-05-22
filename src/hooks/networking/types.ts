@@ -11,3 +11,5 @@ export interface ToastProps {
 export interface Toast {
   (props: ToastProps): void;
 }
+
+export * from '@/components/dialogs/networking/types';

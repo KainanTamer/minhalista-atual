@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { NetworkingContact } from '@/types/networking';
 import { getContact, fetchContacts } from '@/services/networking/contactOperations';
-import { useContactMutations } from '@/hooks/networking/useContactMutations';
+import { useContactMutations } from '@/hooks/networking';
 import { SocialMediaLink } from '@/components/dialogs/networking/types';
 
 export function useNetworking() {
