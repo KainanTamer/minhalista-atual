@@ -1,3 +1,4 @@
+
 import { useMutation, QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NetworkingContact } from '@/types/networking';
@@ -32,35 +33,64 @@ export function useContactMutations(
         ];
       });
       
-      // Insert the contact
-      const { data: newContact, error: contactError } = await supabase
-        .from('networking_contacts')
-        .insert([{
-          ...contactFields,
-          user_id: (await supabase.auth.getUser()).data.user?.id
-        }])
-        .select()
-        .single();
-      
-      if (contactError) throw contactError;
-      
-      // Insert social media links if any
-      if (contact_social_media && contact_social_media.length > 0) {
-        const socialLinksWithContactId = contact_social_media.map(link => ({
-          ...link,
-          contact_id: newContact.id
-        }));
+      try {
+        // Extract musician-specific fields to add as separate columns
+        const { contact_type, musical_genre, instrument, ...basicContactFields } = contactFields;
         
-        const { error: socialError } = await supabase
-          .from('contact_social_media')
-          .insert(socialLinksWithContactId);
+        // Insert the contact
+        const { data: newContact, error: contactError } = await supabase
+          .from('networking_contacts')
+          .insert([{
+            ...basicContactFields,
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          }])
+          .select()
+          .single();
         
-        if (socialError) throw socialError;
+        if (contactError) throw contactError;
+
+        // If we have musician-specific fields, update the contact with them
+        if (contact_type || musical_genre || instrument) {
+          const updates: any = {};
+          
+          // Add contact metadata to a separate metadata field for now
+          // This is a workaround until we can alter the table schema
+          updates.notes = JSON.stringify({
+            ...(newContact.notes ? JSON.parse(newContact.notes) : {}),
+            contact_type,
+            musical_genre,
+            instrument
+          });
+          
+          const { error: updateError } = await supabase
+            .from('networking_contacts')
+            .update(updates)
+            .eq('id', newContact.id);
+            
+          if (updateError) console.warn("Could not update contact with additional fields:", updateError);
+        }
+        
+        // Insert social media links if any
+        if (contact_social_media && contact_social_media.length > 0) {
+          const socialLinksWithContactId = contact_social_media.map(link => ({
+            ...link,
+            contact_id: newContact.id
+          }));
+          
+          const { error: socialError } = await supabase
+            .from('contact_social_media')
+            .insert(socialLinksWithContactId);
+          
+          if (socialError) throw socialError;
+        }
+        
+        // Fetch the created contact with its social media links
+        const completeContact = await getContact(newContact.id);
+        return completeContact;
+      } catch (error) {
+        console.error("Error in contact creation:", error);
+        throw error;
       }
-      
-      // Fetch the created contact with its social media links
-      const completeContact = await getContact(newContact.id);
-      return completeContact;
     },
     onSuccess: (newContact) => {
       if (newContact) {

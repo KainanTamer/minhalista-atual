@@ -21,7 +21,22 @@ export const getContact = async (id: string): Promise<NetworkingContact | null> 
     
     if (socialError) throw socialError;
     
-    return { ...contact, contact_social_media: socialMedia || [] };
+    // Parse musician-specific fields from notes if they exist
+    let enrichedContact = { ...contact };
+    
+    if (contact.notes) {
+      try {
+        const parsedNotes = JSON.parse(contact.notes);
+        if (parsedNotes.contact_type) enrichedContact.contact_type = parsedNotes.contact_type;
+        if (parsedNotes.musical_genre) enrichedContact.musical_genre = parsedNotes.musical_genre;
+        if (parsedNotes.instrument) enrichedContact.instrument = parsedNotes.instrument;
+      } catch (e) {
+        // If notes is not valid JSON, just use it as-is
+        console.log("Notes is not in JSON format, using as plain text");
+      }
+    }
+    
+    return { ...enrichedContact, contact_social_media: socialMedia || [] };
   } catch (error) {
     console.error('Error fetching contact:', error);
     return null;
@@ -38,7 +53,7 @@ export const fetchContacts = async (): Promise<NetworkingContact[]> => {
     
     if (contactsError) throw contactsError;
     
-    // For each contact, get their social media links
+    // For each contact, get their social media links and parse musician fields
     const contactsWithSocial = await Promise.all(
       contactsData.map(async (contact) => {
         const { data: socialMedia, error: socialError } = await supabase
@@ -51,7 +66,21 @@ export const fetchContacts = async (): Promise<NetworkingContact[]> => {
           return { ...contact, contact_social_media: [] };
         }
         
-        return { ...contact, contact_social_media: socialMedia || [] };
+        // Parse musician-specific fields from notes if they exist
+        let enrichedContact = { ...contact };
+        
+        if (contact.notes) {
+          try {
+            const parsedNotes = JSON.parse(contact.notes);
+            if (parsedNotes.contact_type) enrichedContact.contact_type = parsedNotes.contact_type;
+            if (parsedNotes.musical_genre) enrichedContact.musical_genre = parsedNotes.musical_genre;
+            if (parsedNotes.instrument) enrichedContact.instrument = parsedNotes.instrument;
+          } catch (e) {
+            // If notes is not valid JSON, just use it as-is
+          }
+        }
+        
+        return { ...enrichedContact, contact_social_media: socialMedia || [] };
       })
     );
     
