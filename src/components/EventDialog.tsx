@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarIcon } from 'lucide-react';
-import { createEvent, EventInsert, Event, updateEvent, deleteEvent } from '@/services/api';
+import { createEvent, updateEvent, deleteEvent } from '@/services/api';
+import { Event, EventInsert } from '@/services/api/types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

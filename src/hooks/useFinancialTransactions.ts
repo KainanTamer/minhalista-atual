@@ -5,9 +5,9 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   createFinancialTransaction, 
   updateFinancialTransaction, 
-  deleteFinancialTransaction, 
-  FinancialTransactionInsert,
-  FinancialTransaction 
+  deleteFinancialTransaction,
+  FinancialTransaction,
+  FinancialTransactionInsert
 } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 

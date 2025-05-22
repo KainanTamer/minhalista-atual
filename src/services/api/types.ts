@@ -1,5 +1,8 @@
 
-import { Profile } from "@/integrations/supabase/types";
+import { Tables } from "@/integrations/supabase/types";
+
+// Using the Profile type from Supabase's generated types
+export type Profile = Tables<"profiles">;
 
 export interface Event {
   id: string;
@@ -17,6 +20,10 @@ export interface Event {
   updated_at: string;
 }
 
+// Add insert and update types for Event
+export type EventInsert = Omit<Event, 'id' | 'created_at' | 'updated_at'>;
+export type EventUpdate = Partial<EventInsert>;
+
 export interface FinancialTransaction {
   id: string;
   user_id: string;
@@ -32,6 +39,10 @@ export interface FinancialTransaction {
   created_at: string;
   updated_at: string;
 }
+
+// Add insert and update types for FinancialTransaction
+export type FinancialTransactionInsert = Omit<FinancialTransaction, 'id' | 'created_at' | 'updated_at'>;
+export type FinancialTransactionUpdate = Partial<FinancialTransactionInsert>;
 
 export interface EventParticipant {
   event_id: string;
@@ -49,6 +60,3 @@ export interface Connection {
 export interface ProfileWithMetadata extends Profile {
   isFollowing?: boolean;
 }
-
-// Exportando o tipo Profile para uso em outros módulos
-export type { Profile };

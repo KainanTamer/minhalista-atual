@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Music, Mic, Check, Plus, X, DragHandleDots2 } from 'lucide-react';
+import { Loader2, Music, Mic, Check, Plus, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,15 @@ const musicProfileSchema = z.object({
 });
 
 type MusicProfileFormValues = z.infer<typeof musicProfileSchema>;
+
+// Type for social links
+interface SocialLinks {
+  spotify?: string;
+  youtube?: string;
+  instagram?: string;
+  soundcloud?: string;
+  [key: string]: string | undefined;
+}
 
 const MusicProfileForm: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -69,7 +78,7 @@ const MusicProfileForm: React.FC = () => {
           }
           
           // Configurar os links sociais
-          const socialLinks = data.social_links || {};
+          const socialLinks = data.social_links as SocialLinks || {};
           form.reset({
             spotify: socialLinks.spotify || '',
             youtube: socialLinks.youtube || '',
@@ -195,7 +204,6 @@ const MusicProfileForm: React.FC = () => {
         toast({
           title: "Links atualizados",
           description: "Seus links de plataformas foram atualizados com sucesso.",
-          icon: <Check className="h-4 w-4 text-green-500" />
         });
       } catch (err) {
         console.error('Erro ao atualizar links sociais:', err);
