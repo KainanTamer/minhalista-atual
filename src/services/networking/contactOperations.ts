@@ -22,7 +22,12 @@ export const getContact = async (id: string): Promise<NetworkingContact | null> 
     if (socialError) throw socialError;
     
     // Parse musician-specific fields from notes if they exist
-    let enrichedContact = { ...contact };
+    let enrichedContact: NetworkingContact = { 
+      ...contact, 
+      contact_type: undefined,
+      musical_genre: undefined,
+      instrument: undefined
+    };
     
     if (contact.notes) {
       try {
@@ -67,7 +72,12 @@ export const fetchContacts = async (): Promise<NetworkingContact[]> => {
         }
         
         // Parse musician-specific fields from notes if they exist
-        let enrichedContact = { ...contact };
+        let enrichedContact: NetworkingContact = { 
+          ...contact, 
+          contact_type: undefined,
+          musical_genre: undefined,
+          instrument: undefined
+        };
         
         if (contact.notes) {
           try {

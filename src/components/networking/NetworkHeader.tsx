@@ -17,7 +17,7 @@ const NetworkHeader: React.FC<NetworkHeaderProps> = ({
   hasContacts 
 }) => {
   return (
-    <CardHeader className="pb-2 flex flex-row items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
+    <CardHeader className="pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
       <div>
         <CardTitle className="text-xl flex items-center gap-2">
           <div className="bg-primary/20 p-2 rounded-full">
@@ -29,7 +29,7 @@ const NetworkHeader: React.FC<NetworkHeaderProps> = ({
           Conecte-se com artistas, produtores e venues
         </CardDescription>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button 
@@ -61,7 +61,7 @@ const NetworkHeader: React.FC<NetworkHeaderProps> = ({
           variant="outline" 
           size="sm" 
           onClick={onAddContact}
-          className="group hover:bg-primary/20 hover:text-primary transition-colors"
+          className="group hover:bg-primary/20 hover:text-primary transition-colors ml-auto sm:ml-0"
         >
           <PlusCircle className="mr-1 h-4 w-4 group-hover:scale-110 transition-transform" />
           Novo artista
