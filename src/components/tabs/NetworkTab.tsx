@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Users, Search, Mail, Phone, Link as LinkIcon, Instagram, Twitter, Facebook, Youtube, Music } from 'lucide-react';
+import { PlusCircle, Users, Search, Mail, Phone, Link as LinkIcon, Instagram, Twitter, Facebook, Youtube, Music, UserCircle } from 'lucide-react';
 import { useSubscription } from '@/contexts/subscription';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -53,18 +54,29 @@ const NetworkTab: React.FC = () => {
   // Filter contacts based on search and active tab
   const filteredContacts = contacts.filter(contact => {
     const matchesSearch = contact.name.toLowerCase().includes(search.toLowerCase()) || 
-                         (contact.occupation && contact.occupation.toLowerCase().includes(search.toLowerCase()));
+                         (contact.occupation && contact.occupation.toLowerCase().includes(search.toLowerCase())) ||
+                         (contact.company && contact.company.toLowerCase().includes(search.toLowerCase()));
                          
     // Apply category filter if not showing all
     if (activeTab === 'musicians') {
-      return matchesSearch && contact.occupation && ['Baixista', 'Vocalista', 'Baterista', 'Guitarrista'].some(
-        role => contact.occupation?.toLowerCase().includes(role.toLowerCase())
+      return matchesSearch && (
+        contact.contact_type === 'músico' || 
+        contact.contact_type === 'banda' ||
+        (contact.occupation && ['baixista', 'vocalista', 'baterista', 'guitarrista'].some(
+          role => contact.occupation?.toLowerCase().includes(role.toLowerCase())
+        ))
       );
     } else if (activeTab === 'producers') {
-      return matchesSearch && contact.occupation?.toLowerCase().includes('produtor');
+      return matchesSearch && (
+        contact.contact_type === 'produtor' || 
+        (contact.occupation && contact.occupation.toLowerCase().includes('produtor'))
+      );
     } else if (activeTab === 'venues') {
-      return matchesSearch && ['venue', 'casa', 'teatro', 'bar'].some(
-        term => contact.company?.toLowerCase().includes(term.toLowerCase())
+      return matchesSearch && (
+        contact.contact_type === 'casa de shows' ||
+        ['venue', 'casa', 'teatro', 'bar', 'local'].some(
+          term => contact.company?.toLowerCase().includes(term.toLowerCase())
+        )
       );
     }
     
@@ -83,9 +95,36 @@ const NetworkTab: React.FC = () => {
       case 'youtube':
         return <Youtube className="h-4 w-4" />;
       case 'spotify':
+      case 'deezer':
+      case 'applemusic':
+      case 'soundcloud':
+      case 'amazonmusic':
         return <Music className="h-4 w-4" />;
       default:
         return <LinkIcon className="h-4 w-4" />;
+    }
+  };
+  
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  const getContactTypeColor = (type?: string) => {
+    switch (type?.toLowerCase()) {
+      case 'músico':
+        return 'bg-blue-100 text-blue-800';
+      case 'banda':
+        return 'bg-purple-100 text-purple-800';
+      case 'produtor':
+        return 'bg-amber-100 text-amber-800';
+      case 'dj':
+        return 'bg-pink-100 text-pink-800';
+      case 'casa de shows':
+        return 'bg-green-100 text-green-800';
+      case 'estúdio':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -208,12 +247,22 @@ const NetworkTab: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarFallback className="bg-primary/20 text-primary">
-                          {contact.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                          {getInitials(contact.name)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <CardTitle className="text-base">{contact.name}</CardTitle>
-                        <CardDescription>{contact.occupation}</CardDescription>
+                        <div className="flex items-center gap-2">
+                          {contact.contact_type && (
+                            <Badge 
+                              variant="outline" 
+                              className={`px-2 py-0 h-5 text-xs ${getContactTypeColor(contact.contact_type)}`}
+                            >
+                              {contact.contact_type}
+                            </Badge>
+                          )}
+                          {contact.occupation && <CardDescription className="text-xs">{contact.occupation}</CardDescription>}
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
@@ -221,23 +270,60 @@ const NetworkTab: React.FC = () => {
                     <div className="space-y-2 text-sm">
                       {contact.company && (
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="px-2 py-0 h-5 text-xs bg-background/50">
-                            {contact.company}
-                          </Badge>
+                          <UserCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{contact.company}</span>
                         </div>
                       )}
+                      
+                      {/* Mostrar instrumentos e gêneros musicais se disponíveis */}
+                      {contact.instrument && contact.instrument.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <Music className="h-3.5 w-3.5 text-muted-foreground" />
+                          {contact.instrument.map((inst, idx) => (
+                            <Badge 
+                              key={idx} 
+                              variant="secondary" 
+                              className="bg-blue-50 text-blue-800 text-xs px-1.5 py-0"
+                            >
+                              {inst}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {contact.musical_genre && contact.musical_genre.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Gêneros:</span>
+                          {contact.musical_genre.map((genre, idx) => (
+                            <Badge 
+                              key={idx} 
+                              variant="outline" 
+                              className="bg-purple-50 text-purple-800 text-xs px-1.5 py-0"
+                            >
+                              {genre}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
                       {contact.email && (
                         <div className="flex items-center gap-2">
                           <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                          <a href={`mailto:${contact.email}`} className="hover:text-primary">{contact.email}</a>
+                          <a href={`mailto:${contact.email}`} className="hover:text-primary" onClick={(e) => e.stopPropagation()}>
+                            {contact.email}
+                          </a>
                         </div>
                       )}
+                      
                       {contact.phone && (
                         <div className="flex items-center gap-2">
                           <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                          <a href={`tel:${contact.phone}`} className="hover:text-primary">{contact.phone}</a>
+                          <a href={`tel:${contact.phone}`} className="hover:text-primary" onClick={(e) => e.stopPropagation()}>
+                            {contact.phone}
+                          </a>
                         </div>
                       )}
+                      
                       {contact.contact_social_media && contact.contact_social_media.length > 0 && (
                         <div className="flex items-center gap-2 mt-2">
                           {contact.contact_social_media.map((social: SocialMediaLink, index: number) => (

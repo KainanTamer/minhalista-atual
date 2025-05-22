@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useNetworking } from '@/hooks/useNetworking';
-import { PlusCircle, Trash2, Link as LinkIcon, Instagram, Youtube, Music } from 'lucide-react';
+import { PlusCircle, Trash2, Link as LinkIcon, Instagram, Youtube, Music, DollarSign, Mic, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface SocialMediaLink {
   platform: string;
@@ -38,19 +39,30 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
   const [newUrl, setNewUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'personal' | 'social'>('personal');
+  const [activeTab, setActiveTab] = useState<'personal' | 'social' | 'music'>('personal');
+  
+  // Novos campos para músicos
+  const [contactType, setContactType] = useState<string>('músico');
+  const [instruments, setInstruments] = useState<string[]>([]);
+  const [genres, setGenres] = useState<string[]>([]);
+  const [newInstrument, setNewInstrument] = useState('');
+  const [newGenre, setNewGenre] = useState('');
   
   // Estado para as redes sociais específicas
   const [socialMedia, setSocialMedia] = useState({
     instagram: { enabled: false, url: '' },
     facebook: { enabled: false, url: '' },
-    youtube: { enabled: false, url: '' }
+    youtube: { enabled: false, url: '' },
+    tiktok: { enabled: false, url: '' }
   });
   
   // Estado para plataformas de streaming
   const [streamingPlatforms, setStreamingPlatforms] = useState({
     spotify: { enabled: false, url: '' },
-    deezer: { enabled: false, url: '' }
+    deezer: { enabled: false, url: '' },
+    appleMusic: { enabled: false, url: '' },
+    soundcloud: { enabled: false, url: '' },
+    amazonMusic: { enabled: false, url: '' }
   });
   
   useEffect(() => {
@@ -65,6 +77,11 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
           setCompany(contact.company || '');
           setNotes(contact.notes || '');
           
+          // Carregar campos específicos para músicos
+          setContactType(contact.contact_type || 'músico');
+          setInstruments(contact.instrument || []);
+          setGenres(contact.musical_genre || []);
+          
           // Inicializar redes sociais com valores existentes
           const socialMediaTemp = { ...socialMedia };
           const streamingTemp = { ...streamingPlatforms };
@@ -75,14 +92,16 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
             // Preencher informações de redes sociais específicas
             contact.contact_social_media.forEach((social: SocialMediaLink) => {
               const platform = social.platform.toLowerCase();
-              if (platform === 'instagram' || platform === 'facebook' || platform === 'youtube') {
+              if (platform === 'instagram' || platform === 'facebook' || platform === 'youtube' || platform === 'tiktok') {
                 socialMediaTemp[platform as keyof typeof socialMediaTemp] = {
                   enabled: true,
                   url: social.url
                 };
               }
-              else if (platform === 'spotify' || platform === 'deezer') {
-                streamingTemp[platform as keyof typeof streamingTemp] = {
+              else if (platform === 'spotify' || platform === 'deezer' || platform === 'applemusic' || platform === 'soundcloud' || platform === 'amazonmusic') {
+                const key = platform === 'applemusic' ? 'appleMusic' : 
+                           platform === 'amazonmusic' ? 'amazonMusic' : platform;
+                streamingTemp[key as keyof typeof streamingTemp] = {
                   enabled: true,
                   url: social.url
                 };
@@ -126,8 +145,11 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     // Adicionar plataformas de streaming
     Object.entries(streamingPlatforms).forEach(([platform, data]) => {
       if (data.enabled && data.url) {
+        const platformName = platform === 'appleMusic' ? 'AppleMusic' : 
+                             platform === 'amazonMusic' ? 'AmazonMusic' : 
+                             platform.charAt(0).toUpperCase() + platform.slice(1);
         allSocialLinks.push({
-          platform: platform.charAt(0).toUpperCase() + platform.slice(1),
+          platform: platformName,
           url: data.url
         });
       }
@@ -136,7 +158,7 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     // Adicionar outros links personalizados
     socialLinks.forEach(link => {
       const platform = link.platform.toLowerCase();
-      if (!['instagram', 'facebook', 'youtube', 'spotify', 'deezer'].includes(platform)) {
+      if (!['instagram', 'facebook', 'youtube', 'tiktok', 'spotify', 'deezer', 'applemusic', 'soundcloud', 'amazonmusic'].includes(platform)) {
         allSocialLinks.push(link);
       }
     });
@@ -148,7 +170,11 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
       occupation,
       company,
       notes,
-      contact_social_media: allSocialLinks
+      contact_social_media: allSocialLinks,
+      // Campos específicos para músicos
+      contact_type: contactType,
+      musical_genre: genres,
+      instrument: instruments
     };
     
     try {
@@ -178,14 +204,23 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     setSocialLinks([]);
     setNewPlatform('');
     setNewUrl('');
+    setContactType('músico');
+    setInstruments([]);
+    setGenres([]);
+    setNewInstrument('');
+    setNewGenre('');
     setSocialMedia({
       instagram: { enabled: false, url: '' },
       facebook: { enabled: false, url: '' },
-      youtube: { enabled: false, url: '' }
+      youtube: { enabled: false, url: '' },
+      tiktok: { enabled: false, url: '' }
     });
     setStreamingPlatforms({
       spotify: { enabled: false, url: '' },
-      deezer: { enabled: false, url: '' }
+      deezer: { enabled: false, url: '' },
+      appleMusic: { enabled: false, url: '' },
+      soundcloud: { enabled: false, url: '' },
+      amazonMusic: { enabled: false, url: '' }
     });
     setActiveTab('personal');
   };
@@ -196,6 +231,28 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
       setNewPlatform('');
       setNewUrl('');
     }
+  };
+  
+  const addInstrument = () => {
+    if (newInstrument && !instruments.includes(newInstrument)) {
+      setInstruments([...instruments, newInstrument]);
+      setNewInstrument('');
+    }
+  };
+  
+  const removeInstrument = (instrument: string) => {
+    setInstruments(instruments.filter(i => i !== instrument));
+  };
+  
+  const addGenre = () => {
+    if (newGenre && !genres.includes(newGenre)) {
+      setGenres([...genres, newGenre]);
+      setNewGenre('');
+    }
+  };
+  
+  const removeGenre = (genre: string) => {
+    setGenres(genres.filter(g => g !== genre));
   };
   
   const removeSocialLink = (index: number) => {
@@ -209,6 +266,12 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
       case 'youtube':
         return <Youtube className="h-4 w-4" />;
       case 'spotify':
+      case 'apple music':
+      case 'applemusic':
+      case 'deezer':
+      case 'soundcloud':  
+      case 'amazonmusic':
+      case 'amazon music':
         return <Music className="h-4 w-4" />;
       default:
         return <LinkIcon className="h-4 w-4" />;
@@ -256,6 +319,21 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
     'Bandcamp'
   ];
   
+  const musicInstrumentsDB = [
+    'Violão', 'Guitarra', 'Baixo', 'Bateria', 'Teclado', 'Piano', 'Violino',
+    'Saxofone', 'Flauta', 'Trompete', 'Violoncelo', 'Percussão', 'Voz'
+  ];
+  
+  const musicGenresDB = [
+    'Rock', 'Pop', 'Jazz', 'Blues', 'Samba', 'MPB', 'Funk', 'Sertanejo',
+    'Eletrônica', 'Hip Hop', 'R&B', 'Reggae', 'Metal', 'Forró', 'Clássica'
+  ];
+  
+  const contactTypesDB = [
+    'Músico', 'Banda', 'Produtor', 'DJ', 'Casa de Shows', 'Estúdio', 'Empresário',
+    'Técnico de Som', 'Luthier', 'Loja de Instrumentos'
+  ];
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
@@ -271,12 +349,13 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
         <Tabs
           defaultValue="personal"
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as 'personal' | 'social')}
+          onValueChange={(value) => setActiveTab(value as 'personal' | 'social' | 'music')}
           className="w-full"
         >
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="personal">Informações Pessoais</TabsTrigger>
-            <TabsTrigger value="social">Redes Sociais</TabsTrigger>
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="personal">Informações</TabsTrigger>
+            <TabsTrigger value="music">Música</TabsTrigger>
+            <TabsTrigger value="social">Redes</TabsTrigger>
           </TabsList>
           
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -292,6 +371,23 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                     className="bg-background"
                     autoFocus
                   />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="contactType">Tipo de Contato</Label>
+                  <Select
+                    value={contactType}
+                    onValueChange={setContactType}
+                  >
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Selecione o tipo de contato" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contactTypesDB.map((type) => (
+                        <SelectItem key={type} value={type.toLowerCase()}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -366,11 +462,136 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
               </div>
             )}
             
+            {activeTab === 'music' && (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Mic className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Instrumentos</h3>
+                  </div>
+                  
+                  {instruments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {instruments.map((instrument, index) => (
+                        <Badge key={index} variant="outline" className="pl-2 flex items-center gap-1 bg-background/80">
+                          {instrument}
+                          <Button
+                            type="button"
+                            variant="ghost" 
+                            size="sm"
+                            className="h-5 w-5 p-0 ml-1 hover:bg-destructive/10 hover:text-destructive rounded-full"
+                            onClick={() => removeInstrument(instrument)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span className="sr-only">Remover</span>
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-end gap-2">
+                    <div className="grid gap-2 flex-1">
+                      <Label htmlFor="newInstrument">Adicionar Instrumento</Label>
+                      <Input
+                        id="newInstrument"
+                        value={newInstrument}
+                        onChange={(e) => setNewInstrument(e.target.value)}
+                        className="bg-background"
+                        placeholder="Digite o instrumento..."
+                        list="instruments-suggestions"
+                      />
+                      <datalist id="instruments-suggestions">
+                        {musicInstrumentsDB.map((instrument, idx) => (
+                          <option key={idx} value={instrument} />
+                        ))}
+                      </datalist>
+                    </div>
+                    
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={addInstrument}
+                      disabled={!newInstrument}
+                      className="mb-[1px]"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      <span className="sr-only">Adicionar</span>
+                    </Button>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Music className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Gêneros Musicais</h3>
+                  </div>
+                  
+                  {genres.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {genres.map((genre, index) => (
+                        <Badge key={index} variant="outline" className="pl-2 flex items-center gap-1 bg-background/80">
+                          {genre}
+                          <Button
+                            type="button"
+                            variant="ghost" 
+                            size="sm"
+                            className="h-5 w-5 p-0 ml-1 hover:bg-destructive/10 hover:text-destructive rounded-full"
+                            onClick={() => removeGenre(genre)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span className="sr-only">Remover</span>
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-end gap-2">
+                    <div className="grid gap-2 flex-1">
+                      <Label htmlFor="newGenre">Adicionar Gênero</Label>
+                      <Input
+                        id="newGenre"
+                        value={newGenre}
+                        onChange={(e) => setNewGenre(e.target.value)}
+                        className="bg-background"
+                        placeholder="Digite o gênero musical..."
+                        list="genres-suggestions"
+                      />
+                      <datalist id="genres-suggestions">
+                        {musicGenresDB.map((genre, idx) => (
+                          <option key={idx} value={genre} />
+                        ))}
+                      </datalist>
+                    </div>
+                    
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={addGenre}
+                      disabled={!newGenre}
+                      className="mb-[1px]"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      <span className="sr-only">Adicionar</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {activeTab === 'social' && (
               <div className="space-y-6">
                 {/* Seção de Redes Sociais */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Redes Sociais</h3>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Redes Sociais</h3>
+                  </div>
                   
                   <div className="space-y-3">
                     {/* Instagram */}
@@ -444,42 +665,41 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                         />
                       )}
                     </div>
-                  </div>
-                  
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      // Salvar redes sociais atualizadas para socialLinks
-                      const updatedSocialLinks = [...socialLinks];
-                      Object.entries(socialMedia).forEach(([platform, data]) => {
-                        if (data.enabled && data.url) {
-                          const index = updatedSocialLinks.findIndex(
-                            link => link.platform.toLowerCase() === platform.toLowerCase()
-                          );
-                          if (index >= 0) {
-                            updatedSocialLinks[index].url = data.url;
-                          } else {
-                            updatedSocialLinks.push({
-                              platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-                              url: data.url
-                            });
+                    
+                    {/* TikTok */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="tiktok" 
+                          checked={socialMedia.tiktok.enabled}
+                          onCheckedChange={(checked) => 
+                            handleSocialMediaChange('tiktok', 'enabled', checked === true)
                           }
-                        }
-                      });
-                      setSocialLinks(updatedSocialLinks);
-                    }}
-                  >
-                    Salvar Redes Sociais
-                  </Button>
+                        />
+                        <Label htmlFor="tiktok" className="font-medium cursor-pointer">
+                          TikTok
+                        </Label>
+                      </div>
+                      {socialMedia.tiktok.enabled && (
+                        <Input
+                          value={socialMedia.tiktok.url}
+                          onChange={(e) => handleSocialMediaChange('tiktok', 'url', e.target.value)}
+                          placeholder="https://tiktok.com/@usuario"
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <Separator />
                 
                 {/* Seção de Plataformas de Streaming */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Plataformas de Streaming</h3>
+                  <div className="flex items-center gap-2">
+                    <Music className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Plataformas de Streaming</h3>
+                  </div>
                   
                   <div className="space-y-3">
                     {/* Spotify */}
@@ -501,6 +721,30 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                           value={streamingPlatforms.spotify.url}
                           onChange={(e) => handleStreamingChange('spotify', 'url', e.target.value)}
                           placeholder="https://open.spotify.com/artist/..."
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Apple Music */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="appleMusic" 
+                          checked={streamingPlatforms.appleMusic.enabled}
+                          onCheckedChange={(checked) => 
+                            handleStreamingChange('appleMusic', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="appleMusic" className="font-medium cursor-pointer">
+                          Apple Music
+                        </Label>
+                      </div>
+                      {streamingPlatforms.appleMusic.enabled && (
+                        <Input
+                          value={streamingPlatforms.appleMusic.url}
+                          onChange={(e) => handleStreamingChange('appleMusic', 'url', e.target.value)}
+                          placeholder="https://music.apple.com/artist/..."
                           className="flex-1"
                         />
                       )}
@@ -529,48 +773,71 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                         />
                       )}
                     </div>
-                  </div>
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      // Salvar plataformas atualizadas para socialLinks
-                      const updatedSocialLinks = [...socialLinks];
-                      Object.entries(streamingPlatforms).forEach(([platform, data]) => {
-                        if (data.enabled && data.url) {
-                          const index = updatedSocialLinks.findIndex(
-                            link => link.platform.toLowerCase() === platform.toLowerCase()
-                          );
-                          if (index >= 0) {
-                            updatedSocialLinks[index].url = data.url;
-                          } else {
-                            updatedSocialLinks.push({
-                              platform: platform.charAt(0).toUpperCase() + platform.slice(1),
-                              url: data.url
-                            });
+                    
+                    {/* SoundCloud */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="soundcloud" 
+                          checked={streamingPlatforms.soundcloud.enabled}
+                          onCheckedChange={(checked) => 
+                            handleStreamingChange('soundcloud', 'enabled', checked === true)
                           }
-                        }
-                      });
-                      setSocialLinks(updatedSocialLinks);
-                    }}
-                  >
-                    Salvar Plataformas
-                  </Button>
+                        />
+                        <Label htmlFor="soundcloud" className="font-medium cursor-pointer">
+                          SoundCloud
+                        </Label>
+                      </div>
+                      {streamingPlatforms.soundcloud.enabled && (
+                        <Input
+                          value={streamingPlatforms.soundcloud.url}
+                          onChange={(e) => handleStreamingChange('soundcloud', 'url', e.target.value)}
+                          placeholder="https://soundcloud.com/..."
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Amazon Music */}
+                    <div className="flex items-start space-x-3">
+                      <div className="flex h-5 items-center space-x-2">
+                        <Checkbox 
+                          id="amazonMusic" 
+                          checked={streamingPlatforms.amazonMusic.enabled}
+                          onCheckedChange={(checked) => 
+                            handleStreamingChange('amazonMusic', 'enabled', checked === true)
+                          }
+                        />
+                        <Label htmlFor="amazonMusic" className="font-medium cursor-pointer">
+                          Amazon Music
+                        </Label>
+                      </div>
+                      {streamingPlatforms.amazonMusic.enabled && (
+                        <Input
+                          value={streamingPlatforms.amazonMusic.url}
+                          onChange={(e) => handleStreamingChange('amazonMusic', 'url', e.target.value)}
+                          placeholder="https://music.amazon.com/artists/..."
+                          className="flex-1"
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <Separator />
                 
                 {/* Seção de Links Personalizados */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Outros Links</h3>
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Outros Links</h3>
+                  </div>
                   
                   {socialLinks.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {socialLinks
                         .filter(link => 
-                          !['instagram', 'facebook', 'youtube', 'spotify', 'deezer']
+                          !['instagram', 'facebook', 'youtube', 'tiktok', 'spotify', 'deezer', 'applemusic', 'soundcloud', 'amazonmusic']
                             .includes(link.platform.toLowerCase())
                         )
                         .map((link, index) => (
@@ -600,13 +867,13 @@ const NetworkingDialog: React.FC<NetworkingDialogProps> = ({ open, onOpenChange,
                         value={newPlatform}
                         onChange={(e) => setNewPlatform(e.target.value)}
                         className="bg-background"
-                        placeholder="TikTok, SoundCloud..."
+                        placeholder="Bandcamp, SoundBetter..."
                         list="platform-suggestions"
                       />
                       <datalist id="platform-suggestions">
                         {[...socialNetworksDB, ...platformsDB]
                           .filter(platform => 
-                            !['Instagram', 'Facebook', 'YouTube', 'Spotify', 'Deezer']
+                            !['Instagram', 'Facebook', 'YouTube', 'TikTok', 'Spotify', 'Deezer', 'Apple Music', 'SoundCloud', 'Amazon Music']
                               .includes(platform)
                           )
                           .map((platform, idx) => (
