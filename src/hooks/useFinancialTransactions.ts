@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -42,7 +41,11 @@ export const useFinancialTransactions = (
         amount: parseFloat(values.amount),
         transaction_date: values.transaction_date,
         notes: values.notes || null,
-        user_id: user.id
+        user_id: user.id,
+        // Add the missing properties
+        related_event_id: values.related_event_id || null,
+        related_contract_id: values.related_contract_id || null,
+        receipt_url: values.receipt_url || null
       };
 
       // Store the previous data for possible rollback

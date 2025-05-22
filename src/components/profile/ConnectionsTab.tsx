@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { followUser, unfollowUser, getFollowingProfiles } from '@/services/api';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
-import { Loader2, UserPlus, UserMinus, Check } from 'lucide-react';
+import { Loader2, UserPlus, UserMinus } from 'lucide-react';
 
 const ConnectionsTab: React.FC = () => {
   const { user } = useAuth();
@@ -51,7 +52,7 @@ const ConnectionsTab: React.FC = () => {
     }
 
     try {
-      await followUser(user.id, profileId);
+      await followUser(profileId);
       setFollowing(prevFollowing => [
         ...prevFollowing,
         {
@@ -87,7 +88,7 @@ const ConnectionsTab: React.FC = () => {
     }
 
     try {
-      await unfollowUser(user.id, profileId);
+      await unfollowUser(profileId);
       setFollowing(prevFollowing => prevFollowing.filter(profile => profile.id !== profileId));
       toast({
         title: "Deixou de seguir",
@@ -138,7 +139,7 @@ const ConnectionsTab: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <Link to={`/profile/${profile.id}`}>
                     <Avatar>
-                      <AvatarImage src={profile.avatar_url} alt={profile.full_name || profile.username || "Avatar"} />
+                      <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || profile.username || "Avatar"} />
                       <AvatarFallback>{profile.full_name?.charAt(0) || profile.username?.charAt(0) || "U"}</AvatarFallback>
                     </Avatar>
                   </Link>
