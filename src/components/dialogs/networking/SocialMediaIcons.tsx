@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, Youtube, Twitter, Facebook, Music, LinkIcon } from 'lucide-react';
+import { Instagram, Youtube, Twitter, Facebook, Music, LinkIcon, TiktokIcon } from 'lucide-react';
 
 export const getSocialIcon = (platform: string): React.ReactNode => {
   switch (platform.toLowerCase()) {
@@ -12,6 +12,9 @@ export const getSocialIcon = (platform: string): React.ReactNode => {
       return <Twitter className="h-4 w-4" />;
     case 'facebook':
       return <Facebook className="h-4 w-4" />;
+    case 'tiktok':
+      // TiktokIcon doesn't exist in lucide-react, so we use a custom icon or fallback
+      return <LinkIcon className="h-4 w-4" />;
     case 'spotify':
     case 'apple music':
     case 'applemusic':
@@ -19,6 +22,8 @@ export const getSocialIcon = (platform: string): React.ReactNode => {
     case 'soundcloud':  
     case 'amazonmusic':
     case 'amazon music':
+    case 'tidal':
+    case 'youtube music':
       return <Music className="h-4 w-4" />;
     default:
       return <LinkIcon className="h-4 w-4" />;
