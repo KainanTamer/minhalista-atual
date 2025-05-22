@@ -1,15 +1,54 @@
 
-import { Database } from "@/integrations/supabase/types";
+import { Profile } from "@/integrations/supabase/types";
 
-// Export common types used across API services
-export type Event = Database["public"]["Tables"]["events"]["Row"];
-export type EventParticipant = Database["public"]["Tables"]["event_participants"]["Row"];
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
-export type FinancialTransaction = Database["public"]["Tables"]["financial_transactions"]["Row"];
-export type Connection = Database["public"]["Tables"]["connections"]["Row"];
+export interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  start_time: string;
+  end_time: string;
+  event_type: "ensaio" | "show" | "gravacao" | "outro";
+  status: "planejado" | "confirmado" | "cancelado" | "realizado";
+  location: string | null;
+  venue_name: string | null;
+  notes: string | null;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
-export type EventInsert = Database["public"]["Tables"]["events"]["Insert"];
-export type EventUpdate = Database["public"]["Tables"]["events"]["Update"];
-export type FinancialTransactionInsert = Database["public"]["Tables"]["financial_transactions"]["Insert"];
-export type FinancialTransactionUpdate = Database["public"]["Tables"]["financial_transactions"]["Update"];
+export interface FinancialTransaction {
+  id: string;
+  user_id: string;
+  description: string;
+  amount: number;
+  transaction_type: "receita" | "despesa";
+  category: "show" | "venda_merch" | "equipamento" | "transporte" | "estudio" | "marketing" | "outro";
+  transaction_date: string;
+  related_event_id: string | null;
+  related_contract_id: string | null;
+  notes: string | null;
+  receipt_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventParticipant {
+  event_id: string;
+  profile_id: string;
+  role: string | null;
+  added_at: string;
+}
+
+export interface Connection {
+  follower_id: string;
+  following_id: string;
+  created_at: string;
+}
+
+export interface ProfileWithMetadata extends Profile {
+  isFollowing?: boolean;
+}
+
+// Exportando o tipo Profile para uso em outros módulos
+export type { Profile };
