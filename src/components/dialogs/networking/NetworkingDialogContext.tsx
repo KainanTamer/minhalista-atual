@@ -57,7 +57,8 @@ const initialSocialMedia: SocialMediaState = {
   instagram: { enabled: false, url: '' },
   facebook: { enabled: false, url: '' },
   youtube: { enabled: false, url: '' },
-  tiktok: { enabled: false, url: '' }
+  tiktok: { enabled: false, url: '' },
+  twitter: { enabled: false, url: '' }
 };
 
 const initialStreamingPlatforms: SocialMediaState = {
@@ -65,7 +66,8 @@ const initialStreamingPlatforms: SocialMediaState = {
   deezer: { enabled: false, url: '' },
   appleMusic: { enabled: false, url: '' },
   soundcloud: { enabled: false, url: '' },
-  amazonMusic: { enabled: false, url: '' }
+  amazonMusic: { enabled: false, url: '' },
+  youtubeMusic: { enabled: false, url: '' }
 };
 
 const initialFormState: ContactFormState = {
@@ -153,8 +155,8 @@ export const NetworkingDialogProvider: React.FC<{
           setGenres(contact.musical_genre || []);
           
           // Initialize social networks with existing values
-          const socialMediaTemp = { ...socialMedia };
-          const streamingTemp = { ...streamingPlatforms };
+          const socialMediaTemp = { ...initialSocialMedia };
+          const streamingTemp = { ...initialStreamingPlatforms };
           
           if (contact.contact_social_media && contact.contact_social_media.length > 0) {
             setSocialLinks(contact.contact_social_media || []);
@@ -162,15 +164,20 @@ export const NetworkingDialogProvider: React.FC<{
             // Fill specific social network information
             contact.contact_social_media.forEach((social: SocialMediaLink) => {
               const platform = social.platform.toLowerCase();
-              if (platform === 'instagram' || platform === 'facebook' || platform === 'youtube' || platform === 'tiktok') {
+              if (platform === 'instagram' || platform === 'facebook' || 
+                  platform === 'youtube' || platform === 'tiktok' ||
+                  platform === 'twitter') {
                 socialMediaTemp[platform as keyof typeof socialMediaTemp] = {
                   enabled: true,
                   url: social.url
                 };
               }
-              else if (platform === 'spotify' || platform === 'deezer' || platform === 'applemusic' || platform === 'soundcloud' || platform === 'amazonmusic') {
+              else if (platform === 'spotify' || platform === 'deezer' || 
+                       platform === 'applemusic' || platform === 'soundcloud' || 
+                       platform === 'amazonmusic' || platform === 'youtubemusic') {
                 const key = platform === 'applemusic' ? 'appleMusic' : 
-                           platform === 'amazonmusic' ? 'amazonMusic' : platform;
+                           platform === 'amazonmusic' ? 'amazonMusic' :
+                           platform === 'youtubemusic' ? 'youtubeMusic' : platform;
                 streamingTemp[key as keyof typeof streamingTemp] = {
                   enabled: true,
                   url: social.url
@@ -214,7 +221,8 @@ export const NetworkingDialogProvider: React.FC<{
     Object.entries(streamingPlatforms).forEach(([platform, data]) => {
       if (data.enabled && data.url) {
         const platformName = platform === 'appleMusic' ? 'AppleMusic' : 
-                             platform === 'amazonMusic' ? 'AmazonMusic' : 
+                             platform === 'amazonMusic' ? 'AmazonMusic' :
+                             platform === 'youtubeMusic' ? 'YouTubeMusic' :
                              platform.charAt(0).toUpperCase() + platform.slice(1);
         allSocialLinks.push({
           platform: platformName,
@@ -226,7 +234,9 @@ export const NetworkingDialogProvider: React.FC<{
     // Add other custom links
     socialLinks.forEach(link => {
       const platform = link.platform.toLowerCase();
-      if (!['instagram', 'facebook', 'youtube', 'tiktok', 'spotify', 'deezer', 'applemusic', 'soundcloud', 'amazonmusic'].includes(platform)) {
+      if (!['instagram', 'facebook', 'youtube', 'tiktok', 'twitter', 
+            'spotify', 'deezer', 'applemusic', 'soundcloud', 
+            'amazonmusic', 'youtubemusic'].includes(platform)) {
         allSocialLinks.push(link);
       }
     });

@@ -68,11 +68,13 @@ const NetworkingDialogContent: React.FC = () => {
   return (
     <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle>{isEditing ? 'Editar Contato' : 'Adicionar Novo Contato'}</DialogTitle>
+        <DialogTitle>
+          {isEditing ? 'Editar Perfil Artístico' : 'Adicionar Novo Contato Artístico'}
+        </DialogTitle>
         <DialogDescription>
           {isEditing 
-            ? 'Edite as informações do contato em sua rede.' 
-            : 'Adicione um novo contato à sua rede de networking.'}
+            ? 'Edite as informações de contato e redes sociais.' 
+            : 'Adicione um novo contato à sua rede e conecte-se através das redes sociais.'}
         </DialogDescription>
       </DialogHeader>
       

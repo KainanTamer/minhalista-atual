@@ -24,4 +24,17 @@ export interface ContactFormState {
   socialLinks: SocialMediaLink[];
   socialMedia: SocialMediaState;
   streamingPlatforms: SocialMediaState;
+  // Campos adicionais para artistas
+  artisticName?: string;
+  mainGenre?: string;
+  profilePicture?: string;
+}
+
+export type SocialNetworkType = 'social' | 'streaming' | 'other';
+
+export interface SocialNetwork {
+  name: string;
+  type: SocialNetworkType;
+  icon: string;
+  placeholder: string;
 }

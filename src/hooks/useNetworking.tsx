@@ -16,10 +16,10 @@ export interface NetworkingContact {
   contact_social_media?: SocialMediaLink[];
   created_at: string;
   updated_at: string;
-  // Added missing fields
   contact_type?: string;
   musical_genre?: string[];
   instrument?: string[];
+  artist_name?: string;
 }
 
 export function useNetworking() {

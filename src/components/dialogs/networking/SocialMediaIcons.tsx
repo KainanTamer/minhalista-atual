@@ -7,6 +7,8 @@ export const getSocialIcon = (platform: string): React.ReactNode => {
     case 'instagram':
       return <Instagram className="h-4 w-4" />;
     case 'youtube':
+    case 'youtubemusic':
+    case 'youtube music':
       return <Youtube className="h-4 w-4" />;
     case 'twitter':
       return <Twitter className="h-4 w-4" />;
@@ -23,7 +25,6 @@ export const getSocialIcon = (platform: string): React.ReactNode => {
     case 'amazonmusic':
     case 'amazon music':
     case 'tidal':
-    case 'youtube music':
       return <Music className="h-4 w-4" />;
     default:
       return <LinkIcon className="h-4 w-4" />;
